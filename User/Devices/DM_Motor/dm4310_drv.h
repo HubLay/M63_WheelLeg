@@ -10,8 +10,8 @@
 
 #define RPM_TO_RADPS (2.0f * PI / 60.0f)
 
-#define P_MIN -6.283f
-#define P_MAX 6.283f
+#define P_MIN -3.1416f
+#define P_MAX 3.1416f
 #define V_MIN -45.0f
 #define V_MAX 45.0f
 #define KP_MIN 0.0f
@@ -48,6 +48,9 @@ typedef struct
 	float Kd;
 	float Tmos;
 	float Tcoil;
+	uint16_t online_flag;
+	uint16_t pre_online_flag;
+	uint8_t online_status;
 }motor_fbpara_t;
 
 

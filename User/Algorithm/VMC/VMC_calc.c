@@ -3,6 +3,7 @@
 
 void VMC_init(vmc_leg_t *vmc)//给杆长赋值
 {
+	//左上第一条边为l1，逆时针编号
 	vmc->l5=0.00f;//AE长度 //单位为m
 	vmc->l1=0.215f;//单位为m
 	vmc->l2=0.258f;//单位为m
@@ -12,10 +13,13 @@ void VMC_init(vmc_leg_t *vmc)//给杆长赋值
 
 
 void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给lqr用，同时也计算腿长L0
-{		
+{	
+	//如果定义车体符合右手系，这里VMC定义的应该是左腿x朝前，右腿x朝后
+	//两边腿的VMC X轴方向不一致 导致角度的正方向什么也不一样 面朝外侧逆时针方向为正
+	//有关x方向的变量应该刚好是倒过来的
 		static float PitchR=0.0f;
 	  static float PithGyroR=0.0f;
-	  PitchR=ins->Pitch;
+	  PitchR=ins->Pitch;								//可能是因为IMU坐标系反了，这里的Pitch如果符合面朝Y轴逆时针为正应该是要有一个负号，对应左腿是相反的
 	  PithGyroR=ins->Gyro[0];
 	
 	  vmc->YD = vmc->l4*arm_sin_f32(vmc->phi4);//D的y坐标
@@ -34,25 +38,44 @@ void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给l
 		vmc->XC = vmc->l1*arm_cos_f32(vmc->phi1) + vmc->l2*arm_cos_f32(vmc->phi2);
 		vmc->YC = vmc->l1*arm_sin_f32(vmc->phi1) + vmc->l2*arm_sin_f32(vmc->phi2);
 		//C点极坐标
-		vmc->L0 = sqrt((vmc->XC - vmc->l5/2.0f)*(vmc->XC - vmc->l5/2.0f) + vmc->YC*vmc->YC);
-		
-	  vmc->phi0 = atan2f(vmc->YC,(vmc->XC - vmc->l5/2.0f));//phi0用于计算lqr需要的theta		
-	  vmc->alpha=pi/2.0f-vmc->phi0 ;
+		vmc->L0 = sqrt((vmc->XC - vmc->l5/2.0f)*(vmc->XC - vmc->l5/2.0f) + vmc->YC*vmc->YC);		//虚拟杆长L0
+		vmc->phi0 = atan2f(vmc->YC,(vmc->XC - vmc->l5/2.0f));//phi0用于计算lqr需要的theta		
+						
+	  //等效杆长与机体Y轴夹角
+	  vmc->alpha=pi/2.0f-vmc->phi0 ;				//左右腿x正方向不同，但公式是一样的，实际上左右腿的角度在相同姿态下会因为这个差一个负号
+
+		if( vmc->alpha>pi) vmc->alpha-=2*pi;
+		else if( vmc->alpha<-pi) vmc->alpha+=2*pi;	
 		
 		if(vmc->first_flag==0)
 		{
-			vmc->last_phi0=vmc->phi0 ;
+			vmc->last_phi0=vmc->phi0;
 			vmc->first_flag=1;
 		}
-		vmc->d_phi0=(vmc->phi0-vmc->last_phi0)/dt;//计算phi0变化率，d_phi0用于计算lqr需要的d_theta
-		vmc->d_alpha=0.0f-vmc->d_phi0 ;
+
+		//计算雅可比矩阵
+		vmc->j11 = (vmc->l1*arm_sin_f32(vmc->phi0-vmc->phi3)*arm_sin_f32(vmc->phi1-vmc->phi2))/arm_sin_f32(vmc->phi3-vmc->phi2);
+		vmc->j12 = (vmc->l1*arm_cos_f32(vmc->phi0-vmc->phi3)*arm_sin_f32(vmc->phi1-vmc->phi2))/(vmc->L0*arm_sin_f32(vmc->phi3-vmc->phi2));
+		vmc->j21 = (vmc->l4*arm_sin_f32(vmc->phi0-vmc->phi2)*arm_sin_f32(vmc->phi3-vmc->phi4))/arm_sin_f32(vmc->phi3-vmc->phi2);
+		vmc->j22 = (vmc->l4*arm_cos_f32(vmc->phi0-vmc->phi2)*arm_sin_f32(vmc->phi3-vmc->phi4))/(vmc->L0*arm_sin_f32(vmc->phi3-vmc->phi2));
+
+		//d_phi0计算应改为雅可比矩阵求解
+		vmc->d_L0   = vmc->j11 * vmc->d_phi1 + vmc->j21 * vmc->d_phi4;
+		vmc->d_phi0 = vmc->j12 * vmc->d_phi1 + vmc->j22 * vmc->d_phi4;
 		
+		//vmc->d_phi0 = (vmc->XC *vmc->d_YC - vmc->YC * vmc->d_XC ) / (vmc->XC*vmc->XC + vmc->YC *vmc->YC );
+
+	//	vmc->d_phi0=(vmc->phi0-vmc->last_phi0)/dt;//计算phi0变化率，d_phi0用于计算lqr需要的d_theta
+		vmc->d_alpha=0.0f-vmc->d_phi0;
+		
+		//关注一下theta的计算
+		//两边腿的VMC X轴方向不一致，左腿超前右腿朝后  导致角度的正方向什么也不一样   面朝外侧逆时针方向为正
 		vmc->theta=pi/2.0f-PitchR-vmc->phi0;//得到状态变量1
 		vmc->d_theta=(-PithGyroR-vmc->d_phi0);//得到状态变量2
 		
-		vmc->last_phi0=vmc->phi0 ;
-    
-		vmc->d_L0=(vmc->L0-vmc->last_L0)/dt;//腿长L0的一阶导数
+		vmc->last_phi0=vmc->phi0;
+
+    //vmc->d_L0=(vmc->L0-vmc->last_L0)/dt;//腿长L0的一阶导数
     vmc->dd_L0=(vmc->d_L0-vmc->last_d_L0)/dt;//腿长L0的二阶导数
 		
 		vmc->last_d_L0=vmc->d_L0;
@@ -67,7 +90,7 @@ void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给lq
 {		
 	  static float PitchL=0.0f;
 	  static float PithGyroL=0.0f;
-	  PitchL=0.0f-ins->Pitch;
+	  PitchL=0.0f-ins->Pitch;				
 	  PithGyroL=0.0f-ins->Gyro[0];
 	
 		vmc->YD = vmc->l4*arm_sin_f32(vmc->phi4);//D的y坐标
@@ -87,16 +110,30 @@ void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给lq
 		vmc->YC = vmc->l1*arm_sin_f32(vmc->phi1) + vmc->l2*arm_sin_f32(vmc->phi2);
 		//C点极坐标
 		vmc->L0 = sqrt((vmc->XC - vmc->l5/2.0f)*(vmc->XC - vmc->l5/2.0f) + vmc->YC*vmc->YC);
-			
+					
 	  vmc->phi0 = atan2f(vmc->YC,(vmc->XC - vmc->l5/2.0f));//phi0用于计算lqr需要的theta		
 	  vmc->alpha=pi/2.0f-vmc->phi0 ;
-		
+			if( vmc->alpha>pi) vmc->alpha-=2*pi;
+		else if( vmc->alpha<-pi) vmc->alpha+=2*pi;	
 		if(vmc->first_flag==0)
 		{
 			vmc->last_phi0=vmc->phi0 ;
 			vmc->first_flag=1;
 		}
-		vmc->d_phi0=(vmc->phi0-vmc->last_phi0)/dt;//计算phi0变化率，d_phi0用于计算lqr需要的d_theta
+
+		//计算雅可比矩阵
+		vmc->j11 = (vmc->l1*arm_sin_f32(vmc->phi0-vmc->phi3)*arm_sin_f32(vmc->phi1-vmc->phi2))/arm_sin_f32(vmc->phi3-vmc->phi2);
+		vmc->j12 = (vmc->l1*arm_cos_f32(vmc->phi0-vmc->phi3)*arm_sin_f32(vmc->phi1-vmc->phi2))/(vmc->L0*arm_sin_f32(vmc->phi3-vmc->phi2));
+		vmc->j21 = (vmc->l4*arm_sin_f32(vmc->phi0-vmc->phi2)*arm_sin_f32(vmc->phi3-vmc->phi4))/arm_sin_f32(vmc->phi3-vmc->phi2);
+		vmc->j22 = (vmc->l4*arm_cos_f32(vmc->phi0-vmc->phi2)*arm_sin_f32(vmc->phi3-vmc->phi4))/(vmc->L0*arm_sin_f32(vmc->phi3-vmc->phi2));
+		
+		//vmc->d_phi0=(vmc->phi0-vmc->last_phi0)/dt;//计算phi0变化率，d_phi0用于计算lqr需要的d_theta
+		
+		vmc->d_L0   = vmc->j11 * vmc->d_phi1 + vmc->j21 * vmc->d_phi4;
+		vmc->d_phi0 = vmc->j12 * vmc->d_phi1 + vmc->j22 * vmc->d_phi4;
+
+		//vmc->d_phi0=(vmc->XC *vmc->d_YC - vmc->YC * vmc->d_XC ) / (vmc->XC*vmc->XC + vmc->YC *vmc->YC );
+
 		vmc->d_alpha=0.0f-vmc->d_phi0 ;
 		
 		vmc->theta=pi/2.0f-PitchL-vmc->phi0;//得到状态变量1
@@ -104,7 +141,7 @@ void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给lq
 		
 		vmc->last_phi0=vmc->phi0 ;
 
-		vmc->d_L0=(vmc->L0-vmc->last_L0)/dt;//腿长L0的一阶导数
+		//vmc->d_L0=(vmc->L0-vmc->last_L0)/dt;//腿长L0的一阶导数
     vmc->dd_L0=(vmc->d_L0-vmc->last_d_L0)/dt;//腿长L0的二阶导数
 		
 		vmc->last_d_L0=vmc->d_L0;
@@ -115,15 +152,9 @@ void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给lq
 }
 
 void VMC_calc_2(vmc_leg_t *vmc)//计算期望的关节输出力矩
-{
-		vmc->j11 = (vmc->l1*arm_sin_f32(vmc->phi0-vmc->phi3)*arm_sin_f32(vmc->phi1-vmc->phi2))/arm_sin_f32(vmc->phi3-vmc->phi2);
-		vmc->j12 = (vmc->l1*arm_cos_f32(vmc->phi0-vmc->phi3)*arm_sin_f32(vmc->phi1-vmc->phi2))/(vmc->L0*arm_sin_f32(vmc->phi3-vmc->phi2));
-		vmc->j21 = (vmc->l4*arm_sin_f32(vmc->phi0-vmc->phi2)*arm_sin_f32(vmc->phi3-vmc->phi4))/arm_sin_f32(vmc->phi3-vmc->phi2);
-		vmc->j22 = (vmc->l4*arm_cos_f32(vmc->phi0-vmc->phi2)*arm_sin_f32(vmc->phi3-vmc->phi4))/(vmc->L0*arm_sin_f32(vmc->phi3-vmc->phi2));
-	
-		vmc->torque_set[0]=vmc->j11*vmc->F0+vmc->j12*vmc->Tp;//得到RightFront的输出轴期望力矩，F0为五连杆机构末端沿腿的推力 
-		vmc->torque_set[1]=vmc->j21*vmc->F0+vmc->j22*vmc->Tp;//得到RightBack的输出轴期望力矩，Tp为沿中心轴的力矩 
-
+{	
+	vmc->torque_set[0]=vmc->j11*vmc->F0+vmc->j12*vmc->Tp;//得到RightFront的输出轴期望力矩，F0为五连杆机构末端沿腿的推力 
+	vmc->torque_set[1]=vmc->j21*vmc->F0+vmc->j22*vmc->Tp;//得到RightBack的输出轴期望力矩，Tp为沿中心轴的力矩 
 }
 
 uint8_t ground_detectionR(vmc_leg_t *vmc,INS_t *ins)
@@ -132,7 +163,7 @@ uint8_t ground_detectionR(vmc_leg_t *vmc,INS_t *ins)
 //	vmc->FN=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0
 //+0.6f*(ins->MotionAccel_n[2]-vmc->dd_L0*arm_cos_f32(vmc->theta)+2.0f*vmc->d_L0*vmc->d_theta*arm_sin_f32(vmc->theta)+vmc->L0*vmc->dd_theta*arm_sin_f32(vmc->theta)+vmc->L0*vmc->d_theta*vmc->d_theta*arm_cos_f32(vmc->theta));
  
-	if(vmc->FN<5.0f)
+	if(vmc->FN<60.0f)
 	{//离地了
 
 	  return 1;
@@ -149,7 +180,7 @@ uint8_t ground_detectionL(vmc_leg_t *vmc,INS_t *ins)
 //	vmc->FN=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0
 //+0.6f*(ins->MotionAccel_n[2]-vmc->dd_L0*arm_cos_f32(vmc->theta)+2.0f*vmc->d_L0*vmc->d_theta*arm_sin_f32(vmc->theta)+vmc->L0*vmc->dd_theta*arm_sin_f32(vmc->theta)+vmc->L0*vmc->d_theta*vmc->d_theta*arm_cos_f32(vmc->theta));
  
-	if(vmc->FN<5.0f)
+	if(vmc->FN<60.0f)
 	{//离地了
 	  return 1;
 	}

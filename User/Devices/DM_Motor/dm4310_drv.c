@@ -77,6 +77,7 @@ void dm4310_fbdata(Joint_Motor_t *motor, uint8_t *rx_data,uint32_t data_len)
 { 
 	if(data_len==FDCAN_DLC_BYTES_8)
 	{//返回的数据有8个字节
+		motor->para.online_flag++;
 	  motor->para.id = (rx_data[0])&0x0F;
 	  motor->para.state = (rx_data[0])>>4;
 	  motor->para.p_int=(rx_data[1]<<8)|rx_data[2];
@@ -95,7 +96,9 @@ void dm6215_fbdata(Wheel_Motor_t *motor, uint8_t *rx_data,uint32_t data_len)
 { 
 	if(data_len==FDCAN_DLC_BYTES_8)
 		
-	{//返回的数据有8个字节
+	{
+		motor->para.online_flag++;
+		//返回的数据有8个字节
 			int16_t v_rpm;
 //	  motor->para.id = (rx_data[0])&0x0F;
 //	  motor->para.state = (rx_data[0])>>4;
@@ -104,14 +107,13 @@ void dm6215_fbdata(Wheel_Motor_t *motor, uint8_t *rx_data,uint32_t data_len)
 //	  motor->para.t_int=((rx_data[4])<<8)|rx_data[5];
 //	  motor->para.pos = uint_to_float(motor->para.p_int, P_MIN2, P_MAX2, 16); //
 //	  motor->para.vel = uint_to_float(motor->para.v_int, V_MIN2, V_MAX2, 16); //
-			motor->para.vel =-v_rpm*RPM_TO_RADPS/14.f;
+			motor->para.vel =-v_rpm*RPM_TO_RADPS/15.765f;
 //	  motor->para.tor = uint_to_float(motor->para.t_int, -20, 20, 16);  // 
 //	  motor->para.Tmos = (float)(rx_data[6]);
 //	  motor->para.Tcoil = (float)(rx_data[7]);
 	
 	}
 }
-
 
 void enable_motor_mode(hcan_t* hcan, uint16_t motor_id, uint16_t mode_id)
 {
@@ -259,7 +261,7 @@ void mit_ctrl2(hcan_t* hcan, uint16_t motor_id, float pos, float vel,float kp, f
 	uint8_t data[8];
 	int16_t pos_tmp,vel_tmp,kp_tmp,kd_tmp,tor_tmp;
 	int16_t id = 0x200;
-	tor_tmp=torq*7412;
+	tor_tmp=torq*3330;
 if(hcan==&hfdcan2)
 {
 	data[0] = 0;

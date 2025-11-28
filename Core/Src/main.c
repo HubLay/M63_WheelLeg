@@ -23,6 +23,7 @@
 #include "fdcan.h"
 #include "spi.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -75,6 +76,7 @@ void MX_FREERTOS_Init(void);
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -91,7 +93,7 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
-/* Configure the peripherals common clocks */
+  /* Configure the peripherals common clocks */
   PeriphCommonClock_Config();
 
   /* USER CODE BEGIN SysInit */
@@ -106,28 +108,30 @@ int main(void)
   MX_FDCAN2_Init();
   MX_TIM3_Init();
   MX_FDCAN3_Init();
+  MX_UART7_Init();
   /* USER CODE BEGIN 2 */
 	DWT_Init(480);
   
-    /* BMI088³õÊ¼»¯ */
+    /* BMI088ï¿½ï¿½Ê¼ï¿½ï¿½ */
   while (BMI088_init(&hspi2, 0) != BMI088_NO_ERROR)
 	{
 	  ;
 	}
-	Power_OUT1_ON;//imu³õÊ¼»¯Íê³É£¬¿É¿ØµçÔ´´ò¿ª£¬ledµÆÁÁ
+	Power_OUT1_ON;//imuï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½É¿Øµï¿½Ô´ï¿½ò¿ª£ï¿½ledï¿½ï¿½ï¿½ï¿½
 	Power_OUT2_ON;
 	
-  FDCAN1_Config();//can¹ýÂËÆ÷³õÊ¼»¯
+  FDCAN1_Config();//canï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½
 	FDCAN2_Config();
   /* USER CODE END 2 */
 
-  /* Call init function for freertos objects (in freertos.c) */
+  /* Call init function for freertos objects (in cmsis_os2.c) */
   MX_FREERTOS_Init();
 
   /* Start scheduler */
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -241,7 +245,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM2) {
+  if (htim->Instance == TIM2)
+  {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
@@ -263,8 +268,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

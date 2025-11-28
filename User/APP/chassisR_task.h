@@ -62,13 +62,14 @@ typedef struct
 	float roll_f0;//roll轴补偿
 	float leg_tp;//防劈叉补偿
 	
-	uint8_t start_flag;//启动标志
+	uint8_t start_flag;//遥控器启动标志
 	
 	uint8_t jump_flag;//跳跃标志
 	uint8_t jump_flag2;//跳跃标志
 	
 	uint8_t prejump_flag;//预跳跃标志
 	uint8_t recover_flag;//一种情况下的倒地自起标志
+	uint8_t leg_theta_flag;//腿是否达到可以自起的标志位
 	
 	uint32_t count_key;
 	float jump_leg;
@@ -76,6 +77,17 @@ typedef struct
 	uint32_t jump_time_l;
 	uint8_t jump_status_r;
 	uint8_t jump_status_l;
+	
+	//这些flag是当时调试用的，可以删除不用
+	uint8_t stand_ready_flag_r;									//右腿站立完成标志
+	uint16_t stand_ready_time_r;
+	uint8_t stand_ready_flag_l;									//左腿站立完成标志
+	uint16_t stand_ready_time_l;
+	uint16_t stand_ok_time;
+	uint8_t stand_ready_flag;										//用于单独判断某个腿是否完成站立的计数
+	uint8_t stand_ready_ok_flag;								//车体站立标志，只用了右腿角度判断
+	uint16_t stand_ready_ok_time;
+	uint8_t stop_flag;						//行驶过程中车倒下
 	
 } chassis_t;
 

@@ -3,6 +3,7 @@
 #include "dm4310_drv.h"
 #include "string.h"
 #include "chassisR_task.h"
+#include "Up_board.h"
 
 FDCAN_RxHeaderTypeDef RxHeader1;
 uint8_t g_Can1RxData[64];
@@ -152,6 +153,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
         case 3 :dm4310_fbdata(&chassis_move.joint_motor[0], g_Can1RxData,RxHeader1.DataLength);break;
         case 4 :dm4310_fbdata(&chassis_move.joint_motor[1], g_Can1RxData,RxHeader1.DataLength);break;	         	
 				case 0x204 :dm6215_fbdata(&chassis_move.wheel_motor[0], g_Can1RxData,RxHeader1.DataLength);break;
+				case 0x77: upborad_fbdata(&Up_borard,g_Can1RxData,RxHeader1.DataLength);break;
 				default: break;
 			}			
 	  }
@@ -172,6 +174,7 @@ void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
         case 3 :dm4310_fbdata(&chassis_move.joint_motor[2], g_Can2RxData,RxHeader2.DataLength);break;
         case 4 :dm4310_fbdata(&chassis_move.joint_motor[3], g_Can2RxData,RxHeader2.DataLength);break;	         	
 				case 0x203 :dm6215_fbdata(&chassis_move.wheel_motor[1], g_Can2RxData,RxHeader2.DataLength);break;
+				case 0x77: upborad_fbdata(&Up_borard,g_Can1RxData,RxHeader1.DataLength);break;
 				default: break;
 			}	
     }

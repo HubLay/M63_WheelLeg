@@ -36,6 +36,7 @@ void INS_Init(void)
    INS.AccelLPF = 0.0089f;
 }
 
+//机器人姿态估计任务，计算机体的速度，位移，IMU（角度，角速度，位移）
 void INS_task(void)
 {
 	 INS_Init();
@@ -73,7 +74,7 @@ void INS_task(void)
        
       // 将重力从导航坐标系n转换到机体系b,随后根据加速度计数据计算运动加速度
 		float gravity_b[3];
-    EarthFrameToBodyFrame(gravity, gravity_b, INS.q);
+    EarthFrameToBodyFrame(gravity, gravity_b, INS.q);			//大地标准重力加速度转换到机体坐标系的三轴上
     for (uint8_t i = 0; i < 3; i++) // 同样过一个低通滤波
     {
       INS.MotionAccel_b[i] = (INS.Accel[i] - gravity_b[i]) * ins_dt / (INS.AccelLPF + ins_dt) 
@@ -81,7 +82,7 @@ void INS_task(void)
 //			INS.MotionAccel_b[i] = (INS.Accel[i] ) * dt / (INS.AccelLPF + dt) 
 //														+ INS.MotionAccel_b[i] * INS.AccelLPF / (INS.AccelLPF + dt);			
 		}
-		BodyFrameToEarthFrame(INS.MotionAccel_b, INS.MotionAccel_n, INS.q); // 转换回导航系n
+		BodyFrameToEarthFrame(INS.MotionAccel_b, INS.MotionAccel_n, INS.q); 	//滤波后的数据作为真实的三轴加速度，再换回大地坐标系下
 		
 		//死区处理
 		if(fabsf(INS.MotionAccel_n[0])<0.02f)

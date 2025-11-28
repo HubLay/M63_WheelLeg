@@ -24,6 +24,7 @@ typedef struct
 	float XD,YD;//D点的坐标
 	
 	float XC,YC;//C点的直角坐标
+	float d_XC,d_YC;//C点的直角坐标
 	float L0,phi0;//C点的极坐标
 	float alpha;
 	float d_alpha;	
@@ -36,6 +37,7 @@ typedef struct
 	float A0,B0,C0;//中间变量
 	float phi2,phi3;
 	float phi1,phi4;
+	float d_phi1,d_phi4;
 	
 	float j11,j12,j21,j22;//笛卡尔空间力到关节空间的力的雅可比矩阵系数
 	float torque_set[2];
