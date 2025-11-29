@@ -138,7 +138,7 @@ void chassisL_control_loop(chassis_t *chassis,vmc_leg_t *vmcl,INS_t *ins,float *
 	{
 		LQR_K[i]=LQR_K_calc(&Poly_Coefficient[i][0],vmcl->L0 );	
 	}
-			
+
 	chassis->wheel_motor[1].wheel_T=(LQR_K[0]*(vmcl->theta-0.0f)
 																	+LQR_K[1]*(vmcl->d_theta-0.0f)
 																	+LQR_K[2]*(chassis->x_set-chassis->x_filter-x_error)

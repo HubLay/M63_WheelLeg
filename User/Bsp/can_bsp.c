@@ -130,7 +130,7 @@ uint8_t canx_send_data(FDCAN_HandleTypeDef *hcan, uint16_t id, uint8_t *data, ui
   if(HAL_FDCAN_AddMessageToTxFifoQ(hcan, &TxHeader, data) != HAL_OK)
   {
         // ∑¢ÀÕ ß∞‹¥¶¿Ì
-       Error_Handler();      
+       //Error_Handler();      
   }
 	 return 0;
 }

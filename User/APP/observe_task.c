@@ -20,7 +20,7 @@
 #include "cmsis_os.h"
 
 KalmanFilter_t vaEstimateKF;	   // 卡尔曼滤波器结构体
-my_kalman kalman_MotionAccel_b;
+my_kalman kalman_MotionAccel_n;
 my_kalman kalman_Gyro0;
 float vaEstimateKF_F[4] = {1.0f, 0.003f, 
                            0.0f, 1.0f};	   // 状态转移矩阵，控制周期为0.001s
@@ -31,8 +31,8 @@ float vaEstimateKF_P[4] = {1.0f, 0.0f,
 float vaEstimateKF_Q[4] = {0.1f, 0.0f, 
                            0.0f, 0.1f};    // Q矩阵初始值
 
-float vaEstimateKF_R[4] = {100.0f, 0.0f, 
-                            0.0f,  100.0f}; 	//观测噪声
+float vaEstimateKF_R[4] = {150.0f, 0.0f, 
+                            0.0f,  150.0f}; 	//观测噪声
 														
 float vaEstimateKF_K[4];
 													 
@@ -59,12 +59,12 @@ void 	Observe_task(void)
 	static float aver_v=0.0f;
 		
 	xvEstimateKF_Init(&vaEstimateKF);
-	kalman_Init(&kalman_MotionAccel_b,0.5,0.01,0,1);
+	kalman_Init(&kalman_MotionAccel_n,0.3,0.01,0,1);
 	kalman_Init(&kalman_Gyro0,0.5,0.01,0,1);
   while(1)
 	{  
-		kalman_set_now(&kalman_MotionAccel_b,INS.MotionAccel_b[1]);
-		Recv_Adjust_PeriodElapsedCallback(&kalman_MotionAccel_b);
+		kalman_set_now(&kalman_MotionAccel_n,INS.MotionAccel_n[1]);
+		Recv_Adjust_PeriodElapsedCallback(&kalman_MotionAccel_n);
 //		kalman_set_now(&kalman_Gyro0,INS.Gyro[0]);
 //		Recv_Adjust_PeriodElapsedCallback(&kalman_Gyro0);
 		wr= -chassis_move.wheel_motor[0].para.vel-INS.Gyro[0]+right.d_alpha;//右边驱动轮转子相对大地角速度，这里定义的是顺时针为正
@@ -74,11 +74,14 @@ void 	Observe_task(void)
 		vlb=wl*0.075f+left.L0*left.d_theta*arm_cos_f32(left.theta)+left.d_L0*arm_sin_f32(left.theta);//机体b系的速度
 		
 		aver_v=(vrb-vlb)/2.0f;//取平均（坐标系方向相反）
-    xvEstimateKF_Update(&vaEstimateKF,INS.MotionAccel_b[1],aver_v);
+    xvEstimateKF_Update(&vaEstimateKF,kalman_MotionAccel_n.Out,aver_v);
 	//	xvEstimateKF_Update(&vaEstimateKF,kalman_MotionAccel_b.Out,aver_v);
 		
 		//原地自转的过程中v_filter和x_filter应该都是为0
 		chassis_move.v_filter=vel_acc[0];//得到卡尔曼滤波后的速度
+		if(fabs(chassis_move.v_filter) < 0.001f){
+			chassis_move.v_filter = 0;					//速度太小了不能进行累计，不然x会飘
+		}
 		chassis_move.x_filter=chassis_move.x_filter+chassis_move.v_filter*((float)OBSERVE_TIME/1000.0f);
 		
 	//如果想直接用轮子速度，不做融合的话可以这样

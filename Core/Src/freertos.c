@@ -107,7 +107,7 @@ void MX_FREERTOS_Init(void) {
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of INS_TASK */
-  osThreadDef(INS_TASK, INS_Task, osPriorityRealtime, 0, 512);
+  osThreadDef(INS_TASK, INS_Task, osPriorityRealtime, 0, 3000);
   INS_TASKHandle = osThreadCreate(osThread(INS_TASK), NULL);
 
   /* definition and creation of CHASSISR_TASK */

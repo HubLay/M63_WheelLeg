@@ -23,12 +23,12 @@ const float IMU_QuaternionEKF_F[36] = {1, 0, 0, 0, 0, 0,
                                        0, 0, 0, 1, 0, 0,
                                        0, 0, 0, 0, 1, 0,
                                        0, 0, 0, 0, 0, 1};
-float IMU_QuaternionEKF_P[36] = {1, 0.1, 0.1, 0.1, 0.1, 0.1,
-                                 0.1, 1, 0.1, 0.1, 0.1, 0.1,
-                                 0.1, 0.1, 1, 0.1, 0.1, 0.1,
-                                 0.1, 0.1, 0.1, 1, 0.1, 0.1,
-                                 0.1, 0.1, 0.1, 0.1, 1, 0.1,
-                                 0.1, 0.1, 0.1, 0.1, 0.1, 1};
+float IMU_QuaternionEKF_P[36] = {100000, 0.1, 0.1, 0.1, 0.1, 0.1,
+                                 0.1, 100000, 0.1, 0.1, 0.1, 0.1,
+                                 0.1, 0.1, 100000, 0.1, 0.1, 0.1,
+                                 0.1, 0.1, 0.1, 100000, 0.1, 0.1,
+                                 0.1, 0.1, 0.1, 0.1, 100, 0.1,
+                                 0.1, 0.1, 0.1, 0.1, 0.1, 100};
 float IMU_QuaternionEKF_K[18];
 float IMU_QuaternionEKF_H[18];
 
@@ -46,6 +46,7 @@ static void IMU_QuaternionEKF_xhatUpdate(KalmanFilter_t *kf);
  * @param[in] lambda         fading coefficient          0.9996
  * @param[in] lpf            lowpass filter coefficient  0
  */
+float yaw_offset = 0.000980000012;
 void IMU_QuaternionEKF_Init(float process_noise1, float process_noise2, float measure_noise, float lambda, float lpf)
 {
     QEKF_INS.Initialized = 1;
@@ -198,7 +199,7 @@ void IMU_QuaternionEKF_Update(float gx, float gy, float gz, float ax, float ay, 
     QEKF_INS.q[3] = QEKF_INS.IMU_QuaternionEKF.FilteredValue[3];
     QEKF_INS.GyroBias[0] = QEKF_INS.IMU_QuaternionEKF.FilteredValue[4];
     QEKF_INS.GyroBias[1] = QEKF_INS.IMU_QuaternionEKF.FilteredValue[5];
-    QEKF_INS.GyroBias[2] = 0; // 大部分时候z轴通天,无法观测yaw的漂移
+    QEKF_INS.GyroBias[2] = yaw_offset; // 大部分时候z轴通天,无法观测yaw的漂移
 
     // 利用四元数反解欧拉角
     QEKF_INS.Yaw = atan2f(2.0f * (QEKF_INS.q[0] * QEKF_INS.q[3] + QEKF_INS.q[1] * QEKF_INS.q[2]), 2.0f * (QEKF_INS.q[0] * QEKF_INS.q[0] + QEKF_INS.q[1] * QEKF_INS.q[1]) - 1.0f) * 57.295779513f;

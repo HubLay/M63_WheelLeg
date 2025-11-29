@@ -91,7 +91,9 @@ void ChassisR_task(void)
 
 	while (1)
 	{
-		
+		sprintf(Mes, "%f,%f,%f,%f,%d\n", chassis_move.v_set, chassis_move.v_filter,chassis_move.x_set,chassis_move.x_filter,chassis_move.start_flag);
+		HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
+
 		chassisR_feedback_update(&chassis_move, &right, &INS); // 更新数据
 		chassisR_control_loop(&chassis_move, &right, &INS, LQR_K_R, &LegR_Pid); // 控制计算
 
@@ -193,7 +195,7 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 	// chassis->roll_f0=PID_Calc(&Roll_Pid, chassis->roll,chassis->roll_set);//roll轴pid计算
 	chassis->roll_f0 = Roll_Pid.Kp * (chassis->roll_set - chassis->roll) - Roll_Pid.Kd * ins->Gyro[1];
 	chassis->leg_tp = PID_Calc(&Tp_Pid, chassis->theta_err, 0.0f); // 防劈叉pid计算
-
+	
 	chassis->wheel_motor[0].wheel_T = (
 													LQR_K[0] * (vmcr->theta - 0.0f) + 
 													LQR_K[1] * (vmcr->d_theta - 0.0f) + 
@@ -230,6 +232,7 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 				if (chassis->stand_ready_ok_time >= 100)
 				{
 					// 站立完成
+					chassis->x_set = chassis->x_filter;				//起来的时候车会后退一段
 					chassis->stand_ready_ok_flag = 1;
 				}
 			}

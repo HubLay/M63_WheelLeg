@@ -19,6 +19,10 @@
 #include "bsp_PWM.h"
 #include "mahony_filter.h"
 
+const float X_b[3] = {1, 0, 0};
+const float Y_b[3] = {0, 1, 0};
+const float Z_b[3] = {0, 0, 1};
+
 INS_t INS;
 
 struct MAHONY_FILTER_t mahony;
@@ -33,7 +37,8 @@ int stop_time;
 void INS_Init(void)
 { 
 	 mahony_init(&mahony,1.0f,0.0f,0.001f);
-   INS.AccelLPF = 0.0089f;
+	 IMU_QuaternionEKF_Init(10, 0.001, 10000000, 0.9996, 0);
+   INS.AccelLPF = 0.0085f;
 }
 
 //机器人姿态估计任务，计算机体的速度，位移，IMU（角度，角速度，位移）
@@ -62,15 +67,24 @@ void INS_task(void)
 		Gyro.y=BMI088.Gyro[1];
 		Gyro.z=BMI088.Gyro[2];
 
-		mahony_input(&mahony,Gyro,Accel);
-		mahony_update(&mahony);
-		mahony_output(&mahony);
-	  RotationMatrix_update(&mahony);
+		IMU_QuaternionEKF_Update(INS.Gyro[0], INS.Gyro[1], INS.Gyro[2], INS.Accel[0], INS.Accel[1], INS.Accel[2], ins_dt);
+
+    memcpy(INS.q, QEKF_INS.q, sizeof(QEKF_INS.q));
+
+		// 机体系基向量转换到导航坐标系，本例选取惯性系为导航系
+    BodyFrameToEarthFrame(X_b, INS.xn, INS.q);
+    BodyFrameToEarthFrame(Y_b, INS.yn, INS.q);
+    BodyFrameToEarthFrame(Z_b, INS.zn, INS.q);
+
+		// mahony_input(&mahony,Gyro,Accel);
+		// mahony_update(&mahony);
+		// mahony_output(&mahony);
+	  // RotationMatrix_update(&mahony);
 				
-		INS.q[0]=mahony.q0;
-		INS.q[1]=mahony.q1;
-		INS.q[2]=mahony.q2;
-		INS.q[3]=mahony.q3;
+		// INS.q[0]=mahony.q0;
+		// INS.q[1]=mahony.q1;
+		// INS.q[2]=mahony.q2;
+		// INS.q[3]=mahony.q3;
        
       // 将重力从导航坐标系n转换到机体系b,随后根据加速度计数据计算运动加速度
 		float gravity_b[3];
@@ -85,15 +99,15 @@ void INS_task(void)
 		BodyFrameToEarthFrame(INS.MotionAccel_b, INS.MotionAccel_n, INS.q); 	//滤波后的数据作为真实的三轴加速度，再换回大地坐标系下
 		
 		//死区处理
-		if(fabsf(INS.MotionAccel_n[0])<0.02f)
+		if(fabsf(INS.MotionAccel_n[0])<0.005f)
 		{
 		  INS.MotionAccel_n[0]=0.0f;	//x轴
 		}
-		if(fabsf(INS.MotionAccel_n[1])<0.02f)
+		if(fabsf(INS.MotionAccel_n[1])<0.005f)
 		{
 		  INS.MotionAccel_n[1]=0.0f;	//y轴
 		}
-		if(fabsf(INS.MotionAccel_n[2])<0.04f)
+		if(fabsf(INS.MotionAccel_n[2])<0.002f)
 		{
 		  INS.MotionAccel_n[2]=0.0f;//z轴
 			stop_time++;
@@ -110,9 +124,12 @@ void INS_task(void)
 		  INS.x_n=INS.x_n+INS.v_n*0.001f;
 			INS.ins_flag=1;//四元数基本收敛，加速度也基本收敛，可以开始底盘任务
 			// 获取最终数据
-      INS.Pitch=mahony.roll;
-		  INS.Roll=mahony.pitch;
-		  INS.Yaw=mahony.yaw;
+      // INS.Pitch=mahony.roll;
+		  // INS.Roll=mahony.pitch;
+		  // INS.Yaw=mahony.yaw;
+			INS.Pitch = QEKF_INS.Pitch * PI / 180.0f;
+			INS.Roll  = QEKF_INS.Roll * PI / 180.0f;
+			INS.Yaw   = QEKF_INS.Yaw * PI / 180.0f;
 		
 		//INS.YawTotalAngle=INS.YawTotalAngle+INS.Gyro[2]*0.001f;
 			

@@ -20,6 +20,8 @@
 #include "stdint.h"
 #include "stdlib.h"
 
+#define _CMSIS_OS_H
+
 #ifndef user_malloc
 #ifdef _CMSIS_OS_H
 #define user_malloc pvPortMalloc
