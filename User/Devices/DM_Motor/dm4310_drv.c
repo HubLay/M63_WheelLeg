@@ -3,6 +3,12 @@
 #include "fdcan.h"
 #include "arm_math.h"
 
+#define M3508_TORQUE_CONTANT 0.3f
+#define M3508_GEAR_RADIO     19.2032f
+#define MOTOR_RADIO_NOW			 15.765f
+#define MOTOR_TORQUE_To_CURRENT (M3508_TORQUE_CONTANT * MOTOR_RADIO_NOW / M3508_GEAR_RADIO)
+
+
 float Hex_To_Float(uint32_t *Byte,int num)//十六进制到浮点数
 {
 	return *((float*)Byte);
@@ -178,6 +184,7 @@ void mit_ctrl(hcan_t* hcan, uint16_t motor_id, float pos, float vel,float kp, fl
 	uint16_t pos_tmp,vel_tmp,kp_tmp,kd_tmp,tor_tmp;
 	uint16_t id = motor_id + MIT_MODE;
 
+	//达妙电机是力矩和uint直接变换对应的
 	pos_tmp = float_to_uint(pos,  P_MIN,  P_MAX,  16);
 	vel_tmp = float_to_uint(vel,  V_MIN,  V_MAX,  12);
 	kp_tmp  = float_to_uint(kp,   KP_MIN, KP_MAX, 12);
@@ -255,13 +262,12 @@ void speed_ctrl(hcan_t* hcan,uint16_t motor_id, float vel)
 }
 
 
-
 void mit_ctrl2(hcan_t* hcan, uint16_t motor_id, float pos, float vel,float kp, float kd, float torq)
 {
 	uint8_t data[8];
 	int16_t pos_tmp,vel_tmp,kp_tmp,kd_tmp,tor_tmp;
 	int16_t id = 0x200;
-	tor_tmp=torq*3330;
+	tor_tmp = torq * 20.0f / (MOTOR_TORQUE_To_CURRENT * 16384.0f);
 if(hcan==&hfdcan2)
 {
 	data[0] = 0;
