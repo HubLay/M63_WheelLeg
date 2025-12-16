@@ -4,6 +4,14 @@
             "path": "."
         }
     ],
-    "settings": {},
+    "settings": {
+        "files.associations": {
+            "mahony_filter.h": "c",
+            "kalman_filter.h": "c",
+            "ins_task.h": "c",
+            "vmc_calc.h": "c",
+            "my_kalman.h": "c"
+        }
+    },
     "extensions": {}
 }

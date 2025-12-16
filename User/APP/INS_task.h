@@ -28,11 +28,14 @@ typedef struct
     float q[4]; // 四元数估计值
 
     float Gyro[3];  // 角速度
+    float dGyro[3]; //角速度一阶导
     float Accel[3]; // 加速度
-    float MotionAccel_b[3]; // 机体坐标加速度
+    float MotionAccel_b[3];         // 机体坐标加速度（未处理）
+    float True_MotionAccel_b[3];    //机体坐标加速度（处理向心加速度）
     float MotionAccel_n[3]; // 绝对系加速度
 
     float AccelLPF; // 加速度低通滤波系数
+    float DGyroLPF; // 角速度一阶导低通滤波系数
 
     // 加速度在绝对系的向量表示
     float xn[3];

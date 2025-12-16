@@ -105,8 +105,10 @@ enum Enum_Referee_UI_Refresh_Status
 
 typedef struct
 {
-	float V_X;
-	float V_Y;
+	float Left_X;
+	float Left_Y;
+    float Right_X;
+    float Right_Y;
 	float omega;
 	float gimbal_pitch;
 	enum Enum_Chassis_Control_Type Chassis_Control_Type;

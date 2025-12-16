@@ -267,7 +267,7 @@ void mit_ctrl2(hcan_t* hcan, uint16_t motor_id, float pos, float vel,float kp, f
 	uint8_t data[8];
 	int16_t pos_tmp,vel_tmp,kp_tmp,kd_tmp,tor_tmp;
 	int16_t id = 0x200;
-	tor_tmp = torq * 20.0f / (MOTOR_TORQUE_To_CURRENT * 16384.0f);
+	tor_tmp = torq * 3300;//16384.0f / (MOTOR_TORQUE_To_CURRENT * 20.0f);
 if(hcan==&hfdcan2)
 {
 	data[0] = 0;

@@ -7,21 +7,23 @@
 #include "VMC_calc.h"
 #include "INS_task.h"
 
-#define ROLL_PID_KP 200.0f
+#define ROLL_PID_KP 100.0f
 #define ROLL_PID_KI 0.0f //不用积分项
 #define ROLL_PID_KD 10.0f
-#define ROLL_PID_MAX_OUT  20.0f
+#define ROLL_PID_MAX_OUT  120.0f
 #define ROLL_PID_MAX_IOUT 0.0f
 
-#define TP_PID_KP 10.0f
+//Tp的PID太小会导致转向停下来后腿摆角一前一后，然后导致车体倒下（因为LQR摆角权重不能太大）
+#define TP_PID_KP 70.0f
 #define TP_PID_KI 0.0f //不用积分项
-#define TP_PID_KD 0.1f
-#define TP_PID_MAX_OUT  2.0f
+#define TP_PID_KD 1.2f
+#define TP_PID_MAX_OUT  5.0f
 #define TP_PID_MAX_IOUT 0.0f
 
-#define TURN_PID_KP 2.0f
+//转向PID不用太激进
+#define TURN_PID_KP 3.0f
 #define TURN_PID_KI 0.0f //不用积分项
-#define TURN_PID_KD 0.2f
+#define TURN_PID_KD 0.7f
 #define TURN_PID_MAX_OUT  2.0f//轮毂电机的额定扭矩
 #define TURN_PID_MAX_IOUT 0.0f
 #define Mg 13.0f
@@ -30,6 +32,9 @@ typedef struct
   Joint_Motor_t joint_motor[4];
   Wheel_Motor_t wheel_motor[2];
 	
+	float kalman_wheel_vel_L;
+	float kalman_wheel_vel_R;
+
 	float v_set;//期望速度，单位是m/s
 	float target_v;
 	float x_set;//期望位置，单位是m

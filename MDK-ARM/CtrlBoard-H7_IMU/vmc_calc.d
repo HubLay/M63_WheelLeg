@@ -50,3 +50,4 @@ ctrlboard-h7_imu\vmc_calc.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 ctrlboard-h7_imu\vmc_calc.o: C:\Users\HLlll\AppData\Local\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 ctrlboard-h7_imu\vmc_calc.o: C:\Users\HLlll\AppData\Local\Keil_v5\ARM\ARMCC\Bin\..\include\float.h
 ctrlboard-h7_imu\vmc_calc.o: C:\Users\HLlll\AppData\Local\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+ctrlboard-h7_imu\vmc_calc.o: ../User/Algorithm/my_kalman/my_kalman.h

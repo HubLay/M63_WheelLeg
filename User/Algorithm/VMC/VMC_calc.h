@@ -5,11 +5,11 @@
 #include "INS_task.h"
 
 #define pi 3.1415926f
-#define LEG_PID_KP  700.0f
+#define LEG_PID_KP  800.0f								
 #define LEG_PID_KI  0.0f//不积分
-#define LEG_PID_KD  6000.0f
+#define LEG_PID_KD  500.0f
 #define LEG_PID_MAX_OUT  90.0f //90牛
-#define LEG_PID_MAX_IOUT 0.0f
+#define LEG_PID_MAX_IOUT 5.0f
 
 typedef struct
 {
@@ -54,11 +54,15 @@ typedef struct
 	float dd_L0;//L0的二阶导数
 	float last_L0;
 	float last_d_L0;
+
+	float kalman_d_alpha;
+	float kalman_d_theta;
+	float kalman_d_L0;
 	
 	float FN;//支持力
 	
 	uint8_t first_flag;
-	uint8_t leg_flag;//腿长完成标志
+	uint8_t leg_flag;//腿长完成标志  是否在控制腿长
 } vmc_leg_t;
 
 extern void VMC_init(vmc_leg_t *vmc);//给杆长赋值

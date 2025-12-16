@@ -103,11 +103,9 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of INS_TASK */
-  osThreadDef(INS_TASK, INS_Task, osPriorityRealtime, 0, 3000);
+  osThreadDef(INS_TASK, INS_Task, osPriorityRealtime, 0, 2048);
   INS_TASKHandle = osThreadCreate(osThread(INS_TASK), NULL);
 
   /* definition and creation of CHASSISR_TASK */
@@ -119,7 +117,7 @@ void MX_FREERTOS_Init(void) {
   CHASSISL_TASKHandle = osThreadCreate(osThread(CHASSISL_TASK), NULL);
 
   /* definition and creation of OBSERVE_TASK */
-  osThreadDef(OBSERVE_TASK, OBSERVE_Task, osPriorityHigh, 0, 512);
+  osThreadDef(OBSERVE_TASK, OBSERVE_Task, osPriorityHigh, 0, 1024);
   OBSERVE_TASKHandle = osThreadCreate(osThread(OBSERVE_TASK), NULL);
 
   // /* definition and creation of PS2_TASK */
@@ -127,7 +125,7 @@ void MX_FREERTOS_Init(void) {
   // PS2_TASKHandle = osThreadCreate(osThread(PS2_TASK), NULL);
 
   /* definition and creation of REMOTE_TASK */
-  osThreadDef(REMOTE_TASK, Remote_Task, osPriorityIdle, 0, 128);
+  osThreadDef(REMOTE_TASK, Remote_Task, osPriorityAboveNormal, 0, 256);
   REMOTE_TASKHandle = osThreadCreate(osThread(REMOTE_TASK), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */

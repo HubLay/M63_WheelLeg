@@ -21,8 +21,10 @@ extern INS_t INS;
 uint32_t REMOTE_TIME=10;//ps2手柄任务周期是10ms
 void remote_task(void)
 {
-			Up_borard.V_X=0;
-			Up_borard.V_Y=0;
+			Up_borard.Left_X=0;
+			Up_borard.Left_Y=0;
+			Up_borard.Right_X=0;
+			Up_borard.Right_Y=0;
 			Up_borard.mode=0;
 		while(1)
 	 {
@@ -53,18 +55,29 @@ void Remote_data_process(Up_borard_t *data,chassis_t *chassis,float dt)
 	if(chassis->start_flag==1)
 	{
 		//启动
-		chassis->target_v=data->V_Y;//往前大于0
+		chassis->target_v = data->Left_Y * 1.5f;//往前大于0
 		chassis->v_set=chassis->target_v;
 
-		chassis->x_set=chassis->x_set + chassis->v_set*dt;
-		chassis->turn_set=chassis->turn_set - data->V_X/20.f;//往右大于0		
+		//chassis->x_set=chassis->x_set + chassis->v_set*dt;
+		chassis->turn_set = chassis->turn_set - data->Left_X * 1.5f/30.f;//往右大于0
+		
+		if((chassis->stand_ready_flag_r == 1) && (chassis->stand_ready_flag_l == 1)){
+			chassis->leg_set  = chassis->leg_set + data->Right_Y/1000.0f;
+		}
+		
+		if(chassis->leg_set < 0.180f){
+			chassis->leg_set = 0.180f;
+		}
+		else if(chassis->leg_set > 0.40f){
+			chassis->leg_set = 0.40f;
+		}
 	  			
 		//腿长变化
 	//	chassis->leg_set=chassis->leg_set+((float)(data->ly-128))*(-0.000015f);
 		//chassis->roll_target= ((float)(data->lx-127))*(0.0025f);
 	//	chassis->roll_set=chassis->roll_target;
 		//slope_following(&chassis->roll_target,&chassis->roll_set,0.0075f);
-		chassis->roll_set=0;
+		chassis->roll_set = 0.035f;			//平衡时角度不为0
 		//jump_key(chassis,data);
 
 		chassis->leg_left_set = chassis->leg_set;
@@ -87,7 +100,7 @@ void Remote_data_process(Up_borard_t *data,chassis_t *chassis,float dt)
 	else if(chassis->start_flag==0)
 	{//关闭					按理说应该观测器什么的全部置零，目标值什么的也不能更新，
 	  chassis->v_set=0.0f;//清零
-		chassis->x_set=chassis->x_filter;//保存
+		chassis->x_set=chassis->x_filter = 0.0f;//保存
 	  chassis->turn_set=chassis->total_yaw;//保存
 	  chassis->leg_set=0.18f;//原始腿长
 		chassis->stand_ready_flag=0;

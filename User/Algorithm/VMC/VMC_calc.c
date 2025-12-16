@@ -1,5 +1,13 @@
 #include "VMC_calc.h"
 
+#include "my_kalman.h"
+
+my_kalman kalman_right_d_theta_s;
+my_kalman kalman_right_d_L0_s;
+my_kalman kalman_right_d_alpha_s;
+my_kalman kalman_left_d_theta_s;
+my_kalman kalman_left_d_L0_s;
+my_kalman kalman_left_d_alpha_s;
 
 void VMC_init(vmc_leg_t *vmc)//给杆长赋值
 {
@@ -9,6 +17,16 @@ void VMC_init(vmc_leg_t *vmc)//给杆长赋值
 	vmc->l2=0.258f;//单位为m
 	vmc->l3=0.258f;//单位为m
 	vmc->l4=0.215f;//单位为m
+
+	//Ozone调参
+	kalman_Init(&kalman_left_d_L0_s, 0.99,0.01,0,1);
+	kalman_Init(&kalman_left_d_theta_s, 0.70,0.01,0,1);
+	kalman_Init(&kalman_left_d_alpha_s, 0.80,0.01,0,1);
+	kalman_Init(&kalman_right_d_L0_s, 0.99,0.01,0,1);
+	kalman_Init(&kalman_right_d_theta_s, 0.70,0.01,0,1);
+	kalman_Init(&kalman_right_d_alpha_s, 0.80,0.01,0,1);
+
+
 }
 
 
@@ -19,7 +37,7 @@ void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给l
 	//有关x方向的变量应该刚好是倒过来的
 		static float PitchR=0.0f;
 	  static float PithGyroR=0.0f;
-	  PitchR=ins->Pitch;								//可能是因为IMU坐标系反了，这里的Pitch如果符合面朝Y轴逆时针为正应该是要有一个负号，对应左腿是相反的
+	  PitchR=ins->Pitch;								//可能是因为IMU坐标系反了，这里的Pitch如果符合面朝Y轴逆时针为正应该是要有一个负号（对一下达妙iMU会发现是右手系，当X朝前实际上刚好Y与右腿VMC右手系一致）
 	  PithGyroR=ins->Gyro[0];
 	
 	  vmc->YD = vmc->l4*arm_sin_f32(vmc->phi4);//D的y坐标
@@ -83,6 +101,19 @@ void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给l
 		
 		vmc->dd_theta=(vmc->d_theta-vmc->last_d_theta)/dt;
 		vmc->last_d_theta=vmc->d_theta;
+
+		kalman_set_now(&kalman_right_d_L0_s, vmc->d_L0);
+		kalman_set_now(&kalman_right_d_alpha_s, vmc->d_alpha);
+		kalman_set_now(&kalman_right_d_theta_s, vmc->d_theta);
+
+		Recv_Adjust_PeriodElapsedCallback(&kalman_right_d_L0_s);
+		Recv_Adjust_PeriodElapsedCallback(&kalman_right_d_alpha_s);
+		Recv_Adjust_PeriodElapsedCallback(&kalman_right_d_theta_s);
+
+		vmc->kalman_d_L0    = kalman_right_d_L0_s.Out;
+		vmc->kalman_d_alpha = kalman_right_d_alpha_s.Out;
+		vmc->kalman_d_theta = kalman_right_d_theta_s.Out;
+
 }
 
 
@@ -149,6 +180,19 @@ void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给lq
 		
 		vmc->dd_theta=(vmc->d_theta-vmc->last_d_theta)/dt;
 		vmc->last_d_theta=vmc->d_theta;
+
+		kalman_set_now(&kalman_left_d_L0_s, vmc->d_L0);
+		kalman_set_now(&kalman_left_d_alpha_s, vmc->d_alpha);
+		kalman_set_now(&kalman_left_d_theta_s, vmc->d_theta);
+
+		Recv_Adjust_PeriodElapsedCallback(&kalman_left_d_L0_s);
+		Recv_Adjust_PeriodElapsedCallback(&kalman_left_d_alpha_s);
+		Recv_Adjust_PeriodElapsedCallback(&kalman_left_d_theta_s);
+
+		vmc->kalman_d_L0    = kalman_left_d_L0_s.Out;
+		vmc->kalman_d_alpha = kalman_left_d_alpha_s.Out;
+		vmc->kalman_d_theta = kalman_left_d_theta_s.Out;
+
 }
 
 void VMC_calc_2(vmc_leg_t *vmc)//计算期望的关节输出力矩

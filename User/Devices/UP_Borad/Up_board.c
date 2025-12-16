@@ -36,39 +36,26 @@ void upborad_fbdata(Up_borard_t *borad, uint8_t *rx_data,uint32_t data_len)
 { 
 	
 	
-	 float gimbal_velocity_x, gimbal_velocity_y;
-    //底盘坐标系的目标速度
-    float chassis_velocity_x, chassis_velocity_y;
-    //目标角速度
-    float chassis_omega;
     //底盘控制类型
     enum Enum_Chassis_Control_Type chassis_control_type;
-    //底盘和云台夹角（弧度制）
-    float derta_angle;
     //float映射到int16之后的速度
-    uint16_t tmp_velocity_x, tmp_velocity_y, tmp_omega, tmp_gimbal_pitch;
+    int8_t tmp_dr16_left_x, tmp_dr16_left_y, tmp_dr16_right_x, tmp_dr16_right_y;
 	if(data_len==FDCAN_DLC_BYTES_8)
 	{//返回的数据有8个字节
 		
-    memcpy(&tmp_velocity_x,&rx_data[0],sizeof(uint16_t));
-    memcpy(&tmp_velocity_y,&rx_data[2],sizeof(uint16_t));
-    memcpy(&tmp_omega,&rx_data[4],sizeof(uint8_t));
-    memcpy(&tmp_gimbal_pitch,&rx_data[5],sizeof(uint16_t));
+    memcpy(&tmp_dr16_left_x,&rx_data[0],sizeof(uint8_t));
+    memcpy(&tmp_dr16_left_y,&rx_data[1],sizeof(uint8_t));
+    memcpy(&tmp_dr16_right_x,&rx_data[2],sizeof(uint8_t));
+    memcpy(&tmp_dr16_right_y,&rx_data[3],sizeof(uint8_t));
     memcpy(&control_type,&rx_data[7],sizeof(uint8_t));
-		gimbal_velocity_x = Math_Int_To_Float(tmp_velocity_x,0,0x7FFF,-1 *1,1);
-    gimbal_velocity_y = Math_Int_To_Float(tmp_velocity_y,0,0x7FFF,-1 * 1,1);
-		borad->V_X=gimbal_velocity_x;
-		borad->V_Y=gimbal_velocity_y;
-   // Gimbal_Tx_Pitch_Angle = Math_Int_To_Float(tmp_gimbal_pitch,0,0x7FFF,-10.0f,30.0f);
+
+		borad->Left_X  = (float)tmp_dr16_left_x / 100.0f;
+		borad->Left_Y  = (float)tmp_dr16_left_y / 100.0f;
+    borad->Right_X = (float)tmp_dr16_right_x / 100.0f;
+		borad->Right_Y = (float)tmp_dr16_right_y / 100.0f;
+
 		chassis_control_type = (control_type & 0x03);
-		borad->Chassis_Control_Type= (control_type & 0x03);
-    borad->Sprint_Status =(control_type>>2 & 0x01);
-    borad->Bulletcap_Status = (control_type>>3 & 0x01);
-   	borad-> Fric_Status = (control_type>>4 & 0x01);
-    borad->MinPC_Aim_Status = (control_type>>5 & 0x01);
-    borad->MiniPC_Status =(control_type>>6 & 0x01);
-    borad->Referee_UI_Refresh_Status = (control_type>>7 & 0x01);
-		
+
 		borad->mode=chassis_control_type;
 		
 	}

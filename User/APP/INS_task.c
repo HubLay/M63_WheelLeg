@@ -19,6 +19,15 @@
 #include "bsp_PWM.h"
 #include "mahony_filter.h"
 
+// #define IMU_DISTANCE_X  0.0f
+// #define IMU_DISTANCE_Y  0.0f
+// #define IMU_DISTANCE_Z -0.0f
+
+//这里的XYZ应该是机体的XYZ
+#define IMU_DISTANCE_X  0.0f
+#define IMU_DISTANCE_Y -0.05f
+#define IMU_DISTANCE_Z -0.01f
+
 const float X_b[3] = {1, 0, 0};
 const float Y_b[3] = {0, 1, 0};
 const float Z_b[3] = {0, 0, 1};
@@ -37,8 +46,9 @@ int stop_time;
 void INS_Init(void)
 { 
 	 mahony_init(&mahony,1.0f,0.0f,0.001f);
-	 IMU_QuaternionEKF_Init(10, 0.001, 10000000, 0.9996, 0);
+	 IMU_QuaternionEKF_Init(10, 0.01, 10000000, 1, 0);
    INS.AccelLPF = 0.0085f;
+	 INS.DGyroLPF = 0.009f;
 }
 
 //机器人姿态估计任务，计算机体的速度，位移，IMU（角度，角速度，位移）
@@ -53,6 +63,10 @@ void INS_task(void)
 		mahony.dt = ins_dt;
 
     BMI088_Read(&BMI088);
+
+		INS.dGyro[X] = (BMI088.Gyro[X] - INS.Gyro[X])/ (INS.DGyroLPF + ins_dt) + INS.dGyro[X] * INS.DGyroLPF / (INS.DGyroLPF + ins_dt);
+    INS.dGyro[Y] = (BMI088.Gyro[Y] - INS.Gyro[Y])/ (INS.DGyroLPF + ins_dt) + INS.dGyro[Y] * INS.DGyroLPF / (INS.DGyroLPF + ins_dt);
+    INS.dGyro[Z] = (BMI088.Gyro[Z] - INS.Gyro[Z])/ (INS.DGyroLPF + ins_dt) + INS.dGyro[Z] * INS.DGyroLPF / (INS.DGyroLPF + ins_dt);
 
     INS.Accel[X] = BMI088.Accel[X];
     INS.Accel[Y] = BMI088.Accel[Y];
@@ -89,14 +103,24 @@ void INS_task(void)
       // 将重力从导航坐标系n转换到机体系b,随后根据加速度计数据计算运动加速度
 		float gravity_b[3];
     EarthFrameToBodyFrame(gravity, gravity_b, INS.q);			//大地标准重力加速度转换到机体坐标系的三轴上
-    for (uint8_t i = 0; i < 3; i++) // 同样过一个低通滤波
+    for (uint8_t i = 0; i < 3; i++) // 同样过一个低通滤波 得到经过低通滤波的纯机体加速度
     {
       INS.MotionAccel_b[i] = (INS.Accel[i] - gravity_b[i]) * ins_dt / (INS.AccelLPF + ins_dt) 
-														+ INS.MotionAccel_b[i] * INS.AccelLPF / (INS.AccelLPF + ins_dt); 
-//			INS.MotionAccel_b[i] = (INS.Accel[i] ) * dt / (INS.AccelLPF + dt) 
-//														+ INS.MotionAccel_b[i] * INS.AccelLPF / (INS.AccelLPF + dt);			
+														+ INS.MotionAccel_b[i] * INS.AccelLPF / (INS.AccelLPF + ins_dt);
+			
 		}
-		BodyFrameToEarthFrame(INS.MotionAccel_b, INS.MotionAccel_n, INS.q); 	//滤波后的数据作为真实的三轴加速度，再换回大地坐标系下
+
+		//没用到X，先不算
+		INS.True_MotionAccel_b[X] = INS.MotionAccel_b[X] + IMU_DISTANCE_X * INS.Gyro[Y] * INS.Gyro[Y] - IMU_DISTANCE_Z * INS.dGyro[Y] 
+																+ IMU_DISTANCE_X * INS.Gyro[Z] * INS.Gyro[Z] + IMU_DISTANCE_Y * INS.dGyro[Z];
+
+		INS.True_MotionAccel_b[Y] = INS.MotionAccel_b[Y] + IMU_DISTANCE_Y *  INS.Gyro[Z] * INS.Gyro[Z] - IMU_DISTANCE_X * INS.dGyro[Z] 
+																+ IMU_DISTANCE_Y * INS.Gyro[X] * INS.Gyro[X] + IMU_DISTANCE_Z * INS.dGyro[X];
+		
+		INS.True_MotionAccel_b[Z] = INS.MotionAccel_b[Y] + IMU_DISTANCE_Z * INS.Gyro[X] * INS.Gyro[X] - IMU_DISTANCE_Y * INS.dGyro[X]
+																+ IMU_DISTANCE_Z * INS.Gyro[Y] * INS.Gyro[Y] + IMU_DISTANCE_X * INS.dGyro[Y];
+
+		BodyFrameToEarthFrame(INS.True_MotionAccel_b, INS.MotionAccel_n, INS.q); 	//滤波后的数据作为真实的三轴加速度，再换回大地坐标系下
 		
 		//死区处理
 		if(fabsf(INS.MotionAccel_n[0])<0.005f)
@@ -112,11 +136,11 @@ void INS_task(void)
 		  INS.MotionAccel_n[2]=0.0f;//z轴
 			stop_time++;
 		}
-		if(stop_time>10)
-		{//静止10ms
-		  stop_time=0;
-			INS.v_n=0.0f;
-		}
+		// if(stop_time>10)
+		// {//静止10ms
+		//   stop_time=0;
+		// 	INS.v_n=0.0f;
+		// }
     		
 		if(ins_time>3000.0f)
 		{
