@@ -84,7 +84,7 @@ void dm4310_fbdata(Joint_Motor_t *motor, uint8_t *rx_data,uint32_t data_len)
 	if(data_len==FDCAN_DLC_BYTES_8)
 	{//返回的数据有8个字节
 		motor->para.online_flag++;
-	  motor->para.id = (rx_data[0])&0x0F;
+	  // motor->para.id = (rx_data[0])&0x0F;					会莫名反馈0xF7
 	  motor->para.state = (rx_data[0])>>4;
 	  motor->para.p_int=(rx_data[1]<<8)|rx_data[2];
 	  motor->para.v_int=(rx_data[3]<<4)|(rx_data[4]>>4);

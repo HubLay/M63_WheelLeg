@@ -55,6 +55,7 @@ ctrlboard-h7_imu\chassisr_task.o: ../Drivers/CMSIS/DSP/Include/arm_math.h
 ctrlboard-h7_imu\chassisr_task.o: C:\Users\HLlll\AppData\Local\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 ctrlboard-h7_imu\chassisr_task.o: C:\Users\HLlll\AppData\Local\Keil_v5\ARM\ARMCC\Bin\..\include\float.h
 ctrlboard-h7_imu\chassisr_task.o: C:\Users\HLlll\AppData\Local\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+ctrlboard-h7_imu\chassisr_task.o: ../User/Devices/UP_Borad/Up_board.h
 ctrlboard-h7_imu\chassisr_task.o: ../User/Algorithm/my_kalman/my_kalman.h
 ctrlboard-h7_imu\chassisr_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 ctrlboard-h7_imu\chassisr_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h

@@ -33,8 +33,8 @@ float vaEstimateKF_P[4] = {1.0f, 0.0f,
 float vaEstimateKF_Q[4] = {0.08f, 0.0f, 
                            0.0f, 0.08f};    // Q矩阵初始值
 
-float vaEstimateKF_R[4] = {150.0f, 0.0f, 
-                            0.0f,  150.0f}; 	//观测噪声
+float vaEstimateKF_R[4] = {180.0f, 0.0f, 
+                            0.0f,  120.0f}; 	//v a观测噪声
 														
 float vaEstimateKF_K[4];
 													 
@@ -69,7 +69,7 @@ void 	Observe_task(void)
 	// static float aver_v=0.0f;
 		
 	xvEstimateKF_Init(&vaEstimateKF);
-	kalman_Init(&kalman_MotionAccel_n,0.6,0.01,0,1);
+	kalman_Init(&kalman_MotionAccel_n,0.9,0.005,0,1);
 	kalman_Init(&kalman_vlb_s, 0.8, 0.01, 0, 1);
 	kalman_Init(&kalman_vrb_s, 0.8, 0.01, 0, 1);
 	kalman_Init(&kalman_wheel_L, 0.99,0.003,0,1);
@@ -105,7 +105,7 @@ void 	Observe_task(void)
 		Recv_Adjust_PeriodElapsedCallback(&kalman_vlb_s);
 		Recv_Adjust_PeriodElapsedCallback(&kalman_vrb_s);
 
-		aver_v=(kalman_vrb_s.Out-kalman_vlb_s.Out)/2.0f;//取平均（坐标系方向相反）
+		aver_v=(kalman_vrb_s.Out-kalman_vlb_s.Out)/2.0f;					//取平均（坐标系方向相反）
     xvEstimateKF_Update(&vaEstimateKF,kalman_MotionAccel_n.Out,aver_v);
 	//	xvEstimateKF_Update(&vaEstimateKF,kalman_MotionAccel_b.Out,aver_v);
 		
@@ -116,7 +116,7 @@ void 	Observe_task(void)
 		}
 		//chassis_move.x_filter=chassis_move.x_filter+chassis_move.v_filter*((float)OBSERVE_TIME/1000.0f);
 
-		// sprintf(Mes, "%f,%f,%f,%f,%f\n", wl, (-chassis_move.kalman_wheel_vel_L+INS.Gyro[0]+left.kalman_d_alpha),-chassis_move.kalman_wheel_vel_L, INS.Gyro[0], left.kalman_d_alpha);
+		// sprintf(Mes, "%f,%f,%f\n", chassis_move.v_filter, ((vrb - vlb)/2.0f),kalman_MotionAccel_n.Out);
 		// HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
 
 		static uint8_t v_control_flag = 0;

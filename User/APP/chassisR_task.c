@@ -17,6 +17,7 @@
 	*/
 
 #include "chassisR_task.h"
+#include "Up_board.h"
 #include "my_kalman.h"
 #include "fdcan.h"
 #include "cmsis_os.h"
@@ -105,14 +106,16 @@ void ChassisR_task(void)
 		// sprintf(Mes, "%f,%f,%f,%f,%d\n", chassis_move.v_set, chassis_move.v_filter,chassis_move.x_set,chassis_move.x_filter,chassis_move.start_flag);
 		// HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
 
-		// sprintf(Mes, "%f,%f,%f\n", left.Tp, right.Tp, INS.Pitch);
-		// HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
-
+		
 		// sprintf(Mes, "%f,%f,%f,%f,%d\n", left.F0, left.Tp, left.torque_set[0], left.torque_set[1],chassis_move.start_flag);
 		// HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
 
 		chassisR_feedback_update(&chassis_move, &right, &INS); // 更新数据
 		chassisR_control_loop(&chassis_move, &right, &INS, LQR_K_R, &LegR_Pid); // 控制计算
+
+		// sprintf(Mes, "%f,%f\n", left.L0, left.theta);
+		// HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
+
 
 		//chassis_move.stop_flag = 1;
 
@@ -197,6 +200,7 @@ void chassisR_feedback_update(chassis_t *chassis, vmc_leg_t *vmc, INS_t *ins)
 uint8_t right_flag = 0;
 extern uint8_t left_flag;
 float target_alpha = 0;
+extern Up_borard_t Up_borard;
 extern float x_error;
 void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, float *LQR_K, PidTypeDef *leg)
 {
@@ -212,6 +216,11 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 	// chassis->roll_f0=PID_Calc(&Roll_Pid, chassis->roll,chassis->roll_set);//roll轴pid计算
 	chassis->roll_f0 = Roll_Pid.Kp * (chassis->roll_set - chassis->roll) - Roll_Pid.Kd * ins->Gyro[1];
 	chassis->leg_tp = PID_Calc(&Tp_Pid, chassis->theta_err, 0.0f); // 防劈叉pid计算
+
+	float L1 = (vmcr->L0 + left.L0) / 2.0f;						    //质心理论上在车体中心不变
+	float F1 = Mg * chassis->v_filter * INS.Gyro[2];			//质心受到的向心力
+
+	chassis->compensite_F = 0.7f * L1 * F1 / 0.40f;							//0.40m是车宽 
 	
 	chassis->wheel_motor[0].wheel_T = (
 													LQR_K[0] * (vmcr->theta - 0.0f - theta_offset) + 
@@ -233,7 +242,7 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 	if ((chassis->stand_ready_flag_r == 1) && (chassis->stand_ready_flag_l == 1))
 	{
 		vmcr->Tp = vmcr->Tp + chassis->leg_tp;																									 // 髋关节输出力矩
-		vmcr->F0 = 69.0f / arm_cos_f32(vmcr->theta) + PID_Calc(leg, vmcr->L0, chassis->leg_set); // 重力前馈+pd
+		vmcr->F0 = 69.0f + PID_Calc(leg, vmcr->L0, chassis->leg_set); // 重力前馈+pd
 
 		chassis->wheel_motor[0].wheel_T = chassis->wheel_motor[0].wheel_T - chassis->turn_T; // 轮毂电机输出力矩
 		// 左右腿都是按朝自己VMC正方向来先建模，T是顺时针，与机体不同的在计算力矩那里会改
@@ -261,7 +270,7 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 		else
 		{
 			// 倒下了
-			if ((vmcr->theta > (3.1415926f / 2.0f)) || (vmcr->theta < -3.1415926f / 2.0f))
+			if ((vmcr->theta > (3.1415926f)) || (vmcr->theta < -3.1415926f))
 			{
 				//			chassis->stand_ready_flag=0;
 				//			chassis->stand_ready_time_r=0;
@@ -313,30 +322,53 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 	//	jump_loop_r(chassis,vmcr,leg);
 	right_flag = ground_detectionR(vmcr, ins); // 右腿离地检测
 
+	if(chassis->stand_ready_ok_flag == 0){
+		right_flag = 0;
+	}
+
 	//	 if(chassis->recover_flag==0)
 	//	 {//倒地自起不需要检测是否离地
-	if ((right_flag == 1) && (chassis->stand_ready_ok_flag == 1) && (left_flag == 1) && vmcr->leg_flag==0)
+	if ((right_flag == 1) && (chassis->stand_ready_ok_flag == 1) && vmcr->leg_flag==0)
 	{ // 当两腿同时离地并且遥控器没有在控制腿的伸缩时，才认为离地
 		chassis->wheel_motor[0].wheel_T = 0.0f;
 		vmcr->Tp = LQR_K[6] * (vmcr->theta - 0.0f) + LQR_K[7] * (vmcr->d_theta - 0.0f);
-		//	vmcr->F0=PID_Calc(leg,vmcr->L0,chassis->leg_set);
-		chassis->x_filter = 0.0f;
-		chassis->x_set = 0.0f;
-		chassis->turn_set = chassis->total_yaw;
-		vmcr->Tp = vmcr->Tp + chassis->leg_tp;
-		chassis_move.stop_flag = 1;
+		vmcr->F0 = PID_Calc(leg, vmcr->L0, chassis->leg_set) * 0.8;
+		vmcr->Tp = vmcr->Tp;
+
+		//chassis_move.stop_flag = 1;
 	}
 	else if (chassis->stand_ready_ok_flag == 1)
 	{											// 没有离地
 		vmcr->leg_flag = 0; // 置为0
-		vmcr->F0 = vmcr->F0 - chassis->roll_f0;
+		vmcr->F0 = vmcr->F0 - chassis->roll_f0 + chassis->compensite_F;
+
+		if(vmcr->F0 < 20.0f){
+			vmcr->F0 = 20.0f; 
+		}
+		
 		// roll轴补偿取反然后加上去
+	}
+
+	if((right_flag == 1) && (left_flag == 1) && (chassis->stand_ready_ok_flag == 1) && vmcr->leg_flag==0){
+		chassis->x_filter=0.0f;//对位移清零
+		chassis->x_set=0.0f;
+		chassis->turn_set=chassis->total_yaw;
 	}
 		//  }
 		//  else if(chassis->recover_flag==1)
 		//  {
 		// 	 vmcr->Tp=0.0f;
 		//  }
+
+		// sprintf(Mes, "%f,%f,%f,%f,%f\n", vmcr->F0, chassis->leg_tp, vmcr->L0, vmcr->theta, chassis->roll);
+		sprintf(Mes, "%f,%f\n", chassis->wheel_motor[0].wheel_T, chassis->wheel_motor[1].wheel_T);
+		HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
+
+	// if(chassis->start_flag){
+	// 	chassis->wheel_motor[0].wheel_T = 0.0f;
+	// 	vmcr->F0 = PID_Calc(leg, vmcr->L0, chassis->leg_set);
+	// 	vmcr->Tp = chassis->leg_tp;
+	// }
 
 	// 额定扭矩
 	mySaturate(&vmcr->F0, -200.0f, 200.0f); // 限幅

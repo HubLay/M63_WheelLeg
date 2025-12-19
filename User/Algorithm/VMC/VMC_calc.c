@@ -47,10 +47,10 @@ void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给l
 			
 		vmc->lBD = sqrt((vmc->XD - vmc->XB)*(vmc->XD - vmc->XB) + (vmc->YD -vmc-> YB)*(vmc->YD - vmc->YB));
 	
-	  vmc->A0 = 2*vmc->l2*(vmc->XD - vmc->XB);
-		vmc->B0 = 2*vmc->l2*(vmc->YD - vmc->YB);
+	  vmc->A0 = 2.0f*vmc->l2*(vmc->XD - vmc->XB);
+		vmc->B0 = 2.0f*vmc->l2*(vmc->YD - vmc->YB);
 		vmc->C0 = vmc->l2*vmc->l2 + vmc->lBD*vmc->lBD - vmc->l3*vmc->l3;
-		vmc->phi2 = 2*atan2f((vmc->B0 + sqrt(vmc->A0*vmc->A0 + vmc->B0*vmc->B0 - vmc->C0*vmc->C0)),vmc->A0 + vmc->C0);			
+		vmc->phi2 = 2.0f*atan2f((vmc->B0 + sqrt(vmc->A0*vmc->A0 + vmc->B0*vmc->B0 - vmc->C0*vmc->C0)),vmc->A0 + vmc->C0);			
 	  vmc->phi3 = atan2f(vmc->YB-vmc->YD+vmc->l2*arm_sin_f32(vmc->phi2),vmc->XB-vmc->XD+vmc->l2*arm_cos_f32(vmc->phi2));
 	  //C点直角坐标
 		vmc->XC = vmc->l1*arm_cos_f32(vmc->phi1) + vmc->l2*arm_cos_f32(vmc->phi2);
@@ -60,10 +60,10 @@ void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给l
 		vmc->phi0 = atan2f(vmc->YC,(vmc->XC - vmc->l5/2.0f));//phi0用于计算lqr需要的theta		
 						
 	  //等效杆长与机体Y轴夹角
-	  vmc->alpha=pi/2.0f-vmc->phi0 ;				//左右腿x正方向不同，但公式是一样的，实际上左右腿的角度在相同姿态下会因为这个差一个负号
+	  vmc->alpha=pi/2.0f-vmc->phi0;				//左右腿x正方向不同，但公式是一样的，实际上左右腿的角度在相同姿态下会因为这个差一个负号
 
-		if( vmc->alpha>pi) vmc->alpha-=2*pi;
-		else if( vmc->alpha<-pi) vmc->alpha+=2*pi;	
+		if( vmc->alpha>pi) vmc->alpha-=2.0f*pi;
+		else if( vmc->alpha<-pi) vmc->alpha+=2.0f*pi;	
 		
 		if(vmc->first_flag==0)
 		{
@@ -89,6 +89,10 @@ void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给l
 		//关注一下theta的计算
 		//两边腿的VMC X轴方向不一致，左腿超前右腿朝后  导致角度的正方向什么也不一样   面朝外侧逆时针方向为正
 		vmc->theta=pi/2.0f-PitchR-vmc->phi0;//得到状态变量1
+
+		if(vmc->theta > pi) vmc->theta -= 2.0f * pi;
+		else if(vmc->theta < -pi) vmc->theta += 2.0f * pi;
+
 		vmc->d_theta=(-PithGyroR-vmc->d_phi0);//得到状态变量2
 		
 		vmc->last_phi0=vmc->phi0;
@@ -131,10 +135,10 @@ void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给lq
 			
 		vmc->lBD = sqrt((vmc->XD - vmc->XB)*(vmc->XD - vmc->XB) + (vmc->YD -vmc-> YB)*(vmc->YD - vmc->YB));
 	
-	  vmc->A0 = 2*vmc->l2*(vmc->XD - vmc->XB);
-		vmc->B0 = 2*vmc->l2*(vmc->YD - vmc->YB);
+	  vmc->A0 = 2.0f*vmc->l2*(vmc->XD - vmc->XB);
+		vmc->B0 = 2.0f*vmc->l2*(vmc->YD - vmc->YB);
 		vmc->C0 = vmc->l2*vmc->l2 + vmc->lBD*vmc->lBD - vmc->l3*vmc->l3;
-		vmc->phi2 = 2*atan2f((vmc->B0 + sqrt(vmc->A0*vmc->A0 + vmc->B0*vmc->B0 - vmc->C0*vmc->C0)),vmc->A0 + vmc->C0);			
+		vmc->phi2 = 2.0f*atan2f((vmc->B0 + sqrt(vmc->A0*vmc->A0 + vmc->B0*vmc->B0 - vmc->C0*vmc->C0)),vmc->A0 + vmc->C0);			
 	  vmc->phi3 = atan2f(vmc->YB-vmc->YD+vmc->l2*arm_sin_f32(vmc->phi2),vmc->XB-vmc->XD+vmc->l2*arm_cos_f32(vmc->phi2));
 	  //C点直角坐标
 		vmc->XC = vmc->l1*arm_cos_f32(vmc->phi1) + vmc->l2*arm_cos_f32(vmc->phi2);
@@ -144,8 +148,8 @@ void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给lq
 					
 	  vmc->phi0 = atan2f(vmc->YC,(vmc->XC - vmc->l5/2.0f));//phi0用于计算lqr需要的theta		
 	  vmc->alpha=pi/2.0f-vmc->phi0 ;
-			if( vmc->alpha>pi) vmc->alpha-=2*pi;
-		else if( vmc->alpha<-pi) vmc->alpha+=2*pi;	
+			if( vmc->alpha>pi) vmc->alpha-=2.0f*pi;
+		else if( vmc->alpha<-pi) vmc->alpha+=2.0f*pi;	
 		if(vmc->first_flag==0)
 		{
 			vmc->last_phi0=vmc->phi0 ;
@@ -168,6 +172,10 @@ void VMC_calc_1_left(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给lq
 		vmc->d_alpha=0.0f-vmc->d_phi0 ;
 		
 		vmc->theta=pi/2.0f-PitchL-vmc->phi0;//得到状态变量1
+
+		if(vmc->theta > pi) vmc->theta -= 2.0f * pi;
+		else if(vmc->theta < -pi) vmc->theta += 2.0f * pi;
+
 		vmc->d_theta=(-PithGyroL-vmc->d_phi0);//得到状态变量2
 		
 		vmc->last_phi0=vmc->phi0 ;
@@ -203,11 +211,11 @@ void VMC_calc_2(vmc_leg_t *vmc)//计算期望的关节输出力矩
 
 uint8_t ground_detectionR(vmc_leg_t *vmc,INS_t *ins)
 {
-	vmc->FN=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0+6.0f;//腿部机构的力+轮子重力，这里忽略了轮子质量*驱动轮竖直方向运动加速度
+	vmc->FN=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0 + 0.6f * (9.81f + ins->MotionAccel_n[2]);//腿部机构的力+轮子重力，这里忽略了轮子质量*驱动轮竖直方向运动加速度
 //	vmc->FN=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0
 //+0.6f*(ins->MotionAccel_n[2]-vmc->dd_L0*arm_cos_f32(vmc->theta)+2.0f*vmc->d_L0*vmc->d_theta*arm_sin_f32(vmc->theta)+vmc->L0*vmc->dd_theta*arm_sin_f32(vmc->theta)+vmc->L0*vmc->d_theta*vmc->d_theta*arm_cos_f32(vmc->theta));
  
-	if(vmc->FN<60.0f)
+	if(vmc->FN<55.0f)
 	{//离地了
 
 	  return 1;
@@ -220,18 +228,19 @@ uint8_t ground_detectionR(vmc_leg_t *vmc,INS_t *ins)
 
 uint8_t ground_detectionL(vmc_leg_t *vmc,INS_t *ins)
 {
-	vmc->FN=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0+6.0f;//腿部机构的力+轮子重力，这里忽略了轮子质量*驱动轮竖直方向运动加速度
+	vmc->FN=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0 + 0.6f * (9.81f + ins->MotionAccel_n[2]);//腿部机构的力+轮子重力，这里忽略了轮子质量*驱动轮竖直方向运动加速度
 //	vmc->FN=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0
 //+0.6f*(ins->MotionAccel_n[2]-vmc->dd_L0*arm_cos_f32(vmc->theta)+2.0f*vmc->d_L0*vmc->d_theta*arm_sin_f32(vmc->theta)+vmc->L0*vmc->dd_theta*arm_sin_f32(vmc->theta)+vmc->L0*vmc->d_theta*vmc->d_theta*arm_cos_f32(vmc->theta));
- 
-	if(vmc->FN<60.0f)
+	
+	if(vmc->FN<55.0f)
 	{//离地了
 	  return 1;
 	}
 	else
 	{
-	  return 0;	
+		return 0;
 	}
+
 }
 
 float LQR_K_calc(float *coe,float len)
