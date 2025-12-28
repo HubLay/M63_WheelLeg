@@ -8,24 +8,24 @@
 #include "INS_task.h"
 
 //roll的不要太快，太硬，转弯容易倒  可能是收腿力太大了，导致一边腿离地      太小车体倾斜厉害，会倒，也不行
-#define ROLL_PID_KP 60.0f				
+#define ROLL_PID_KP 400.0f				
 #define ROLL_PID_KI 0.0f //不用积分项
 #define ROLL_PID_KD 3.0f
-#define ROLL_PID_MAX_OUT  90.0f
+#define ROLL_PID_MAX_OUT  50.0f
 #define ROLL_PID_MAX_IOUT 0.0f
 
 //Tp的PID太小会导致转向停下来后腿摆角一前一后，然后导致车体倒下（因为LQR摆角权重不能太大）
-#define TP_PID_KP 55.0f
+#define TP_PID_KP 60.0f
 #define TP_PID_KI 0.0f //不用积分项
 #define TP_PID_KD 20.0f
 #define TP_PID_MAX_OUT  30.0f
 #define TP_PID_MAX_IOUT 0.0f
 
 //转向PID不用太激进
-#define TURN_PID_KP 2.5f
+#define TURN_PID_KP 3.5f
 #define TURN_PID_KI 0.0f //不用积分项
-#define TURN_PID_KD 0.3f
-#define TURN_PID_MAX_OUT  0.75f//轮毂电机的额定扭矩
+#define TURN_PID_KD 0.7f
+#define TURN_PID_MAX_OUT  1.2f//轮毂电机的额定扭矩
 #define TURN_PID_MAX_IOUT 0.0f
 #define Mg 13.0f
 typedef struct

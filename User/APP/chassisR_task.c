@@ -42,18 +42,18 @@
 float LQR_K_R[12] = {-19.7949, -1.7312, -4.5360, -4.9155, 13.4709, 1.6190, 40.1947, 4.1664, 13.9373, 14.3136, 39.5619, 2.4759};
 // a11-a26的12组4维数据
 float Poly_Coefficient[12][4] = {
-    {-105.1466, 137.9171, -91.1062, -1.3694},  // a11
-    {0.1407, 0.8799, -8.6317, -0.0854},         // a12
-    {-43.9729, 48.8673, -19.1419, -3.9064},    // a13
-    {-22.9555, 26.5224, -12.9046, -3.4135},    // a14
-    {-150.9675, 213.3057, -119.0827, 32.5858}, // a15
-    {-5.2680, 9.1903, -6.2156, 2.8878},         // a16
-    {177.1774, -165.7278, 40.9203, 13.0940},   // a21
-    {12.0866, -11.6203, 1.7225, 1.7455},        // a22
-    {-88.9649, 126.9058, -69.9800, 16.6340},   // a23
-    {-89.6878, 116.9342, -59.4289, 13.3717},   // a24
-    {717.0438, -800.8509, 320.5993, 23.5748},  // a25
-    {50.0040, -59.9865, 26.9624, -0.3749}      // a26
+    {-117.5479, 151.2317, -88.2447, 0.3424},  // a11
+    {-1.3488, 2.1678, -7.6119, 0.1911},        // a12
+    {-43.6868, 46.9868, -17.6961, -1.2950},   // a13
+    {-36.4276, 39.6391, -16.2084, -1.2200},   // a14
+    {-163.4291, 227.4991, -125.1808, 33.2732}, // a15
+    {-2.3658, 6.4833, -5.5097, 2.6248},        // a16
+    {290.5810, -270.7300, 66.4818, 15.5149},   // a21
+    {31.2838, -32.8761, 9.8878, 1.0744},       // a22
+    {-128.5387, 168.5418, -85.6370, 19.2411},  // a23
+    {-108.8130, 142.1382, -72.4467, 16.6265},  // a24
+    {1524.0, -1664.1, 644.9444, 14.6957},       // a25（“1.5240e+03”对应1524.0，“1.6641e+03”对应1664.1）
+    {110.3755, -127.2185, 53.8947, -3.6099}    // a26
 };
 // float Poly_Coefficient[12][4] = {
 //     {-67.4309, 102.4276, -106.7760, -1.7936},  // a11
@@ -71,6 +71,7 @@ float Poly_Coefficient[12][4] = {
 // };
 
 float theta_offset = 0.08f;					//串腿等效重心不在虚拟杆上，加一点偏移
+float theta_Air = 0.0f;
 
 vmc_leg_t right;
 
@@ -127,7 +128,7 @@ void ChassisR_task(void)
 			mit_ctrl(&hfdcan1, chassis_move.joint_motor[0].para.id, 0.0f, 0.0f, 0.0f, 0.0f, right.torque_set[0]); // right.torque_set[0]    右前
 			osDelay(CHASSR_TIME);
 			mit_ctrl2(&hfdcan1, chassis_move.wheel_motor[0].para.id, 0.0f, 0.0f, 0.0f, 0.0f, chassis_move.wheel_motor[0].wheel_T); // 右边轮毂电机
-			osDelay(CHASSR_TIME);
+			//osDelay(CHASSR_TIME);
 		}
 		else if (chassis_move.start_flag == 0 || chassis_move.stop_flag == 1)
 		{
@@ -136,7 +137,7 @@ void ChassisR_task(void)
 			mit_ctrl(&hfdcan1, chassis_move.joint_motor[0].para.id, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // right.torque_set[0]
 			osDelay(CHASSR_TIME);
 			mit_ctrl2(&hfdcan1, chassis_move.wheel_motor[0].para.id, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f); // 右边轮毂电机
-			osDelay(CHASSR_TIME);
+			//osDelay(CHASSR_TIME);
 		}
 	}
 }
@@ -202,9 +203,17 @@ extern uint8_t left_flag;
 float target_alpha = 0;
 extern Up_borard_t Up_borard;
 extern float x_error;
+
+uint32_t Right_Last_T = 0;
+float Right_Dt = 0;
+extern float Left_Dt;
+extern uint32_t remote_online_flag;
+
 void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, float *LQR_K, PidTypeDef *leg)
 {
-	VMC_calc_1_right(vmcr, ins, ((float)CHASSR_TIME) * 3.0f / 1000.0f); // 计算theta和d_theta给lqr用，同时也计算右腿长L0,该任务控制周期是3*0.001秒
+	VMC_calc_1_right(vmcr, ins, ((float)CHASSR_TIME) * 2.0f / 1000.0f); // 计算theta和d_theta给lqr用，同时也计算右腿长L0,该任务控制周期是3*0.001秒
+
+	Right_Dt = DWT_GetDeltaT(&Right_Last_T);	
 
 	for (int i = 0; i < 12; i++)
 	{
@@ -270,7 +279,7 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 		else
 		{
 			// 倒下了
-			if ((vmcr->theta > (3.1415926f)) || (vmcr->theta < -3.1415926f))
+			if ((vmcr->theta > (3.1415926f / 1.2f)) || (vmcr->theta < -3.1415926f / 1.2f))
 			{
 				//			chassis->stand_ready_flag=0;
 				//			chassis->stand_ready_time_r=0;
@@ -322,7 +331,7 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 	//	jump_loop_r(chassis,vmcr,leg);
 	right_flag = ground_detectionR(vmcr, ins); // 右腿离地检测
 
-	if(chassis->stand_ready_ok_flag == 0){
+	if(chassis->stand_ready_ok_flag == 0 && (chassis->stand_ready_flag_r == 1) && (chassis->stand_ready_flag_l == 1)){
 		right_flag = 0;
 	}
 
@@ -331,11 +340,17 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 	if ((right_flag == 1) && (chassis->stand_ready_ok_flag == 1) && vmcr->leg_flag==0)
 	{ // 当两腿同时离地并且遥控器没有在控制腿的伸缩时，才认为离地
 		chassis->wheel_motor[0].wheel_T = 0.0f;
-		vmcr->Tp = LQR_K[6] * (vmcr->theta - 0.0f) + LQR_K[7] * (vmcr->d_theta - 0.0f);
-		vmcr->F0 = PID_Calc(leg, vmcr->L0, chassis->leg_set) * 0.8;
+		vmcr->Tp = LQR_K[6] * (vmcr->theta - theta_Air) + LQR_K[7] * (vmcr->d_theta - 0.0f);
+		vmcr->F0 = PID_Calc(leg, vmcr->L0, chassis->leg_set);
 		vmcr->Tp = vmcr->Tp;
 
-		//chassis_move.stop_flag = 1;
+		chassis->x_filter=0.0f;		//对位移清零
+		chassis->v_filter=0.0f;
+		chassis->x_set=0.0f;
+		chassis->v_set=0.0f;
+		chassis->turn_set=chassis->total_yaw;
+
+		// chassis_move.stop_flag = 1;
 	}
 	else if (chassis->stand_ready_ok_flag == 1)
 	{											// 没有离地
@@ -351,7 +366,9 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 
 	if((right_flag == 1) && (left_flag == 1) && (chassis->stand_ready_ok_flag == 1) && vmcr->leg_flag==0){
 		chassis->x_filter=0.0f;//对位移清零
+		chassis->v_filter=0.0f;
 		chassis->x_set=0.0f;
+		chassis->v_set=0.0f;
 		chassis->turn_set=chassis->total_yaw;
 	}
 		//  }
@@ -361,8 +378,6 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 		//  }
 
 		// sprintf(Mes, "%f,%f,%f,%f,%f\n", vmcr->F0, chassis->leg_tp, vmcr->L0, vmcr->theta, chassis->roll);
-		sprintf(Mes, "%f,%f\n", chassis->wheel_motor[0].wheel_T, chassis->wheel_motor[1].wheel_T);
-		HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
 
 	// if(chassis->start_flag){
 	// 	chassis->wheel_motor[0].wheel_T = 0.0f;
@@ -370,12 +385,18 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 	// 	vmcr->Tp = chassis->leg_tp;
 	// }
 
+	sprintf(Mes, "%f,%f,%f,%d,%d\n", chassis_move.v_filter, Right_Dt, Left_Dt,right_flag,remote_online_flag);
+	HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
+
 	// 额定扭矩
 	mySaturate(&vmcr->F0, -200.0f, 200.0f); // 限幅
 	mySaturate(&chassis->wheel_motor[0].wheel_T, -4.2f, 4.2f);
 	VMC_calc_2(vmcr); // 计算期望的关节输出力矩
 	mySaturate(&vmcr->torque_set[1], -20.0f, 20.0f);
 	mySaturate(&vmcr->torque_set[0], -20.0f, 20.0f);
+
+	// sprintf(Mes, "%f,%f,%f,%f,%f,%f\n", Right_Dt, Left_Dt, chassis->wheel_motor[0].Dt, chassis->wheel_motor[1].Dt, chassis->joint_motor[0].Dt, chassis->joint_motor[2].Dt);
+	// HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
 }
 
 //限幅函数

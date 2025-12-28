@@ -84,16 +84,23 @@ void dm4310_fbdata(Joint_Motor_t *motor, uint8_t *rx_data,uint32_t data_len)
 	if(data_len==FDCAN_DLC_BYTES_8)
 	{//返回的数据有8个字节
 		motor->para.online_flag++;
-	  // motor->para.id = (rx_data[0])&0x0F;					会莫名反馈0xF7
-	  motor->para.state = (rx_data[0])>>4;
-	  motor->para.p_int=(rx_data[1]<<8)|rx_data[2];
-	  motor->para.v_int=(rx_data[3]<<4)|(rx_data[4]>>4);
-	  motor->para.t_int=((rx_data[4]&0xF)<<8)|rx_data[5];
-	  motor->para.pos = uint_to_float(motor->para.p_int, P_MIN, P_MAX, 16); // (-12.5,12.5)
-	  motor->para.vel = uint_to_float(motor->para.v_int, V_MIN, V_MAX, 12); // (-30.0,30.0)
-	  motor->para.tor = uint_to_float(motor->para.t_int, T_MIN, T_MAX, 12);  // (-10.0,10.0)
-	  motor->para.Tmos = (float)(rx_data[6]);
-	  motor->para.Tcoil = (float)(rx_data[7]);
+		if(motor->para.id == (rx_data[0]&0x0F)){					//莫名会有错误的数据包进来，造成数据跳变，处理一下
+	  	motor->para.state = (rx_data[0])>>4;
+	  	motor->para.p_int=(rx_data[1]<<8)|rx_data[2];
+	  	motor->para.v_int=(rx_data[3]<<4)|(rx_data[4]>>4);
+	  	motor->para.t_int=((rx_data[4]&0xF)<<8)|rx_data[5];
+	  	motor->para.pos = uint_to_float(motor->para.p_int, P_MIN, P_MAX, 16); // (-12.5,12.5)
+	  	motor->para.vel = uint_to_float(motor->para.v_int, V_MIN, V_MAX, 12); // (-30.0,30.0)
+	  	motor->para.tor = uint_to_float(motor->para.t_int, T_MIN, T_MAX, 12);  // (-10.0,10.0)
+	  	motor->para.Tmos = (float)(rx_data[6]);
+	  	motor->para.Tcoil = (float)(rx_data[7]);
+
+			motor->Dt = DWT_GetDeltaT(&motor->Last_T);
+
+		}
+		else{
+
+		}
 	}
 }
 
@@ -117,6 +124,7 @@ void dm6215_fbdata(Wheel_Motor_t *motor, uint8_t *rx_data,uint32_t data_len)
 //	  motor->para.tor = uint_to_float(motor->para.t_int, -20, 20, 16);  // 
 //	  motor->para.Tmos = (float)(rx_data[6]);
 //	  motor->para.Tcoil = (float)(rx_data[7]);
+		motor->Dt = DWT_GetDeltaT(&motor->Last_T);
 	
 	}
 }

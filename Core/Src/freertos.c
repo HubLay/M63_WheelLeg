@@ -105,19 +105,17 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of defaultTask */
 
   /* definition and creation of INS_TASK */
-  osThreadDef(INS_TASK, INS_Task, osPriorityRealtime, 0, 2048);
+  osThreadDef(INS_TASK, INS_Task, osPriorityHigh, 0, 2048);
   INS_TASKHandle = osThreadCreate(osThread(INS_TASK), NULL);
 
-  /* definition and creation of CHASSISR_TASK */
-  osThreadDef(CHASSISR_TASK, ChassisR_Task, osPriorityAboveNormal, 0, 512);
-  CHASSISR_TASKHandle = osThreadCreate(osThread(CHASSISR_TASK), NULL);
-
-  /* definition and creation of CHASSISL_TASK */
   osThreadDef(CHASSISL_TASK, ChassisL_Task, osPriorityAboveNormal, 0, 512);
   CHASSISL_TASKHandle = osThreadCreate(osThread(CHASSISL_TASK), NULL);
 
+  osThreadDef(CHASSISR_TASK, ChassisR_Task, osPriorityAboveNormal, 0, 512);
+  CHASSISR_TASKHandle = osThreadCreate(osThread(CHASSISR_TASK), NULL);
+
   /* definition and creation of OBSERVE_TASK */
-  osThreadDef(OBSERVE_TASK, OBSERVE_Task, osPriorityHigh, 0, 1024);
+  osThreadDef(OBSERVE_TASK, OBSERVE_Task, osPriorityAboveNormal, 0, 1024);
   OBSERVE_TASKHandle = osThreadCreate(osThread(OBSERVE_TASK), NULL);
 
   // /* definition and creation of PS2_TASK */

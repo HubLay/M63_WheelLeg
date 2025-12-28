@@ -32,6 +32,8 @@ float Math_Int_To_Float(int32_t x, int32_t Int_Min, int32_t Int_Max, float Float
     float out = tmp * (Float_Max - Float_Min) + Float_Min;
     return (out);
 }
+
+int remote_online_flag, Last_remote_online_flag;
 void upborad_fbdata(Up_borard_t *borad, uint8_t *rx_data,uint32_t data_len)
 { 
 	
@@ -42,7 +44,7 @@ void upborad_fbdata(Up_borard_t *borad, uint8_t *rx_data,uint32_t data_len)
     int8_t tmp_dr16_left_x, tmp_dr16_left_y, tmp_dr16_right_x, tmp_dr16_right_y;
 	if(data_len==FDCAN_DLC_BYTES_8)
 	{//返回的数据有8个字节
-		
+		remote_online_flag ++;
     memcpy(&tmp_dr16_left_x,&rx_data[0],sizeof(uint8_t));
     memcpy(&tmp_dr16_left_y,&rx_data[1],sizeof(uint8_t));
     memcpy(&tmp_dr16_right_x,&rx_data[2],sizeof(uint8_t));

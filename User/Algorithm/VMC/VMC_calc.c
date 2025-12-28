@@ -20,10 +20,10 @@ void VMC_init(vmc_leg_t *vmc)//给杆长赋值
 
 	//Ozone调参
 	kalman_Init(&kalman_left_d_L0_s, 0.99,0.01,0,1);
-	kalman_Init(&kalman_left_d_theta_s, 0.70,0.01,0,1);
+	kalman_Init(&kalman_left_d_theta_s, 0.90,0.01,0,1);
 	kalman_Init(&kalman_left_d_alpha_s, 0.80,0.01,0,1);
 	kalman_Init(&kalman_right_d_L0_s, 0.99,0.01,0,1);
-	kalman_Init(&kalman_right_d_theta_s, 0.70,0.01,0,1);
+	kalman_Init(&kalman_right_d_theta_s, 0.90,0.01,0,1);
 	kalman_Init(&kalman_right_d_alpha_s, 0.80,0.01,0,1);
 
 
@@ -209,38 +209,64 @@ void VMC_calc_2(vmc_leg_t *vmc)//计算期望的关节输出力矩
 	vmc->torque_set[1]=vmc->j21*vmc->F0+vmc->j22*vmc->Tp;//得到RightBack的输出轴期望力矩，Tp为沿中心轴的力矩 
 }
 
+float FnR[10], Var_FnR;
+int8_t FnR_index = 0, FnR_count = 0, Air_Time_R, Unair_Time;
+extern char Mes[100];
+extern UART_HandleTypeDef huart7;
 uint8_t ground_detectionR(vmc_leg_t *vmc,INS_t *ins)
 {
+	static int8_t Status = 0;
 	vmc->FN=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0 + 0.6f * (9.81f + ins->MotionAccel_n[2]);//腿部机构的力+轮子重力，这里忽略了轮子质量*驱动轮竖直方向运动加速度
 //	vmc->FN=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0
 //+0.6f*(ins->MotionAccel_n[2]-vmc->dd_L0*arm_cos_f32(vmc->theta)+2.0f*vmc->d_L0*vmc->d_theta*arm_sin_f32(vmc->theta)+vmc->L0*vmc->dd_theta*arm_sin_f32(vmc->theta)+vmc->L0*vmc->d_theta*vmc->d_theta*arm_cos_f32(vmc->theta));
- 
-	if(vmc->FN<55.0f)
-	{//离地了
 
-	  return 1;
+	if(vmc->FN < 55.0f)
+	{//离地了
+		Air_Time_R ++;
 	}
-	else
+
+	if(vmc->FN > 70.0f)
 	{
-	  return 0;	
+		Air_Time_R = 0;
+		Status = 0;
 	}
+
+	if(Status == 0 && Air_Time_R > 3){
+		Status = 1;
+	}
+
+	// sprintf(Mes, "%d,%d,%f\n", Status, Air_Time_R, vmc->FN);
+	// HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
+
+	return Status;
+
 }
 
+float FnL[10], Var_FnL;
+int8_t FnL_index = 0, FnL_count = 0, Air_Time_L, Unair_Time;
 uint8_t ground_detectionL(vmc_leg_t *vmc,INS_t *ins)
 {
+	static int8_t Status = 0;
 	vmc->FN=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0 + 0.6f * (9.81f + ins->MotionAccel_n[2]);//腿部机构的力+轮子重力，这里忽略了轮子质量*驱动轮竖直方向运动加速度
 //	vmc->FN=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0
 //+0.6f*(ins->MotionAccel_n[2]-vmc->dd_L0*arm_cos_f32(vmc->theta)+2.0f*vmc->d_L0*vmc->d_theta*arm_sin_f32(vmc->theta)+vmc->L0*vmc->dd_theta*arm_sin_f32(vmc->theta)+vmc->L0*vmc->d_theta*vmc->d_theta*arm_cos_f32(vmc->theta));
-	
-	if(vmc->FN<55.0f)
+
+	if(vmc->FN < 55.0f)
 	{//离地了
-	  return 1;
-	}
-	else
-	{
-		return 0;
+		Air_Time_L ++;
 	}
 
+	if(vmc->FN > 70.0f)
+	{
+		Air_Time_L = 0;
+		Status = 0;
+	}
+
+	if(Status == 0 && Air_Time_L > 3){
+		Status = 1;
+	}
+
+	return Status;
 }
 
 float LQR_K_calc(float *coe,float len)

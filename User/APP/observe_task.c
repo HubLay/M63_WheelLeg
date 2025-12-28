@@ -30,11 +30,11 @@ float vaEstimateKF_F[4] = {1.0f, 0.001f,
 float vaEstimateKF_P[4] = {1.0f, 0.0f,
                            0.0f, 1.0f};    // 后验估计协方差初始值
 
-float vaEstimateKF_Q[4] = {0.08f, 0.0f, 
-                           0.0f, 0.08f};    // Q矩阵初始值
+float vaEstimateKF_Q[4] = {1.0f, 0.0f, 
+                           0.0f, 300.0f};    // Q矩阵初始值    增大a有一点低通滤波的样子，更信任上一次的v，能减小打滑
 
-float vaEstimateKF_R[4] = {180.0f, 0.0f, 
-                            0.0f,  120.0f}; 	//v a观测噪声
+float vaEstimateKF_R[4] = {15000.0f, 0.0f, 
+                            0.0f,  0.001f}; 	//v a观测噪声   增大R11减小对轮速的信任度，但是要足够大，太大了会造成转向结束震荡（因为转向时速度实际上应该更信任轮子）
 														
 float vaEstimateKF_K[4];
 													 
@@ -57,6 +57,8 @@ float aver_v=0.0f;
 
 extern char Mes[100];
 extern UART_HandleTypeDef huart7;	
+
+extern float Right_Dt, Left_Dt;
 
 void 	Observe_task(void)
 {
@@ -116,8 +118,6 @@ void 	Observe_task(void)
 		}
 		//chassis_move.x_filter=chassis_move.x_filter+chassis_move.v_filter*((float)OBSERVE_TIME/1000.0f);
 
-		// sprintf(Mes, "%f,%f,%f\n", chassis_move.v_filter, ((vrb - vlb)/2.0f),kalman_MotionAccel_n.Out);
-		// HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
 
 		static uint8_t v_control_flag = 0;
 

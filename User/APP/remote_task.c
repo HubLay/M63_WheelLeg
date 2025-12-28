@@ -16,7 +16,9 @@
 	
 #include "remote_task.h"
 #include "cmsis_os.h"
+int8_t mod100;
 extern chassis_t chassis_move;
+extern uint32_t remote_online_flag, Last_remote_online_flag;
 extern INS_t INS;
 uint32_t REMOTE_TIME=10;//ps2手柄任务周期是10ms
 void remote_task(void)
@@ -28,8 +30,20 @@ void remote_task(void)
 			Up_borard.mode=0;
 		while(1)
 	 {
-		   Remote_data_process(&Up_borard,&chassis_move,(float)REMOTE_TIME/1000.0f);//处理数据，设置期望数据
-		   osDelay(REMOTE_TIME);
+		  Remote_data_process(&Up_borard,&chassis_move,(float)REMOTE_TIME/1000.0f);//处理数据，设置期望数据
+			mod100 ++;
+			if(mod100 % 100 == 0){
+				if(Last_remote_online_flag == remote_online_flag){
+					Up_borard.Left_X=0;
+					Up_borard.Left_Y=0;
+					Up_borard.Right_X=0;
+					Up_borard.Right_Y=0;
+					Up_borard.mode=0;
+				}
+				Last_remote_online_flag = remote_online_flag;
+			}
+		  osDelay(REMOTE_TIME);
+			
 	 }
 }
 extern vmc_leg_t right;			
@@ -55,7 +69,7 @@ void Remote_data_process(Up_borard_t *data,chassis_t *chassis,float dt)
 	if(chassis->start_flag==1)
 	{
 		//启动
-		chassis->target_v = data->Left_Y * 1.5f;//往前大于0
+		chassis->target_v = data->Left_Y * 2.0f;//往前大于0
 		chassis->v_set=chassis->target_v;
 
 		//chassis->x_set=chassis->x_set + chassis->v_set*dt;

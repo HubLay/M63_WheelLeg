@@ -5,10 +5,10 @@
 #include "INS_task.h"
 
 #define pi 3.1415926f
-#define LEG_PID_KP  600.0f								
+#define LEG_PID_KP  500.0f								
 #define LEG_PID_KI  0.0f//²»»ý·Ö
-#define LEG_PID_KD  20.0f
-#define LEG_PID_MAX_OUT  90.0f //90Å£
+#define LEG_PID_KD  50.0f
+#define LEG_PID_MAX_OUT  30.0f 
 #define LEG_PID_MAX_IOUT 0.0f
 
 typedef struct

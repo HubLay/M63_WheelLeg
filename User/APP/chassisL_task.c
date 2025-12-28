@@ -71,7 +71,7 @@ void ChassisL_task(void)
 			mit_ctrl(&hfdcan2,chassis_move.joint_motor[2].para.id, 0.0f, 0.0f,0.0f, 0.0f,left.torque_set[0]);					//左后
 			osDelay(CHASSL_TIME);
 			mit_ctrl2(&hfdcan2,chassis_move.wheel_motor[1].para.id, 0.0f, 0.0f,0.0f, 0.0f,chassis_move.wheel_motor[1].wheel_T);//左边边轮毂电机
-			osDelay(CHASSL_TIME);
+			//osDelay(CHASSL_TIME);
 		}
 		else if(chassis_move.start_flag==0 || chassis_move.stop_flag == 1)	
 		{
@@ -80,7 +80,7 @@ void ChassisL_task(void)
 			mit_ctrl(&hfdcan2,chassis_move.joint_motor[2].para.id, 0.0f, 0.0f,0.0f, 0.0f,0.0f);
 			osDelay(CHASSL_TIME);
 			mit_ctrl2(&hfdcan2,chassis_move.wheel_motor[1].para.id, 0.0f, 0.0f,0.0f, 0.0f,0.0f);//左边轮毂电机	
-			osDelay(CHASSL_TIME);
+			//osDelay(CHASSL_TIME);
 		}
 	}
 }
@@ -132,18 +132,23 @@ float T_out[6];
 float TP_out[6];
 float x_error=0.0f;
 extern float theta_offset;
+extern float theta_Air;
 extern char Mes[100];
 extern UART_HandleTypeDef huart7;
 
 float Test_L0 = 0.18;
 
+uint32_t Left_Last_T = 0;
+float Left_Dt = 0.0f;
+
 void chassisL_control_loop(chassis_t *chassis,vmc_leg_t *vmcl,INS_t *ins,float *LQR_K,PidTypeDef *leg)
 {
-	VMC_calc_1_left(vmcl,ins,((float)CHASSL_TIME)*3.0f/1000.0f);//计算theta和d_theta给lqr用，同时也计算左腿长L0,该任务控制周期是3*0.001秒
+	VMC_calc_1_left(vmcl,ins,((float)CHASSL_TIME)*2.0f/1000.0f);//计算theta和d_theta给lqr用，同时也计算左腿长L0,该任务控制周期是3*0.001秒
 
 	// sprintf(Mes,"%f,%f,%f\n", left.d_theta, filter_Left_Dtheat, -left.d_phi0);
 	// HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
 
+	Left_Dt = DWT_GetDeltaT(&Left_Last_T);
 
 	for(int i=0;i<12;i++)
 	{
@@ -205,27 +210,26 @@ void chassisL_control_loop(chassis_t *chassis,vmc_leg_t *vmcl,INS_t *ins,float *
 		
 		if(vmcl->L0>0.17)vmcl->Tp=0;
 	}
-	if(chassis->stand_ready_flag==0)
-	{	
-	if((vmcl->alpha>(-3.1415926f/12.0f))&&(vmcl->alpha<3.1415926f/12.0f)&&(chassis->start_flag==1)&&(vmcl->d_alpha<0.08)&&(vmcl->d_alpha>-0.08))
+
+	if (chassis->stand_ready_flag == 0)
 	{
-				if(chassis->stand_ready_time_l<1000)
-			chassis->stand_ready_time_l++;
-		if(chassis->stand_ready_time_l>=100)
-		chassis->stand_ready_flag_l=1;
+		if ((vmcl->alpha > (-3.1415926f / 12.0f)) && (vmcl->alpha < 3.1415926f / 12.0f) && (chassis->start_flag == 1) && (vmcl->d_alpha < 0.08) && (vmcl->d_alpha > -0.08))
+		{
+			if (chassis->stand_ready_time_l < 1000)
+				chassis->stand_ready_time_l++;
+			if (chassis->stand_ready_time_l >= 100)
+				chassis->stand_ready_flag_l = 1;
+		}
+		else
+		{
+			chassis->stand_ready_flag_l = 0;
+			chassis->stand_ready_time_l = 0;
+		}
 	}
-	else
-	{	chassis->stand_ready_flag_l=0;
-	chassis->stand_ready_time_l=0;}
-
-	}
-
-
-
 
 //	//jump_loop_l(chassis,vmcl,leg); 
 	left_flag=ground_detectionL(vmcl,ins);//左腿离地检测
-	if(chassis->stand_ready_ok_flag == 0){
+	if(chassis->stand_ready_ok_flag == 0 && (chassis->stand_ready_flag_r == 1) && (chassis->stand_ready_flag_l == 1)){
 		left_flag = 0;
 	}
 ////	
@@ -235,15 +239,21 @@ void chassisL_control_loop(chassis_t *chassis,vmc_leg_t *vmcl,INS_t *ins,float *
 		if((left_flag==1)&&(	chassis->stand_ready_ok_flag==1) && vmcl->leg_flag==0)//&&right_flag==1&&vmcl->leg_flag==0)
 		{//当两腿同时离地并且遥控器没有在控制腿的伸缩时，才认为离地
 			chassis->wheel_motor[1].wheel_T=0.0f;
-			vmcl->Tp=LQR_K[6]*(vmcl->theta-0.0f)+ LQR_K[7]*(vmcl->d_theta-0.0f);
-			vmcl->F0 = PID_Calc(leg,vmcl->L0,chassis->leg_set)*0.8;
+			vmcl->Tp=LQR_K[6]*(vmcl->theta + theta_Air)+ LQR_K[7]*(vmcl->d_theta-0.0f);
+			vmcl->F0 = PID_Calc(leg,vmcl->L0,chassis->leg_set);
 			vmcl->Tp=vmcl->Tp;		
+
+			chassis->x_filter=0.0f;//对位移清零
+			chassis->v_filter=0.0f;
+			chassis->x_set=0.0f;
+			chassis->v_set=0.0f;
+			chassis->turn_set=chassis->total_yaw;
 		}
 		else if(chassis->stand_ready_ok_flag==1)
 		{//没有离地
-			vmcl->leg_flag=0;//置为0
-			vmcl->F0=vmcl->F0+chassis->roll_f0 - chassis->compensite_F;//roll轴补偿取反然后加上去		
-			
+			vmcl->leg_flag = 0;																							// 置为0
+			vmcl->F0 = vmcl->F0 + chassis->roll_f0 - chassis->compensite_F; // roll轴补偿取反然后加上去
+
 			if(vmcl->F0 < 20.0f){
 				vmcl->F0 = 20.0f; 
 			}

@@ -48,8 +48,8 @@ typedef struct
 	float Kd;
 	float Tmos;
 	float Tcoil;
-	uint16_t online_flag;
-	uint16_t pre_online_flag;
+	uint32_t online_flag;
+	uint32_t pre_online_flag;
 	uint8_t online_status;
 }motor_fbpara_t;
 
@@ -58,12 +58,16 @@ typedef struct
 {
 	uint16_t mode;
 	motor_fbpara_t para;
+	uint32_t Last_T;
+	float Dt;
 }Joint_Motor_t ;
 
 typedef struct
 {
 	uint16_t mode;
 	float wheel_T;//轮毂电机的输出扭矩，单位为N
+	uint32_t Last_T;
+	float Dt;
 	
 	motor_fbpara_t para;	
 }Wheel_Motor_t ;
