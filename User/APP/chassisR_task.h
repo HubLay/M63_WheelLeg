@@ -15,7 +15,7 @@
 #define ROLL_PID_MAX_IOUT 0.0f
 
 //Tp的PID太小会导致转向停下来后腿摆角一前一后，然后导致车体倒下（因为LQR摆角权重不能太大）
-#define TP_PID_KP 60.0f
+#define TP_PID_KP 100.0f
 #define TP_PID_KI 0.0f //不用积分项
 #define TP_PID_KD 20.0f
 #define TP_PID_MAX_OUT  30.0f

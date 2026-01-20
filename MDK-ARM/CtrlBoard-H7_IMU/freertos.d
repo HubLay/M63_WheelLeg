@@ -74,3 +74,4 @@ ctrlboard-h7_imu\freertos.o: ../User/APP/observe_task.h
 ctrlboard-h7_imu\freertos.o: ../User/APP/ps2_task.h
 ctrlboard-h7_imu\freertos.o: ../User/APP/remote_task.h
 ctrlboard-h7_imu\freertos.o: ../User/Devices/UP_Borad/Up_board.h
+ctrlboard-h7_imu\freertos.o: ../User/APP/printf_task.h

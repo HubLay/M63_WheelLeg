@@ -43,7 +43,6 @@ void remote_task(void)
 				Last_remote_online_flag = remote_online_flag;
 			}
 		  osDelay(REMOTE_TIME);
-			
 	 }
 }
 extern vmc_leg_t right;			

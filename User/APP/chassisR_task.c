@@ -86,8 +86,6 @@ PidTypeDef Tp_Pid;	 // 防劈叉补偿pd
 PidTypeDef Turn_Pid; // 转向pd
 
 uint32_t CHASSR_TIME = 1;
-char Mes[100];
-extern UART_HandleTypeDef huart7;
 
 void ChassisR_task(void)
 {
@@ -292,7 +290,7 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 				//			chassis->x_set=chassis->x_filter+0.5;//保存
 				//			chassis->turn_set=chassis->total_yaw;//保存
 				//			chassis->leg_set=0.18f;//原始腿长
-				chassis->stop_flag = 1;
+				// chassis->stop_flag = 1;
 			}
 		}
 	}
@@ -342,7 +340,7 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 		chassis->wheel_motor[0].wheel_T = 0.0f;
 		vmcr->Tp = LQR_K[6] * (vmcr->theta - theta_Air) + LQR_K[7] * (vmcr->d_theta - 0.0f);
 		vmcr->F0 = PID_Calc(leg, vmcr->L0, chassis->leg_set);
-		vmcr->Tp = vmcr->Tp;
+		vmcr->Tp = vmcr->Tp + chassis->leg_tp;
 
 		chassis->x_filter=0.0f;		//对位移清零
 		chassis->v_filter=0.0f;
@@ -385,8 +383,7 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 	// 	vmcr->Tp = chassis->leg_tp;
 	// }
 
-	sprintf(Mes, "%f,%f,%f,%d,%d\n", chassis_move.v_filter, Right_Dt, Left_Dt,right_flag,remote_online_flag);
-	HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
+	
 
 	// 额定扭矩
 	mySaturate(&vmcr->F0, -200.0f, 200.0f); // 限幅

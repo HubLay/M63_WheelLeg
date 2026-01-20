@@ -241,7 +241,7 @@ void chassisL_control_loop(chassis_t *chassis,vmc_leg_t *vmcl,INS_t *ins,float *
 			chassis->wheel_motor[1].wheel_T=0.0f;
 			vmcl->Tp=LQR_K[6]*(vmcl->theta + theta_Air)+ LQR_K[7]*(vmcl->d_theta-0.0f);
 			vmcl->F0 = PID_Calc(leg,vmcl->L0,chassis->leg_set);
-			vmcl->Tp=vmcl->Tp;		
+			vmcl->Tp=vmcl->Tp + chassis->leg_tp;		
 
 			chassis->x_filter=0.0f;//对位移清零
 			chassis->v_filter=0.0f;

@@ -31,6 +31,7 @@
 #include "observe_task.h"
 #include "ps2_task.h"
 #include "remote_task.h"
+#include "printf_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,7 +53,7 @@
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-osThreadId defaultTaskHandle;
+osThreadId Printf_TASKHandle;
 osThreadId INS_TASKHandle;
 osThreadId CHASSISR_TASKHandle;
 osThreadId CHASSISL_TASKHandle;
@@ -72,6 +73,7 @@ void ChassisL_Task(void const * argument);
 void OBSERVE_Task(void const * argument);
 void PS2_Task(void const * argument);
 void Remote_Task(void const * argument);
+void Printf_Task(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -105,7 +107,7 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of defaultTask */
 
   /* definition and creation of INS_TASK */
-  osThreadDef(INS_TASK, INS_Task, osPriorityHigh, 0, 2048);
+  osThreadDef(INS_TASK, INS_Task, osPriorityAboveNormal, 0, 512);
   INS_TASKHandle = osThreadCreate(osThread(INS_TASK), NULL);
 
   osThreadDef(CHASSISL_TASK, ChassisL_Task, osPriorityAboveNormal, 0, 512);
@@ -115,7 +117,7 @@ void MX_FREERTOS_Init(void) {
   CHASSISR_TASKHandle = osThreadCreate(osThread(CHASSISR_TASK), NULL);
 
   /* definition and creation of OBSERVE_TASK */
-  osThreadDef(OBSERVE_TASK, OBSERVE_Task, osPriorityAboveNormal, 0, 1024);
+  osThreadDef(OBSERVE_TASK, OBSERVE_Task, osPriorityAboveNormal, 0, 512);
   OBSERVE_TASKHandle = osThreadCreate(osThread(OBSERVE_TASK), NULL);
 
   // /* definition and creation of PS2_TASK */
@@ -125,6 +127,9 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of REMOTE_TASK */
   osThreadDef(REMOTE_TASK, Remote_Task, osPriorityAboveNormal, 0, 256);
   REMOTE_TASKHandle = osThreadCreate(osThread(REMOTE_TASK), NULL);
+
+  osThreadDef(PRINTF_TASK, Printf_Task, osPriorityNormal, 0, 256);
+  Printf_TASKHandle = osThreadCreate(osThread(PRINTF_TASK), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -257,6 +262,14 @@ void Remote_Task(void const * argument)
     remote_task();
   }
   /* USER CODE END Remote_Task */
+}
+
+void Printf_Task(void const *argument)
+{
+  for(;;){
+    printf_task();
+  }
+  
 }
 
 /* Private application code --------------------------------------------------*/

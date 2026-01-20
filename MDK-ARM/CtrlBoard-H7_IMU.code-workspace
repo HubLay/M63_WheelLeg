@@ -10,7 +10,11 @@
             "kalman_filter.h": "c",
             "ins_task.h": "c",
             "vmc_calc.h": "c",
-            "my_kalman.h": "c"
+            "my_kalman.h": "c",
+            "remote_task.h": "c",
+            "printf_task.h": "c",
+            "chassisr_task.h": "c",
+            "observe_task.h": "c"
         }
     },
     "extensions": {}

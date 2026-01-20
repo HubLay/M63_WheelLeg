@@ -111,6 +111,9 @@ virtualFolder:
         - path: ../User/APP/observe_task.c
         - path: ../User/APP/ps2_task.c
         - path: ../User/APP/remote_task.c
+        - path: ../User/APP/remote_task.h
+        - path: ../User/APP/printf_task.c
+        - path: ../User/APP/printf_task.h
       folders: []
     - name: bsp
       files:
