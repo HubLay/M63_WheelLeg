@@ -3,7 +3,7 @@
 <title>Static Call Graph - [CtrlBoard-H7_IMU\CtrlBoard-H7_IMU.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image CtrlBoard-H7_IMU\CtrlBoard-H7_IMU.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Thu Jan 08 14:42:51 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Thu Jan 22 16:50:46 2026
 <BR><P>
 <H3>Maximum Stack Usage =        296 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1002,7 +1002,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ChassisR_task
 </UL>
 
-<P><STRONG><a name="[e0]"></a>ChassisR_task</STRONG> (Thumb, 366 bytes, Stack size 8 bytes, chassisr_task.o(i.ChassisR_task))
+<P><STRONG><a name="[e0]"></a>ChassisR_task</STRONG> (Thumb, 374 bytes, Stack size 8 bytes, chassisr_task.o(i.ChassisR_task))
 <BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = ChassisR_task &rArr; mit_ctrl &rArr; canx_send_data &rArr; HAL_FDCAN_AddMessageToTxFifoQ &rArr; FDCAN_CopyMessageToRAM
 </UL>
 <BR>[Calls]<UL><LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
@@ -2441,7 +2441,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BMI088_init
 </UL>
 
-<P><STRONG><a name="[1ab]"></a>canx_send_data</STRONG> (Thumb, 126 bytes, Stack size 56 bytes, can_bsp.o(i.canx_send_data))
+<P><STRONG><a name="[1ab]"></a>canx_send_data</STRONG> (Thumb, 138 bytes, Stack size 56 bytes, can_bsp.o(i.canx_send_data))
 <BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = canx_send_data &rArr; HAL_FDCAN_AddMessageToTxFifoQ &rArr; FDCAN_CopyMessageToRAM
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_FDCAN_AddMessageToTxFifoQ
@@ -2656,7 +2656,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[17e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_FREERTOS_Init
 </UL>
 
-<P><STRONG><a name="[190]"></a>printf_task</STRONG> (Thumb, 126 bytes, Stack size 48 bytes, printf_task.o(i.printf_task))
+<P><STRONG><a name="[190]"></a>printf_task</STRONG> (Thumb, 156 bytes, Stack size 48 bytes, printf_task.o(i.printf_task))
 <BR><BR>[Stack]<UL><LI>Max Depth = 108<LI>Call Chain = printf_task &rArr; HAL_UART_Transmit_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
