@@ -36,7 +36,7 @@ INS_t INS;
 
 struct MAHONY_FILTER_t mahony;
 Axis3f Gyro,Accel;
-float gravity[3] = {0, 0, 9.81f};
+float gravity[3] = {0, 0, 9.875f};
 
 uint32_t INS_DWT_Count = 0;
 float ins_dt = 0.0f;
@@ -64,6 +64,16 @@ void INS_task(void)
 
     BMI088_Read(&BMI088);
 
+		// float tmp_gyro_x = 0, tmp_accel_x = 0;
+		// tmp_gyro_x = BMI088.Gyro[X];
+		// tmp_accel_x = BMI088.Accel[X];
+
+		// BMI088.Accel[X] = BMI088.Accel[Y];
+		// BMI088.Accel[Y] = -tmp_accel_x;
+
+		// BMI088.Gyro[X] = BMI088.Gyro[Y];
+		// BMI088.Gyro[Y] = -tmp_gyro_x;
+
 		INS.dGyro[X] = (BMI088.Gyro[X] - INS.Gyro[X])/ (INS.DGyroLPF + ins_dt) + INS.dGyro[X] * INS.DGyroLPF / (INS.DGyroLPF + ins_dt);
     INS.dGyro[Y] = (BMI088.Gyro[Y] - INS.Gyro[Y])/ (INS.DGyroLPF + ins_dt) + INS.dGyro[Y] * INS.DGyroLPF / (INS.DGyroLPF + ins_dt);
     INS.dGyro[Z] = (BMI088.Gyro[Z] - INS.Gyro[Z])/ (INS.DGyroLPF + ins_dt) + INS.dGyro[Z] * INS.DGyroLPF / (INS.DGyroLPF + ins_dt);
@@ -71,24 +81,19 @@ void INS_task(void)
     INS.Accel[X] = BMI088.Accel[X];
     INS.Accel[Y] = BMI088.Accel[Y];
     INS.Accel[Z] = BMI088.Accel[Z];
-	  Accel.x=BMI088.Accel[0];
-	  Accel.y=BMI088.Accel[1];
-		Accel.z=BMI088.Accel[2];
+	  Accel.x=BMI088.Accel[X];
+	  Accel.y=BMI088.Accel[Y];
+		Accel.z=BMI088.Accel[Z];
     INS.Gyro[X] = BMI088.Gyro[X];
     INS.Gyro[Y] = BMI088.Gyro[Y];
     INS.Gyro[Z] = BMI088.Gyro[Z];
-  	Gyro.x=BMI088.Gyro[0];
-		Gyro.y=BMI088.Gyro[1];
-		Gyro.z=BMI088.Gyro[2];
+  	Gyro.x=BMI088.Gyro[X];
+		Gyro.y=BMI088.Gyro[Y];
+		Gyro.z=BMI088.Gyro[Z];
 
-		IMU_QuaternionEKF_Update(INS.Gyro[0], INS.Gyro[1], INS.Gyro[2], INS.Accel[0], INS.Accel[1], INS.Accel[2], ins_dt);
+		IMU_QuaternionEKF_Update(INS.Gyro[X], INS.Gyro[Y], INS.Gyro[Z], INS.Accel[X], INS.Accel[Y], INS.Accel[Z], ins_dt);
 
     memcpy(INS.q, QEKF_INS.q, sizeof(QEKF_INS.q));
-
-		// 机体系基向量转换到导航坐标系，本例选取惯性系为导航系
-    BodyFrameToEarthFrame(X_b, INS.xn, INS.q);
-    BodyFrameToEarthFrame(Y_b, INS.yn, INS.q);
-    BodyFrameToEarthFrame(Z_b, INS.zn, INS.q);
 
 		// mahony_input(&mahony,Gyro,Accel);
 		// mahony_update(&mahony);
@@ -111,25 +116,25 @@ void INS_task(void)
 		}
 
 		//没用到X，先不算
-		INS.True_MotionAccel_b[X] = INS.MotionAccel_b[X] + IMU_DISTANCE_X * INS.Gyro[Y] * INS.Gyro[Y] - IMU_DISTANCE_Z * INS.dGyro[Y] 
-																+ IMU_DISTANCE_X * INS.Gyro[Z] * INS.Gyro[Z] + IMU_DISTANCE_Y * INS.dGyro[Z];
+		// INS.True_MotionAccel_b[X] = INS.MotionAccel_b[X] + IMU_DISTANCE_X * INS.Gyro[Y] * INS.Gyro[Y] - IMU_DISTANCE_Z * INS.dGyro[Y] 
+		// 														+ IMU_DISTANCE_X * INS.Gyro[Z] * INS.Gyro[Z] + IMU_DISTANCE_Y * INS.dGyro[Z];
 
-		INS.True_MotionAccel_b[Y] = INS.MotionAccel_b[Y] + IMU_DISTANCE_Y *  INS.Gyro[Z] * INS.Gyro[Z] - IMU_DISTANCE_X * INS.dGyro[Z] 
-																+ IMU_DISTANCE_Y * INS.Gyro[X] * INS.Gyro[X] + IMU_DISTANCE_Z * INS.dGyro[X];
+		// INS.True_MotionAccel_b[Y] = INS.MotionAccel_b[Y] + IMU_DISTANCE_Y *  INS.Gyro[Z] * INS.Gyro[Z] - IMU_DISTANCE_X * INS.dGyro[Z] 
+		// 														+ IMU_DISTANCE_Y * INS.Gyro[X] * INS.Gyro[X] + IMU_DISTANCE_Z * INS.dGyro[X];
 		
-		INS.True_MotionAccel_b[Z] = INS.MotionAccel_b[Y] + IMU_DISTANCE_Z * INS.Gyro[X] * INS.Gyro[X] - IMU_DISTANCE_Y * INS.dGyro[X]
-																+ IMU_DISTANCE_Z * INS.Gyro[Y] * INS.Gyro[Y] + IMU_DISTANCE_X * INS.dGyro[Y];
+		// INS.True_MotionAccel_b[Z] = INS.MotionAccel_b[Y] + IMU_DISTANCE_Z * INS.Gyro[X] * INS.Gyro[X] - IMU_DISTANCE_Y * INS.dGyro[X]
+		// 														+ IMU_DISTANCE_Z * INS.Gyro[Y] * INS.Gyro[Y] + IMU_DISTANCE_X * INS.dGyro[Y];
 
-		BodyFrameToEarthFrame(INS.True_MotionAccel_b, INS.MotionAccel_n, INS.q); 	//滤波后的数据作为真实的三轴加速度，再换回大地坐标系下
+		BodyFrameToEarthFrame(INS.MotionAccel_b, INS.MotionAccel_n, INS.q); 	//滤波后的数据作为真实的三轴加速度，再换回大地坐标系下
 		
 		//死区处理
 		if(fabsf(INS.MotionAccel_n[0])<0.005f)
 		{
-		  INS.MotionAccel_n[0]=0.0f;	//x轴
+		  INS.MotionAccel_n[0]=0.0f;	//y轴
 		}
 		if(fabsf(INS.MotionAccel_n[1])<0.005f)
 		{
-		  INS.MotionAccel_n[1]=0.0f;	//y轴
+		  INS.MotionAccel_n[1]=0.0f;	//x轴
 		}
 		if(fabsf(INS.MotionAccel_n[2])<0.002f)
 		{

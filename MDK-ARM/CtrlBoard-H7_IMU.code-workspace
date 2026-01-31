@@ -14,7 +14,10 @@
             "remote_task.h": "c",
             "printf_task.h": "c",
             "chassisr_task.h": "c",
-            "observe_task.h": "c"
+            "observe_task.h": "c",
+            "quaternionekf.h": "c",
+            "dm4310_drv.h": "c",
+            "can_bsp.h": "c"
         }
     },
     "extensions": {}

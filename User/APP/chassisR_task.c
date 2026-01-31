@@ -153,6 +153,17 @@ void ChassisR_init(chassis_t *chassis, vmc_leg_t *vmc, PidTypeDef *legr)
 
 	PID_init(legr, PID_POSITION, legr_pid, LEG_PID_MAX_OUT, LEG_PID_MAX_IOUT); // 腿长pid
 
+	for (int j = 0; j < 10; j++)
+	{
+		clear_motor_state(&hfdcan1, chassis->joint_motor[1].para.id, chassis->joint_motor[1].mode);
+		osDelay(1);
+	}
+	for (int j = 0; j < 10; j++)
+	{
+		clear_motor_state(&hfdcan1, chassis->joint_motor[0].para.id, chassis->joint_motor[0].mode);
+		osDelay(1);
+	}
+
 	// 使能两个电机
 	for (int j = 0; j < 10; j++)
 	{
@@ -196,16 +207,20 @@ void chassisR_feedback_update(chassis_t *chassis, vmc_leg_t *vmc, INS_t *ins)
 	}
 }
 
-uint8_t right_flag = 0;
+uint8_t right_flag = 0, Last_right_flag = 0;
 extern uint8_t left_flag;
 float target_alpha = 0;
 extern Up_borard_t Up_borard;
 extern float x_error;
 
+int32_t Status = 0;
+uint32_t Right_Air_Count = 0;
 uint32_t Right_Last_T = 0;
 float Right_Dt = 0;
 extern float Left_Dt;
 extern uint32_t remote_online_flag;
+
+uint8_t Air_Flag_R = 0;   //确保只进入一次离地
 
 void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, float *LQR_K, PidTypeDef *leg)
 {
@@ -227,7 +242,7 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 	float L1 = (vmcr->L0 + left.L0) / 2.0f;						    //质心理论上在车体中心不变
 	float F1 = Mg * chassis->v_filter * INS.Gyro[2];			//质心受到的向心力
 
-	chassis->compensite_F = 0.7f * L1 * F1 / 0.40f;							//0.40m是车宽 
+	chassis->compensite_F = 0.0f;//0.7f * L1 * F1 / 0.40f;							//0.40m是车宽 
 	
 	chassis->wheel_motor[0].wheel_T = (
 													LQR_K[0] * (vmcr->theta - 0.0f - theta_offset) + 
@@ -296,6 +311,8 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 	}
 	else if ((chassis->stand_ready_flag_r == 0) || (chassis->stand_ready_flag_l == 0))
 	{		//车体是倒下的状态   倒地自启
+		Status ++;
+		
 		vmcr->F0 = PID_Calc(leg, vmcr->L0, 0.14) * 0.8;
 		vmcr->Tp = 60 * (vmcr->alpha - 3.1415926f / 120.0f);
 		chassis->wheel_motor[0].wheel_T = 0;
@@ -327,16 +344,23 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 
 	//	vmcr->F0=vmcr->F0-chassis->roll_f0;
 	//	jump_loop_r(chassis,vmcr,leg);
+	Last_right_flag = right_flag;
 	right_flag = ground_detectionR(vmcr, ins); // 右腿离地检测
 
-	if(chassis->stand_ready_ok_flag == 0 && (chassis->stand_ready_flag_r == 1) && (chassis->stand_ready_flag_l == 1)){
+	if(chassis->stand_ready_ok_flag == 0 || (chassis->stand_ready_flag_r == 0) || (chassis->stand_ready_flag_l == 0)){
 		right_flag = 0;
+	}
+
+	if(right_flag == 0 && Last_right_flag == 1){
+		Air_Flag_R = 1;
 	}
 
 	//	 if(chassis->recover_flag==0)
 	//	 {//倒地自起不需要检测是否离地
-	if ((right_flag == 1) && (chassis->stand_ready_ok_flag == 1) && vmcr->leg_flag==0)
+	if ((right_flag == 1) && (chassis->stand_ready_ok_flag == 1) && vmcr->leg_flag==0 && Air_Flag_R == 0)
 	{ // 当两腿同时离地并且遥控器没有在控制腿的伸缩时，才认为离地
+		Right_Air_Count ++;
+
 		chassis->wheel_motor[0].wheel_T = 0.0f;
 		vmcr->Tp = LQR_K[6] * (vmcr->theta - theta_Air) + LQR_K[7] * (vmcr->d_theta - 0.0f);
 		vmcr->F0 = PID_Calc(leg, vmcr->L0, chassis->leg_set);
@@ -348,16 +372,15 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 		chassis->v_set=0.0f;
 		chassis->turn_set=chassis->total_yaw;
 
-		// chassis_move.stop_flag = 1;
 	}
 	else if (chassis->stand_ready_ok_flag == 1)
 	{											// 没有离地
 		vmcr->leg_flag = 0; // 置为0
 		vmcr->F0 = vmcr->F0 - chassis->roll_f0 + chassis->compensite_F;
 
-		if(vmcr->F0 < 20.0f){
-			vmcr->F0 = 20.0f; 
-		}
+		// if(vmcr->F0 < 20.0f){
+		// 	vmcr->F0 = 20.0f; 
+		// }
 		
 		// roll轴补偿取反然后加上去
 	}

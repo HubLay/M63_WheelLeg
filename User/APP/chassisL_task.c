@@ -100,6 +100,17 @@ void ChassisL_init(chassis_t *chassis,vmc_leg_t *vmc,PidTypeDef *legl)
 
 	for(int j=0;j<10;j++)
 	{
+	  clear_motor_state(&hfdcan2,chassis->joint_motor[3].para.id,chassis->joint_motor[3].mode);
+	  osDelay(1);
+	}
+	for(int j=0;j<10;j++)
+	{
+	  clear_motor_state(&hfdcan2,chassis->joint_motor[2].para.id,chassis->joint_motor[2].mode);
+	  osDelay(1);
+	}
+
+	for(int j=0;j<10;j++)
+	{
 	  enable_motor_mode(&hfdcan2,chassis->joint_motor[3].para.id,chassis->joint_motor[3].mode);
 	  osDelay(1);
 	}
@@ -127,7 +138,8 @@ void chassisL_feedback_update(chassis_t *chassis,vmc_leg_t *vmc,INS_t *ins)
 }
 
 extern uint8_t right_flag;
-uint8_t left_flag;
+uint8_t left_flag, Last_left_flag = 0;
+uint8_t Air_Flag_L = 0;
 float T_out[6];
 float TP_out[6];
 float x_error=0.0f;
@@ -138,6 +150,7 @@ extern UART_HandleTypeDef huart7;
 
 float Test_L0 = 0.18;
 
+uint32_t Left_Air_Count = 0;
 uint32_t Left_Last_T = 0;
 float Left_Dt = 0.0f;
 
@@ -228,16 +241,25 @@ void chassisL_control_loop(chassis_t *chassis,vmc_leg_t *vmcl,INS_t *ins,float *
 	}
 
 //	//jump_loop_l(chassis,vmcl,leg); 
+	Last_left_flag = left_flag;
 	left_flag=ground_detectionL(vmcl,ins);//左腿离地检测
-	if(chassis->stand_ready_ok_flag == 0 && (chassis->stand_ready_flag_r == 1) && (chassis->stand_ready_flag_l == 1)){
+
+	if(chassis->stand_ready_ok_flag == 0 || (chassis->stand_ready_flag_r == 0) || (chassis->stand_ready_flag_l == 0)){
 		left_flag = 0;
 	}
+
+	if(left_flag == 0 && Last_left_flag == 1){
+		Air_Flag_L = 1;
+	}
+
 ////	
 //	 if(chassis->recover_flag==0)	
 //	 {//倒地自起不需要检测是否离地
 		//车体姿态正常并且左右腿离地
-		if((left_flag==1)&&(	chassis->stand_ready_ok_flag==1) && vmcl->leg_flag==0)//&&right_flag==1&&vmcl->leg_flag==0)
+		if((left_flag==1)&&(	chassis->stand_ready_ok_flag==1) && vmcl->leg_flag==0 && Air_Flag_L == 0)//&&right_flag==1&&vmcl->leg_flag==0)
 		{//当两腿同时离地并且遥控器没有在控制腿的伸缩时，才认为离地
+			Left_Air_Count ++;
+
 			chassis->wheel_motor[1].wheel_T=0.0f;
 			vmcl->Tp=LQR_K[6]*(vmcl->theta + theta_Air)+ LQR_K[7]*(vmcl->d_theta-0.0f);
 			vmcl->F0 = PID_Calc(leg,vmcl->L0,chassis->leg_set);
@@ -254,9 +276,9 @@ void chassisL_control_loop(chassis_t *chassis,vmc_leg_t *vmcl,INS_t *ins,float *
 			vmcl->leg_flag = 0;																							// 置为0
 			vmcl->F0 = vmcl->F0 + chassis->roll_f0 - chassis->compensite_F; // roll轴补偿取反然后加上去
 
-			if(vmcl->F0 < 20.0f){
-				vmcl->F0 = 20.0f; 
-			}
+			// if(vmcl->F0 < 20.0f){
+			// 	vmcl->F0 = 20.0f; 
+			// }
 				
 		}
 

@@ -77,6 +77,7 @@ extern void dm4310_fbdata(Joint_Motor_t *motor, uint8_t *rx_data,uint32_t data_l
 extern void dm6215_fbdata(Wheel_Motor_t *motor, uint8_t *rx_data,uint32_t data_len);
 
 extern void enable_motor_mode(hcan_t* hcan, uint16_t motor_id, uint16_t mode_id);
+extern void clear_motor_state(hcan_t* hcan, uint16_t motor_id, uint16_t mode_id);
 extern void disable_motor_mode(hcan_t* hcan, uint16_t motor_id, uint16_t mode_id);
 
 //关节电机

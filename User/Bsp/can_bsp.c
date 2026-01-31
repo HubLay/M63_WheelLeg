@@ -85,6 +85,7 @@ void FDCAN2_Config(void)
   }
 }
 
+extern int Error_Count;
 uint8_t canx_send_data(FDCAN_HandleTypeDef *hcan, uint16_t id, uint8_t *data, uint32_t len)
 {
 	FDCAN_TxHeaderTypeDef TxHeader;
@@ -130,7 +131,8 @@ uint8_t canx_send_data(FDCAN_HandleTypeDef *hcan, uint16_t id, uint8_t *data, ui
   if(HAL_FDCAN_AddMessageToTxFifoQ(hcan, &TxHeader, data) != HAL_OK)
   {
         // ∑¢ÀÕ ß∞‹¥¶¿Ì
-       //Error_Handler();      
+       //Error_Handler();
+       Error_Count ++;   
   }
 	 return 0;
 }
@@ -153,6 +155,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
         case 3 :dm4310_fbdata(&chassis_move.joint_motor[0], g_Can1RxData,RxHeader1.DataLength);break;
         case 4 :dm4310_fbdata(&chassis_move.joint_motor[1], g_Can1RxData,RxHeader1.DataLength);break;	         	
 				case 0x204 :dm6215_fbdata(&chassis_move.wheel_motor[0], g_Can1RxData,RxHeader1.DataLength);break;
+        //case 0x203 :dm6215_fbdata(&chassis_move.wheel_motor[0], g_Can1RxData,RxHeader1.DataLength);break;
 				case 0x77: upborad_fbdata(&Up_borard,g_Can1RxData,RxHeader1.DataLength);break;
 				default: break;
 			}			
