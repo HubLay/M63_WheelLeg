@@ -3,7 +3,7 @@
 <title>Static Call Graph - [CtrlBoard-H7_IMU\CtrlBoard-H7_IMU.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image CtrlBoard-H7_IMU\CtrlBoard-H7_IMU.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sat Jan 31 16:09:21 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Mon Feb 02 19:46:11 2026
 <BR><P>
 <H3>Maximum Stack Usage =        352 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -968,8 +968,8 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
-<P><STRONG><a name="[d5]"></a>ChassisL_init</STRONG> (Thumb, 184 bytes, Stack size 16 bytes, chassisl_task.o(i.ChassisL_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 108<LI>Call Chain = ChassisL_init &rArr; enable_motor_mode &rArr; canx_send_data &rArr; HAL_FDCAN_AddMessageToTxFifoQ &rArr; FDCAN_CopyMessageToRAM
+<P><STRONG><a name="[d5]"></a>ChassisL_init</STRONG> (Thumb, 216 bytes, Stack size 24 bytes, chassisl_task.o(i.ChassisL_init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 116<LI>Call Chain = ChassisL_init &rArr; enable_motor_mode &rArr; canx_send_data &rArr; HAL_FDCAN_AddMessageToTxFifoQ &rArr; FDCAN_CopyMessageToRAM
 </UL>
 <BR>[Calls]<UL><LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;wheel_motor_init
@@ -1006,8 +1006,8 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
-<P><STRONG><a name="[e2]"></a>ChassisR_init</STRONG> (Thumb, 174 bytes, Stack size 16 bytes, chassisr_task.o(i.ChassisR_init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 108<LI>Call Chain = ChassisR_init &rArr; enable_motor_mode &rArr; canx_send_data &rArr; HAL_FDCAN_AddMessageToTxFifoQ &rArr; FDCAN_CopyMessageToRAM
+<P><STRONG><a name="[e2]"></a>ChassisR_init</STRONG> (Thumb, 206 bytes, Stack size 24 bytes, chassisr_task.o(i.ChassisR_init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 116<LI>Call Chain = ChassisR_init &rArr; enable_motor_mode &rArr; canx_send_data &rArr; HAL_FDCAN_AddMessageToTxFifoQ &rArr; FDCAN_CopyMessageToRAM
 </UL>
 <BR>[Calls]<UL><LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;wheel_motor_init
@@ -1020,7 +1020,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ChassisR_task
 </UL>
 
-<P><STRONG><a name="[e1]"></a>ChassisR_task</STRONG> (Thumb, 342 bytes, Stack size 16 bytes, chassisr_task.o(i.ChassisR_task))
+<P><STRONG><a name="[e1]"></a>ChassisR_task</STRONG> (Thumb, 340 bytes, Stack size 16 bytes, chassisr_task.o(i.ChassisR_task))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = ChassisR_task &rArr; chassisR_control_loop &rArr; VMC_calc_1_right &rArr; __hardfp_atan2f
 </UL>
 <BR>[Calls]<UL><LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
@@ -2503,7 +2503,7 @@ Global Symbols
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clear_motor_state
 </UL>
 
-<P><STRONG><a name="[de]"></a>chassisL_control_loop</STRONG> (Thumb, 1164 bytes, Stack size 48 bytes, chassisl_task.o(i.chassisL_control_loop))
+<P><STRONG><a name="[de]"></a>chassisL_control_loop</STRONG> (Thumb, 898 bytes, Stack size 48 bytes, chassisl_task.o(i.chassisL_control_loop))
 <BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = chassisL_control_loop &rArr; VMC_calc_1_left &rArr; __hardfp_atan2f
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mySaturate
@@ -2521,7 +2521,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ChassisL_task
 </UL>
 
-<P><STRONG><a name="[e5]"></a>chassisR_control_loop</STRONG> (Thumb, 1198 bytes, Stack size 48 bytes, chassisr_task.o(i.chassisR_control_loop))
+<P><STRONG><a name="[e5]"></a>chassisR_control_loop</STRONG> (Thumb, 1264 bytes, Stack size 48 bytes, chassisr_task.o(i.chassisR_control_loop))
 <BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = chassisR_control_loop &rArr; VMC_calc_1_right &rArr; __hardfp_atan2f
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mySaturate

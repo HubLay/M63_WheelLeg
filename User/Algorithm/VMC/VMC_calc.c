@@ -229,7 +229,7 @@ uint8_t ground_detectionR(vmc_leg_t *vmc,INS_t *ins)
 		Air_Time_R ++;
 	}
 
-	if(vmc->FN > 80.0f)
+	if(vmc->FN > 100.0f)
 	{
 		Air_Time_R = 0;
 		Status = 0;
@@ -264,7 +264,7 @@ uint8_t ground_detectionL(vmc_leg_t *vmc,INS_t *ins)
 		Air_Time_L ++;
 	}
 
-	if(vmc->FN > 80.0f)
+	if(vmc->FN > 100.0f)
 	{
 		Air_Time_L = 0;
 		Status = 0;

@@ -11,6 +11,8 @@ extern uint8_t left_flag;
 
 extern float FnR, FnL;
 
+extern float TP_out[6];
+
 char Mes[100];
 extern UART_HandleTypeDef huart7;
 

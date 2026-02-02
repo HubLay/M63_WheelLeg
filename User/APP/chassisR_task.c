@@ -81,6 +81,7 @@ extern vmc_leg_t left;
 chassis_t chassis_move;
 
 PidTypeDef LegR_Pid; // 右腿的腿长pd
+PidTypeDef dLegR_Pid; 
 PidTypeDef Roll_Pid; // 横滚角补偿pd
 PidTypeDef Tp_Pid;	 // 防劈叉补偿pd
 PidTypeDef Turn_Pid; // 转向pd
@@ -126,7 +127,7 @@ void ChassisR_task(void)
 			mit_ctrl(&hfdcan1, chassis_move.joint_motor[0].para.id, 0.0f, 0.0f, 0.0f, 0.0f, right.torque_set[0]); // right.torque_set[0]    右前
 			osDelay(CHASSR_TIME);
 			mit_ctrl2(&hfdcan1, chassis_move.wheel_motor[0].para.id, 0.0f, 0.0f, 0.0f, 0.0f, chassis_move.wheel_motor[0].wheel_T); // 右边轮毂电机
-			//osDelay(CHASSR_TIME);
+			// osDelay(CHASSR_TIME);
 		}
 		else if (chassis_move.start_flag == 0 || chassis_move.stop_flag == 1)
 		{
@@ -143,6 +144,7 @@ void ChassisR_task(void)
 void ChassisR_init(chassis_t *chassis, vmc_leg_t *vmc, PidTypeDef *legr)
 {
 	const static float legr_pid[3] = {LEG_PID_KP, LEG_PID_KI, LEG_PID_KD};
+	const static float dLegR_Pid_config[3] = {DLEG_PID_KP, DLEG_PID_KI,DLEG_PID_KD};
 
 	joint_motor_init(&chassis->joint_motor[0], 6, MIT_MODE); // 发送id为6				右前
 	joint_motor_init(&chassis->joint_motor[1], 8, MIT_MODE); // 发送id为8				右后
@@ -152,6 +154,7 @@ void ChassisR_init(chassis_t *chassis, vmc_leg_t *vmc, PidTypeDef *legr)
 	VMC_init(vmc); // 给杆长赋值
 
 	PID_init(legr, PID_POSITION, legr_pid, LEG_PID_MAX_OUT, LEG_PID_MAX_IOUT); // 腿长pid
+	PID_init(&dLegR_Pid, PID_POSITION,dLegR_Pid_config, DLEG_PID_MAX_OUT, DLEG_PID_MAX_IOUT);
 
 	for (int j = 0; j < 10; j++)
 	{
@@ -207,6 +210,9 @@ void chassisR_feedback_update(chassis_t *chassis, vmc_leg_t *vmc, INS_t *ins)
 	}
 }
 
+float legr_pid_out;
+float dlegr_pid_out;
+
 uint8_t right_flag = 0, Last_right_flag = 0;
 extern uint8_t left_flag;
 float target_alpha = 0;
@@ -219,6 +225,9 @@ uint32_t Right_Last_T = 0;
 float Right_Dt = 0;
 extern float Left_Dt;
 extern uint32_t remote_online_flag;
+
+float T_out[6];
+float TP_out[6];
 
 uint8_t Air_Flag_R = 0;   //确保只进入一次离地
 
@@ -261,10 +270,20 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 					LQR_K[10] * (chassis->myPithR - 0.030f) + 
 					LQR_K[11] * (chassis->myPithGyroR - 0.0f));
 
+	TP_out[0] = LQR_K[6] * (vmcr->theta - 0.0f- theta_offset);
+	TP_out[1] = LQR_K[7] * (vmcr->kalman_d_theta - 0.0f);
+	TP_out[2] = LQR_K[8] * (chassis->x_filter - chassis->x_set + x_error);
+	TP_out[3] = LQR_K[9] * (chassis->v_filter - chassis->v_set);
+	TP_out[4] = LQR_K[10] * (chassis->myPithR - 0.030f);
+	TP_out[5] = LQR_K[11] * (chassis->myPithGyroR - 0.0f);
+
 	if ((chassis->stand_ready_flag_r == 1) && (chassis->stand_ready_flag_l == 1))
 	{
+		legr_pid_out = PID_Calc(leg, vmcr->L0, chassis_move.leg_set);
+		dlegr_pid_out = PID_Calc(&dLegR_Pid, vmcr->kalman_d_L0,legr_pid_out);
+
 		vmcr->Tp = vmcr->Tp + chassis->leg_tp;																									 // 髋关节输出力矩
-		vmcr->F0 = 69.0f + PID_Calc(leg, vmcr->L0, chassis->leg_set); // 重力前馈+pd
+		vmcr->F0 = 69.0f + dlegr_pid_out; // 重力前馈+pd
 
 		chassis->wheel_motor[0].wheel_T = chassis->wheel_motor[0].wheel_T - chassis->turn_T; // 轮毂电机输出力矩
 		// 左右腿都是按朝自己VMC正方向来先建模，T是顺时针，与机体不同的在计算力矩那里会改
@@ -272,6 +291,7 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 		chassis->stand_ready_flag = 1;
 		if (chassis->stand_ready_ok_flag == 0)
 		{
+			//chassis->v_set = chassis->v_filter = 0;
 			chassis->x_set = chassis->x_filter = 0.0f;				//起来的时候车会后退一段
 			if ((vmcr->theta < (3.1415926f / 12.0f)) && (vmcr->theta > -3.1415926f / 12.0f))
 			{
@@ -312,8 +332,11 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 	else if ((chassis->stand_ready_flag_r == 0) || (chassis->stand_ready_flag_l == 0))
 	{		//车体是倒下的状态   倒地自启
 		Status ++;
+
+		legr_pid_out = PID_Calc(leg, vmcr->L0, 0.14f);
+		dlegr_pid_out = PID_Calc(&dLegR_Pid, vmcr->kalman_d_L0,legr_pid_out);
 		
-		vmcr->F0 = PID_Calc(leg, vmcr->L0, 0.14) * 0.8;
+		vmcr->F0 = dlegr_pid_out;
 		vmcr->Tp = 60 * (vmcr->alpha - 3.1415926f / 120.0f);
 		chassis->wheel_motor[0].wheel_T = 0;
 		mySaturate(&vmcr->Tp, -15.f, 15.0f);
@@ -357,13 +380,13 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 
 	//	 if(chassis->recover_flag==0)
 	//	 {//倒地自起不需要检测是否离地
-	if ((right_flag == 1) && (chassis->stand_ready_ok_flag == 1) && vmcr->leg_flag==0 && Air_Flag_R == 0)
+	if ((right_flag == 1) && (chassis->stand_ready_ok_flag == 1) && vmcr->leg_flag==0)
 	{ // 当两腿同时离地并且遥控器没有在控制腿的伸缩时，才认为离地
 		Right_Air_Count ++;
 
 		chassis->wheel_motor[0].wheel_T = 0.0f;
-		vmcr->Tp = LQR_K[6] * (vmcr->theta - theta_Air) + LQR_K[7] * (vmcr->d_theta - 0.0f);
-		vmcr->F0 = PID_Calc(leg, vmcr->L0, chassis->leg_set);
+		vmcr->Tp = LQR_K[6] * (vmcr->theta - theta_Air) + LQR_K[7] * (vmcr->kalman_d_theta - 0.0f);
+		vmcr->F0 = dlegr_pid_out;
 		vmcr->Tp = vmcr->Tp + chassis->leg_tp;
 
 		chassis->x_filter=0.0f;		//对位移清零
@@ -385,35 +408,35 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 		// roll轴补偿取反然后加上去
 	}
 
-	if((right_flag == 1) && (left_flag == 1) && (chassis->stand_ready_ok_flag == 1) && vmcr->leg_flag==0){
-		chassis->x_filter=0.0f;//对位移清零
-		chassis->v_filter=0.0f;
-		chassis->x_set=0.0f;
-		chassis->v_set=0.0f;
-		chassis->turn_set=chassis->total_yaw;
-	}
-		//  }
-		//  else if(chassis->recover_flag==1)
-		//  {
-		// 	 vmcr->Tp=0.0f;
-		//  }
+	// if((right_flag == 1) && (left_flag == 1) && (chassis->stand_ready_ok_flag == 1) && vmcr->leg_flag==0){
+	// 	chassis->x_filter=0.0f;//对位移清零
+	// 	chassis->v_filter=0.0f;
+	// 	chassis->x_set=0.0f;
+	// 	chassis->v_set=0.0f;
+	// 	chassis->turn_set=chassis->total_yaw;
+	// }
+	// 	//  }
+	// 	//  else if(chassis->recover_flag==1)
+	// 	//  {
+	// 	// 	 vmcr->Tp=0.0f;
+	// 	//  }
 
-		// sprintf(Mes, "%f,%f,%f,%f,%f\n", vmcr->F0, chassis->leg_tp, vmcr->L0, vmcr->theta, chassis->roll);
+	// 	// sprintf(Mes, "%f,%f,%f,%f,%f\n", vmcr->F0, chassis->leg_tp, vmcr->L0, vmcr->theta, chassis->roll);
 
 	// if(chassis->start_flag){
 	// 	chassis->wheel_motor[0].wheel_T = 0.0f;
-	// 	vmcr->F0 = PID_Calc(leg, vmcr->L0, chassis->leg_set);
-	// 	vmcr->Tp = chassis->leg_tp;
+	// 	vmcr->F0 = dlegr_pid_out;
+	// 	vmcr->Tp = LQR_K[6] * (vmcr->theta - theta_Air) + LQR_K[7] * (vmcr->kalman_d_theta - 0.0f);
 	// }
 
 	
 
 	// 额定扭矩
-	mySaturate(&vmcr->F0, -200.0f, 200.0f); // 限幅
+	mySaturate(&vmcr->F0, -130.0f, 130.0f); // 限幅   F0过大可能会无解导致输出不正常，也可能是机械卡死
 	mySaturate(&chassis->wheel_motor[0].wheel_T, -4.2f, 4.2f);
 	VMC_calc_2(vmcr); // 计算期望的关节输出力矩
-	mySaturate(&vmcr->torque_set[1], -20.0f, 20.0f);
-	mySaturate(&vmcr->torque_set[0], -20.0f, 20.0f);
+	mySaturate(&vmcr->torque_set[1], -15.0f, 15.0f);					//注意这个力矩的大小！！！！要和上位机对应，输出那里也要
+	mySaturate(&vmcr->torque_set[0], -15.0f, 15.0f);
 
 	// sprintf(Mes, "%f,%f,%f,%f,%f,%f\n", Right_Dt, Left_Dt, chassis->wheel_motor[0].Dt, chassis->wheel_motor[1].Dt, chassis->joint_motor[0].Dt, chassis->joint_motor[2].Dt);
 	// HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
