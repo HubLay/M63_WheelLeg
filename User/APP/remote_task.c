@@ -68,11 +68,11 @@ void Remote_data_process(Up_borard_t *data,chassis_t *chassis,float dt)
 	if(chassis->start_flag==1)
 	{
 		//启动
-		chassis->target_v = data->Left_Y * 2.0f;//往前大于0
+		chassis->target_v = data->Left_Y * 2.5f;//往前大于0
 		chassis->v_set=chassis->target_v;
 
 		//chassis->x_set=chassis->x_set + chassis->v_set*dt;
-		chassis->turn_set = chassis->turn_set - data->Left_X * 1.0f/40.f;//往右大于0
+		chassis->turn_set = chassis->turn_set - data->Left_X * 1.0f/30.f;//往右大于0
 		
 		if((chassis->stand_ready_flag_r == 1) && (chassis->stand_ready_flag_l == 1)){
 			chassis->leg_set  = chassis->leg_set + data->Right_Y * 0.002f;

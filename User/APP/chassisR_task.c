@@ -368,10 +368,13 @@ void chassisR_control_loop(chassis_t *chassis, vmc_leg_t *vmcr, INS_t *ins, floa
 	//	vmcr->F0=vmcr->F0-chassis->roll_f0;
 	//	jump_loop_r(chassis,vmcr,leg);
 	Last_right_flag = right_flag;
-	right_flag = ground_detectionR(vmcr, ins); // 右腿离地检测
+	
 
 	if(chassis->stand_ready_ok_flag == 0 || (chassis->stand_ready_flag_r == 0) || (chassis->stand_ready_flag_l == 0)){
 		right_flag = 0;
+	}
+	else{
+		right_flag = ground_detectionR(vmcr, ins); // 右腿离地检测
 	}
 
 	if(right_flag == 0 && Last_right_flag == 1){

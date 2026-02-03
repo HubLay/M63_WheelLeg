@@ -239,10 +239,12 @@ void chassisL_control_loop(chassis_t *chassis,vmc_leg_t *vmcl,INS_t *ins,float *
 
 //	//jump_loop_l(chassis,vmcl,leg); 
 	Last_left_flag = left_flag;
-	left_flag=ground_detectionL(vmcl,ins);//左腿离地检测
 
 	if(chassis->stand_ready_ok_flag == 0 || (chassis->stand_ready_flag_r == 0) || (chassis->stand_ready_flag_l == 0)){
 		left_flag = 0;
+	}
+	else{
+		left_flag=ground_detectionL(vmcl,ins);//左腿离地检测
 	}
 
 	if(left_flag == 0 && Last_left_flag == 1){

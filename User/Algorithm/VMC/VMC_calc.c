@@ -210,7 +210,7 @@ void VMC_calc_2(vmc_leg_t *vmc)//计算期望的关节输出力矩
 }
 
 
-int8_t Air_Time_R;
+uint32_t Air_Time_R;
 extern char Mes[100];
 extern UART_HandleTypeDef huart7;
 float FnR;
@@ -224,18 +224,18 @@ uint8_t ground_detectionR(vmc_leg_t *vmc,INS_t *ins)
 	FnR=vmc->F0*arm_cos_f32(vmc->theta)+vmc->Tp*arm_sin_f32(vmc->theta)/vmc->L0 + 0.6f * (9.81f + ins->MotionAccel_n[2]
 		- vmc->dd_L0 * arm_cos_f32(vmc->theta) + 2.0f*vmc->d_L0*vmc->d_theta*arm_sin_f32(vmc->theta) + vmc->L0*vmc->dd_theta*arm_sin_f32(vmc->theta) + vmc->L0*vmc->d_theta*vmc->d_theta*arm_cos_f32(vmc->theta));
 
-	if(vmc->FN < 45.0f)
+	if(vmc->FN < 38.0f)
 	{//离地了
 		Air_Time_R ++;
 	}
 
-	if(vmc->FN > 100.0f)
+	if(vmc->FN > 120.0f)
 	{
 		Air_Time_R = 0;
 		Status = 0;
 	}
 
-	if(Status == 0 && Air_Time_R > 5){
+	if(Status == 0 && Air_Time_R > 20){
 		Status = 1;
 	}
 
@@ -246,7 +246,7 @@ uint8_t ground_detectionR(vmc_leg_t *vmc,INS_t *ins)
 
 }
 
-int8_t Air_Time_L;
+uint32_t Air_Time_L;
 float FnL;
 uint8_t ground_detectionL(vmc_leg_t *vmc,INS_t *ins)
 {
@@ -259,18 +259,18 @@ uint8_t ground_detectionL(vmc_leg_t *vmc,INS_t *ins)
 		- vmc->dd_L0 * arm_cos_f32(vmc->theta) + 2.0f*vmc->d_L0*vmc->d_theta*arm_sin_f32(vmc->theta) + vmc->L0*vmc->dd_theta*arm_sin_f32(vmc->theta) + vmc->L0*vmc->d_theta*vmc->d_theta*arm_cos_f32(vmc->theta));
 
 
-	if(vmc->FN < 45.0f)
+	if(vmc->FN < 38.0f)
 	{//离地了
 		Air_Time_L ++;
 	}
 
-	if(vmc->FN > 100.0f)
+	if(vmc->FN > 120.0f)
 	{
 		Air_Time_L = 0;
 		Status = 0;
 	}
 
-	if(Status == 0 && Air_Time_L > 5){
+	if(Status == 0 && Air_Time_L > 20){
 		Status = 1;
 	}
 

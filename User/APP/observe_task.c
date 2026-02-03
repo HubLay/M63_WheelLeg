@@ -30,11 +30,13 @@ float vaEstimateKF_F[4] = {1.0f, 0.001f,
 float vaEstimateKF_P[4] = {1.0f, 0.0f,
                            0.0f, 1.0f};    // 后验估计协方差初始值
 
-float vaEstimateKF_Q[4] = {1.0f, 0.0f, 
-                           0.0f, 300.0f};    // Q矩阵初始值    增大a有一点低通滤波的样子，更信任上一次的v，能减小打滑
-
-float vaEstimateKF_R[4] = {15000.0f, 0.0f, 
-                            0.0f,  0.001f}; 	//v a观测噪声   增大R11减小对轮速的信任度，但是要足够大，太大了会造成转向结束震荡（因为转向时速度实际上应该更信任轮子）
+float vaEstimateKF_Q[4] = {0.5f, 0.0f, 
+                           0.0f, 200.0f};    
+// Q矩阵初始值     Q11减小更信任用加速度估计出来的速度，Q22增大，对加速度的滤波效果减小
+//R11 增大R11减小对轮速的信任度，但是要足够大，太大了会造成转向结束震荡（因为转向时速度实际上应该更信任轮子，实际上是速度滞后太大了不收敛到真实的速度
+//在不打滑的前提下，轮速应该是更准确的，所以在没问题的前提下应该更信任轮子
+float vaEstimateKF_R[4] = {1000.0f, 0.0f, 
+                            0.0f,  0.001f}; 	//v a观测噪声
 														
 float vaEstimateKF_K[4];
 													 
@@ -113,7 +115,7 @@ void 	Observe_task(void)
 		
 		//原地自转的过程中v_filter和x_filter应该都是为0
 		chassis_move.v_filter=vel_acc[0];//得到卡尔曼滤波后的速度
-		if(fabs(chassis_move.v_filter) < 0.005f){
+		if(fabs(chassis_move.v_filter) < 0.05f){
 			chassis_move.v_filter = 0;					//速度太小了不能进行累计，不然x会飘
 		}
 		//chassis_move.x_filter=chassis_move.x_filter+chassis_move.v_filter*((float)OBSERVE_TIME/1000.0f);

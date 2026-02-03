@@ -3,7 +3,7 @@
 <title>Static Call Graph - [CtrlBoard-H7_IMU\CtrlBoard-H7_IMU.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image CtrlBoard-H7_IMU\CtrlBoard-H7_IMU.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Mon Feb 02 19:46:11 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Tue Feb 03 17:35:23 2026
 <BR><P>
 <H3>Maximum Stack Usage =        352 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2179,7 +2179,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[ab]"></a>Printf_Task</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, freertos.o(i.Printf_Task))
-<BR><BR>[Stack]<UL><LI>Max Depth = 140 + In Cycle
+<BR><BR>[Stack]<UL><LI>Max Depth = 132 + In Cycle
 <LI>Call Chain = Printf_Task &rArr;  Printf_Task (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;printf_task
@@ -2503,7 +2503,7 @@ Global Symbols
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clear_motor_state
 </UL>
 
-<P><STRONG><a name="[de]"></a>chassisL_control_loop</STRONG> (Thumb, 898 bytes, Stack size 48 bytes, chassisl_task.o(i.chassisL_control_loop))
+<P><STRONG><a name="[de]"></a>chassisL_control_loop</STRONG> (Thumb, 910 bytes, Stack size 48 bytes, chassisl_task.o(i.chassisL_control_loop))
 <BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = chassisL_control_loop &rArr; VMC_calc_1_left &rArr; __hardfp_atan2f
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mySaturate
@@ -2521,7 +2521,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ChassisL_task
 </UL>
 
-<P><STRONG><a name="[e5]"></a>chassisR_control_loop</STRONG> (Thumb, 1264 bytes, Stack size 48 bytes, chassisr_task.o(i.chassisR_control_loop))
+<P><STRONG><a name="[e5]"></a>chassisR_control_loop</STRONG> (Thumb, 1276 bytes, Stack size 48 bytes, chassisr_task.o(i.chassisR_control_loop))
 <BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = chassisR_control_loop &rArr; VMC_calc_1_right &rArr; __hardfp_atan2f
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mySaturate
@@ -2580,7 +2580,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;mit_ctrl
 </UL>
 
-<P><STRONG><a name="[1af]"></a>ground_detectionL</STRONG> (Thumb, 284 bytes, Stack size 32 bytes, vmc_calc.o(i.ground_detectionL))
+<P><STRONG><a name="[1af]"></a>ground_detectionL</STRONG> (Thumb, 282 bytes, Stack size 32 bytes, vmc_calc.o(i.ground_detectionL))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = ground_detectionL
 </UL>
 <BR>[Calls]<UL><LI><a href="#[18d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;arm_sin_f32
@@ -2589,7 +2589,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;chassisL_control_loop
 </UL>
 
-<P><STRONG><a name="[1b1]"></a>ground_detectionR</STRONG> (Thumb, 284 bytes, Stack size 32 bytes, vmc_calc.o(i.ground_detectionR))
+<P><STRONG><a name="[1b1]"></a>ground_detectionR</STRONG> (Thumb, 282 bytes, Stack size 32 bytes, vmc_calc.o(i.ground_detectionR))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = ground_detectionR
 </UL>
 <BR>[Calls]<UL><LI><a href="#[18d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;arm_sin_f32
@@ -2717,8 +2717,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[17e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_FREERTOS_Init
 </UL>
 
-<P><STRONG><a name="[190]"></a>printf_task</STRONG> (Thumb, 118 bytes, Stack size 48 bytes, printf_task.o(i.printf_task))
-<BR><BR>[Stack]<UL><LI>Max Depth = 140<LI>Call Chain = printf_task &rArr; HAL_UART_Transmit_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
+<P><STRONG><a name="[190]"></a>printf_task</STRONG> (Thumb, 108 bytes, Stack size 40 bytes, printf_task.o(i.printf_task))
+<BR><BR>[Stack]<UL><LI>Max Depth = 132<LI>Call Chain = printf_task &rArr; HAL_UART_Transmit_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strlen
 <LI><a href="#[15f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit_DMA

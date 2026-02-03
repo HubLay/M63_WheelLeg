@@ -13,8 +13,14 @@ extern float FnR, FnL;
 
 extern float TP_out[6];
 
+extern float aver_v;
+
+extern INS_t INS;
+
 char Mes[100];
 extern UART_HandleTypeDef huart7;
+
+extern uint32_t Air_Time_R;
 
 int Error_Count = 0;
 
@@ -22,7 +28,8 @@ void printf_task(){
   if(chassis_move.leg_tp > 100){
     //Error_Count ++;
   }
-  sprintf(Mes, "%f,%f,%f,%f,%f,%d,%d\n", chassis_move.target_v, right.FN, left.FN, right.F0, left.F0, right_flag, left_flag);
+  // sprintf(Mes, "%d,%f,%f,%f,%f,%d,%d\n", Air_Time_R, right.FN, left.FN, right.F0, left.F0, right_flag, left_flag);
+  sprintf(Mes, "%f,%f,%f,%f,%f\n", chassis_move.target_v,chassis_move.v_filter, aver_v, INS.Accel[1], right.FN);
 	HAL_UART_Transmit_DMA(&huart7, Mes, strlen(Mes));
   vTaskDelay(2);
 }
