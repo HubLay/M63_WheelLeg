@@ -91,6 +91,8 @@ void INS_task(void)
 		Gyro.y=BMI088.Gyro[Y];
 		Gyro.z=BMI088.Gyro[Z];
 
+		//注意由于内部解算的原因，这里的X是右手系下的Y，Y应该是右手系下的Y加个负号（也应该这样安装IMU才对）
+		//这样子解算出的Pitch是向上转动的
 		IMU_QuaternionEKF_Update(INS.Gyro[X], INS.Gyro[Y], INS.Gyro[Z], INS.Accel[X], INS.Accel[Y], INS.Accel[Z], ins_dt);
 
     memcpy(INS.q, QEKF_INS.q, sizeof(QEKF_INS.q));

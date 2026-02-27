@@ -29,7 +29,11 @@ void VMC_init(vmc_leg_t *vmc)//给杆长赋值
 
 }
 
-
+//WC 这些坐标系全是乱的           
+//建模的坐标系: 前X 右Y 上Z
+//这里VMC的：前X 左Y 上Z（因为传进来的Pitch是反过来的了）
+//所以这里算出来的theta 和d_theta是与建模相反的，所以LQR计算的时候不是Target - now
+//至于alpha感觉也是错的，应该是差一个负号
 void VMC_calc_1_right(vmc_leg_t *vmc,INS_t *ins,float dt)//计算theta和d_theta给lqr用，同时也计算腿长L0
 {	
 	//如果定义车体符合右手系，这里VMC定义的应该是左腿x朝前，右腿x朝后
