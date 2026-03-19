@@ -1,0 +1,90 @@
+/**
+ * @file config.h
+ * @author cjw
+ * @brief 工程配置文件
+ * @version 0.1
+ * @date 2025-07-1 0.1 26赛季定稿
+ *
+ * @copyright ZLLC 2026
+ *
+ */
+
+#ifndef CONFIG_H
+#define CONFIG_H
+
+/* Includes ------------------------------------------------------------------*/
+
+/* Exported macros -----------------------------------------------------------*/
+
+//底盘或云台状态
+//#define CHASSIS
+#define GIMBAL
+
+#define INS_TASK_DT      2                  //姿态估计任务周期      ms  
+#define ROBOT_TASK_DT    2                  //机器人控制任务周期
+#define DAEMON_TASK_DT   10                 //离线守护任务周期
+#define CAN_TRANSMIT_TASK_DT  1             //can发送任务周期
+#define CMDProcess_TASK_DT 5                //控制命令处理周期  5ms
+
+//功率控制相关
+#define POWER_CONTROL 1 //启用功率控制
+//#define BUFFER_LOOP
+
+//遥控器选择
+//#define USE_VT13
+#define USE_DR16
+
+/* 兵种/底盘类型选择*/
+#define AGV      //舵轮底盘
+//#define OMNI_WHEEL //全向轮底盘
+
+//#define INFANTRY //步兵
+//#define HERO  //英雄
+//#define SENTRY //哨兵
+#define BALANCE_CHASSIS //哨兵
+
+/*轮组数据*/
+#ifdef INFANTRY
+#define Wheel_Diameter 0.12000000f // 轮子直径，单位为m
+#endif 
+
+#ifdef HERO
+#define Wheel_Diameter 0.12000000f // 轮子直径，单位为m
+#endif 
+
+#ifdef SENTRY
+#define Wheel_Diameter 0.12000000f // 轮子直径，单位为m
+#define Chassis_Radius 0.46000000f // 底盘半径，单位为m
+#endif
+
+#ifdef BALANCE_CHASSIS
+
+#define Robot_Mg       13.0f        //Kg
+#define Chassis_Width  0.40f        //车宽 m
+#define Wheel_Diameter 0.075f       // 轮子半径，单位为m
+
+#define JOINT_MAX_TORQUE 15.0f      //关节电机的最大输出力矩，要和上位机对应
+
+#define UNFLLOW_ENABLE              //单底盘调试状态
+
+#define V_MAX 2.5f
+#define Yaw_Angle_Resolution 1.5f
+#define Length_Angle_Resolution 0.008f
+
+#define Length_MIN 0.15f
+#define Length_MAX 0.35f
+
+#endif
+
+
+
+/* Exported types ------------------------------------------------------------*/
+
+
+/* Exported variables --------------------------------------------------------*/
+
+/* Exported function declarations --------------------------------------------*/
+
+#endif
+
+/************************ COPYRIGHT(C) USTC-ROBOWALKER **************************/

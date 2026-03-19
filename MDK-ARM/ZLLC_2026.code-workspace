@@ -1,0 +1,28 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.associations": {
+            "arm_common_tables.h": "c",
+            "arm_math_types.h": "c",
+            "robot.h": "c",
+            "my_kalman.h": "c",
+            "daemon.h": "c",
+            "string.h": "c",
+            "freertos.h": "c",
+            "freertosconfig.h": "c",
+            "stdint.h": "c",
+            "cantransmit_msg.h": "c",
+            "fdcan.h": "c",
+            "dvc_dwt.h": "c",
+            "task.h": "c",
+            "drv_can.h": "c",
+            "stm32h7xx_hal.h": "c"
+        },
+        "commentTranslate.multiLineMerge": true
+    },
+    "extensions": {}
+}
