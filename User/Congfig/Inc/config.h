@@ -61,6 +61,7 @@
 
 #define Robot_Mg       13.0f        //Kg
 #define Chassis_Width  0.40f        //车宽 m
+#define Chassis_Half_Width (Chassis_Width / 2.0f)
 #define Wheel_Diameter 0.075f       // 轮子半径，单位为m
 
 #define JOINT_MAX_TORQUE 15.0f      //关节电机的最大输出力矩，要和上位机对应

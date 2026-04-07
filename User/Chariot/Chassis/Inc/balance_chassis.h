@@ -6,6 +6,7 @@
 #include "kalman_filter.h"
 #include "dvc_dr16.h"
 #include "dvc_imu.h"
+#include "Td.h"
 
 class Class_Balance_Chassis;
 
@@ -87,6 +88,8 @@ class Class_Balance_Chassis{
     CMD_Data_s CMD_Data;
     #endif
 
+    uint32_t Chassis_Stable_Count = 0;
+
   protected:
 
     float X = 0.0f;
@@ -97,6 +100,7 @@ class Class_Balance_Chassis{
     float Roll_Angle = 0.0f, GyroRoll = 0.0f;               //rad
     float Yaw_Angle = 0.0f, GyroYaw = 0.0f;                 //angle
 
+    float True_Target_Vx = 0.0f;
     float Target_X = 0.0f, Target_Vx = 0.0f;
     float Target_theta = 0.0f;
     float Target_Length = 0.16f;
@@ -105,6 +109,8 @@ class Class_Balance_Chassis{
     float Target_Pitch_Angle = 0.0f;
 
     float Target_Omega = 0.0f;
+
+    TD_HandleTypeDef Target_Vx_Td;
 
     KalmanFilter_t V_EstimateKF;
 
@@ -128,7 +134,6 @@ class Class_Balance_Chassis{
     //相关中间变量小写
     float aver_v;
     float theta_error;
-    uint32_t Chassis_Stable_Count = 0;
 };
 
 inline float Class_Balance_Chassis::Get_aver_v()

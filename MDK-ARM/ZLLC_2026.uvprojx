@@ -779,6 +779,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\Algorithm\Src\my_kalman.c</FilePath>
             </File>
+            <File>
+              <FileName>Td.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\User\Algorithm\Src\Td.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

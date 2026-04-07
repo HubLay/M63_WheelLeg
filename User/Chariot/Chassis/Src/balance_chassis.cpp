@@ -1,6 +1,7 @@
 #include "balance_chassis.h"
 
 #include "user_lib.h"
+#include "drv_math.h"
 #include "cantransmit_msg.h"
 
 #define RAD_TO_ANGLE (180.0f / 3.14159f)
@@ -55,10 +56,12 @@ void Class_Balance_Chassis::Init()
   Daemon_Init_Config_s daemon_init_config_instance = Get_DaemonInitConfig_s(50, NULL, Gimbal_Offline_CallbackFunction);
   Gimbal_Daemon = DaemonRegister(daemon_init_config_instance);
 
+  TD_Init(&Target_Vx_Td, 15, 1, 0.002);
+
   Tp_PID.Init(80.0f, 0.0f, 2.0f, 0.0f, 0.0f, 30.0f);
   Roll_PID.Init(0.0f, 0.0f, 0.0f);
-  Turn_Angle_PID.Init(0.2f, 0.0f, 0.0f);
-  Turn_Omega_PID.Init(0.7f, 0.0f, 0.0f);
+  Turn_Angle_PID.Init(0.15f, 0.0f, 0.0f);
+  Turn_Omega_PID.Init(0.8f, 0.0f, 0.0f);
 
   //Tp_PID.Set_D_Extern_Status(PID_D_Extern_ENABLE);
   Roll_PID.Set_D_Extern_Status(PID_D_Extern_ENABLE);
@@ -156,11 +159,13 @@ void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
     Left_Leg.VMCProject();
     Right_Leg.VMCProject();   
 
-    if(Chassis_Stable_Count >= 1000){
+    if(Chassis_Stable_Count >= 2000){
       Left_Leg.ForceSlove();
       Right_Leg.ForceSlove();
     }
     else{
+      Left_Leg.Air_Status = Leg_UnAir;
+      Right_Leg.Air_Status = Leg_UnAir;
       Chassis_Stable_Count++;
     }
 
@@ -202,13 +207,26 @@ void Class_Balance_Chassis::LengthControl()
   Roll_PID.Set_Target(0.0f);
   Roll_PID.TIM_Adjust_PeriodElapsedCallback();
 
+  if(Left_Leg.Air_Status == Leg_UnAir && Right_Leg.Air_Status == Leg_UnAir){
+    float tan_beta = ((Right_Leg.L0 - Left_Leg.L0) * arm_cos_f32(Roll_Angle) + 2.0f * Chassis_Half_Width * arm_sin_f32(Roll_Angle)) / ((Left_Leg.L0 - Right_Leg.L0) * arm_sin_f32(Roll_Angle) + 2.0f * Chassis_Half_Width * arm_cos_f32(Roll_Angle));
+    float Compensite_Length = 2.0f * Chassis_Half_Width * tan_beta;
+    // Compensite_Length = 0.0f;
+
+    Left_Leg.Target_L0 = Target_Length - Compensite_Length / 2.0f;
+    Right_Leg.Target_L0 = Target_Length + Compensite_Length / 2.0f;
+  }
+  else{
+    Left_Leg.Target_L0 = Target_Length;
+    Right_Leg.Target_L0 = Target_Length;
+  }
+
   Left_Leg.Length_Calc();
   Right_Leg.Length_Calc();
 
   float L1 = (Right_Leg.L0 + Left_Leg.L0) / 2.0f;						    //质心理论上在车体中心不变
 	float F1 = Robot_Mg * Vx * GyroYaw;			//质心受到的向心力
 
-	Compensite_F0 = 0.7f * L1 * F1 / 0.40f;							//0.40m是车宽     转向向心力的补偿 0.7是人为的缩放因子
+	Compensite_F0 = 1.5f * L1 * F1 / Chassis_Width;							//0.40m是车宽     转向向心力的补偿 0.7是人为的缩放因子
 }
 
 void Class_Balance_Chassis::SynthesizeMotion()
@@ -252,10 +270,21 @@ void Class_Balance_Chassis::SpeedUpdata()
   Left_Leg.Vx  = Vx;
   Right_Leg.X  = -X;
   Right_Leg.Vx = -Vx;
+
+  float theta_offset = 0.08f + (Target_Vx - Vx) * 0.08f;
+  Math_Constrain(&theta_offset, -0.15f, 0.15f);
+
+  Left_Leg.pitch_offset = -0.03f;
+  Right_Leg.pitch_offset = 0.03f;
+  Left_Leg.theta_offset = theta_offset;
+  Right_Leg.theta_offset = -theta_offset;
+
 }
 
 void Class_Balance_Chassis::ParamUpdata()
 {
+  static float pre_Target_Length = 0.16f; 
+
   Yaw_Angle   = IMU.Get_Angle_Yaw();              
   Roll_Angle  = IMU.Get_Rad_Roll();
   Pitch_Angle = IMU.Get_Rad_Pitch();
@@ -269,6 +298,9 @@ void Class_Balance_Chassis::ParamUpdata()
 
   Math_Constrain(&Target_Vx, -V_MAX, V_MAX);
   Math_Constrain(&Target_Length, Length_MIN, Length_MAX);
+
+  // TD_SetTarget(&Target_Vx_Td, Target_Vx);
+  // TD_Update(&Target_Vx_Td);
 
   //IMU安装方式前Y，右X，这也是IMU解算算法的坐标系
   Left_Leg.Pitch      = Pitch_Angle;
@@ -295,13 +327,19 @@ void Class_Balance_Chassis::ParamUpdata()
     // Left_Leg.Target_L0 = Right_Leg.Target_L0 = Target_Length = 0.2f;
     Target_Yaw_Angle = Yaw_Angle;
     Target_Omega = 0.0f;
+
+    Target_Length = pre_Target_Length;            //离地的时候不能变腿长
+
+  }
+  else{
+    pre_Target_Length = Target_Length;
   }
 
-  if(Left_Leg.Get_Air_Status() == Leg_UnAir && Right_Leg.Get_Air_Status() == Leg_UnAir){
-    // Left_Leg.Target_L0 = Right_Leg.Target_L0 = Target_Length;         //后续考虑的应该是加上Roll轴的考虑，目标腿长不应直接这样
-  }
+  // Left_Leg.Target_L0 = Right_Leg.Target_L0 = Target_Length;
 
-  Left_Leg.Target_L0 = Right_Leg.Target_L0 = Target_Length;
+  // if(Left_Leg.Get_Air_Status() == Leg_UnAir && Right_Leg.Get_Air_Status() == Leg_UnAir){
+  //   // Left_Leg.Target_L0 = Right_Leg.Target_L0 = Target_Length;         //后续考虑的应该是加上Roll轴的考虑，目标腿长不应直接这样
+  // }
   
   Left_Leg.ParamUpdata();
   Right_Leg.ParamUpdata();
@@ -346,8 +384,8 @@ void Class_Balance_Chassis::NormalOutput()
 {
   //最终力的输出
   if(Left_Leg.Get_Air_Status() == Leg_UnAir && Right_Leg.Get_Air_Status() == Leg_UnAir){
-    Left_Leg.F0  = 69.0f + Left_Leg.dLength_PID.Get_Out() ;//+ Roll_PID.Get_Out() - Compensite_F0;         //F0是机体受到的向上的力
-    Right_Leg.F0 = 69.0f + Right_Leg.dLength_PID.Get_Out() ;//- Roll_PID.Get_Out() + Compensite_F0; 
+    Left_Leg.F0  = 69.0f + Left_Leg.dLength_PID.Get_Out() + Roll_PID.Get_Out() - Compensite_F0;         //F0是机体受到的向上的力
+    Right_Leg.F0 = 69.0f + Right_Leg.dLength_PID.Get_Out() - Roll_PID.Get_Out() + Compensite_F0; 
 
     Left_Leg.Tp = Left_Leg.Get_LQR_Tp() + Tp_PID.Get_Out();
     Left_Leg.Wheel_T = Left_Leg.Get_LQR_Wheel_T() -  Turn_Omega_PID.Get_Out();        //顺时针切割x为正
@@ -392,6 +430,7 @@ void Class_Balance_Chassis::Chassis_Disable()
 {
   X = 0.0f;
   Chassis_Stable_Count = 0;
+  Target_Yaw_Angle = Yaw_Angle;
   Reserve_Status = Reserve_Disable;
 
   Left_Leg.Disable();
@@ -498,7 +537,7 @@ void Class_Balance_Chassis::Reserve_FSM()
 
       Target_X  = 0.0f;
       Target_Vx = 0.0f;
-      Target_Yaw_Angle = 0.0f;
+      Target_Yaw_Angle = Yaw_Angle;
       Target_Roll_Angle = 0.0f;
       Target_Length = Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.15f;
       Reserve_Status = Reserve_Disable;
@@ -519,6 +558,9 @@ void Class_Balance_Chassis::Reserve_FSM()
 
       Math_Constrain(&Left_Leg.Tp, -10.0f, 10.0f);
       Math_Constrain(&Right_Leg.Tp, -10.0f, 10.0f);
+
+      Left_Leg.Air_Status = Leg_UnAir;
+      Right_Leg.Air_Status = Leg_UnAir;
 
       // Chassis_Control_Type = Chassis_Control_Type_RESERVE;
 

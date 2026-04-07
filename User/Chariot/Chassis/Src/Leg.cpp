@@ -16,8 +16,8 @@ void Class_Leg::Init()
   Front_Joint.TIM_Process_PeriodElapsedCallback();                //处理一次数据防止上电时刻0的数组线性映射到力矩不为0
   Back_Joint.TIM_Process_PeriodElapsedCallback();
 
-  Length_PID.Init(13.0f, 0.0f, 0.35f, 0.0f, 0.0f, 2.0f);
-  dLength_PID.Init(60.0f, 0.0f, 0.0f, 0.0f, 0.0f, 80.0f);
+  Length_PID.Init(14.0f, 0.0f, 0.20f, 0.0f, 0.0f, 2.0f);
+  dLength_PID.Init(60.0f, 0.0f, 0.0f, 0.0f, 0.0f, 50.0f);         //腿太硬了回没有缓冲，容易进入离地
 
   kalman_Init(&d_L0_Kalman, 0.99f, 0.01f, 0.0f, 1.0f);
   kalman_Init(&d_alpha_Kalman, 0.99f, 0.01f, 0.0f, 1.0f);
@@ -115,25 +115,25 @@ void Class_Leg::LQR_Calc()
   }
 
   if(Air_Status == Leg_Air){
-    LQR_Tp[0] = LQR_K[6] * (0.0f - theta + theta_offset);
-    LQR_Tp[1] = LQR_K[7] * (0.0f - d_theta_true + d_theta_offset);
+    LQR_Tp[0] = LQR_K[6] * (0.0f - theta);
+    LQR_Tp[1] = LQR_K[7] * (0.0f - d_theta_true);
 
     LQR_Tp[6] = LQR_Tp[0] + LQR_Tp[1];
     LQR_Wheel_T[6] = 0.0f;
   }
   else{
-    LQR_Wheel_T[0] = LQR_K[0] * (0.0f - (theta + theta_offset));
+    LQR_Wheel_T[0] = LQR_K[0] * (0.0f + theta_offset - theta);
     LQR_Wheel_T[1] = LQR_K[1] * (0.0f - d_theta_true + d_theta_offset);
     LQR_Wheel_T[2] = LQR_K[2] * (Target_X - X);
     LQR_Wheel_T[3] = LQR_K[3] * (Target_Vx - Vx);
-    LQR_Wheel_T[4] = LQR_K[4] * (0.0f - (Pitch + pitch_offset));
+    LQR_Wheel_T[4] = LQR_K[4] * (0.0f - Pitch + pitch_offset);
     LQR_Wheel_T[5] = LQR_K[5] * (0.0f - GyroPitch);
 
-    LQR_Tp[0] = LQR_K[6] * (0.0f - (theta + theta_offset));
+    LQR_Tp[0] = LQR_K[6] * (0.0f + theta_offset - theta);
     LQR_Tp[1] = LQR_K[7] * (0.0f - d_theta_true + d_theta_offset);
     LQR_Tp[2] = LQR_K[8] * (Target_X - X);
     LQR_Tp[3] = LQR_K[9] * (Target_Vx - Vx);
-    LQR_Tp[4] = LQR_K[10] * (0.0f - (Pitch + pitch_offset));
+    LQR_Tp[4] = LQR_K[10] * (0.0f - Pitch + pitch_offset);
     LQR_Tp[5] = LQR_K[11] * (0.0f - GyroPitch);
 
     for(int i = 0;i<6;i++){
@@ -172,84 +172,89 @@ void Class_Leg::ForceSlove()
 {
   static uint32_t Status_Count = 0;
   static uint8_t Status = 0;
+  static float Pre_FN = 0.0f;
 
   //腿部机构的力+轮子重力，这里忽略了轮子质量*驱动轮竖直方向运动加速度
-  FN = F0*arm_cos_f32(theta) + Tp*arm_sin_f32(theta)/L0 + 0.6f * (9.81f + Accel_Z);
+  float tmp_FN = F0*arm_cos_f32(theta) + Tp*arm_sin_f32(theta)/L0 + 0.6f * (9.81f + Accel_Z);
 
-  // switch(Status){
-  //   case(0):                        //正常不离地状态
-  //   {
-  //     Air_Status = Leg_UnAir;
-  //     if(FN < 40){
-  //       Status = 1;                 //可能离地状态
-  //       Status_Count = 0;
-  //     }
+  FN = tmp_FN;//0.5f * tmp_FN + 0.5f * Pre_FN;
 
-  //     Status_Count += ROBOT_TASK_DT;
+  Pre_FN = FN;
 
-  //     break;
-  //   }
-  //   case(1):                      //疑似离地状态
-  //   {
-  //     Air_Status = Leg_UnAir;
-  //     if(FN < 20){
-  //       Status = 2;                 //真正离地
-  //       Status_Count = 0;
-  //     }
+  switch(Status){
+    case(0):                        //正常不离地状态
+    {
+      Air_Status = Leg_UnAir;
+      if(FN < 50){
+        Status = 1;                 //可能离地状态
+        Status_Count = 0;
+      }
 
-  //     if (FN > 40 || Status_Count > 100)              //小于40后的100ms内没有小于20，认为是误判了
-  //     {
-  //       Status = 0;
-  //       Status_Count = 0;
-  //     }
+      Status_Count += ROBOT_TASK_DT;
 
-  //     Status_Count += ROBOT_TASK_DT;
+      break;
+    }
+    case(1):                      //疑似离地状态
+    {
+      Air_Status = Leg_UnAir;
+      if(FN < 30){
+        Status = 2;                 //真正离地
+        Status_Count = 0;
+      }
 
-  //     break;
-  //   }
-  //   case(2):                        //真正离地状态
-  //   {
-  //     Air_Status = Leg_Air;
-  //     if(FN > 80){
-  //       Status = 3;                 //切到可能落地状态
-  //       Status_Count = 0;
-  //     }
+      if (FN > 50 || Status_Count > 100)              //小于40后的100ms内没有小于20，认为是误判了
+      {
+        Status = 0;
+        Status_Count = 0;
+      }
 
-  //     Status_Count += ROBOT_TASK_DT;
+      Status_Count += ROBOT_TASK_DT;
 
-  //     break;
-  //   }
-  //   case(3):
-  //   {
-  //     Air_Status = Leg_UnAir;
-  //     if(Status_Count < 100){               //落地后的一段时间内存在力的波动，疑似落地的100ms内都不进行检测
+      break;
+    }
+    case(2):                        //真正离地状态
+    {
+      Air_Status = Leg_Air;
+      if(FN > 40){
+        Status = 3;                 //切到可能落地状态
+        Status_Count = 0;
+      }
+
+      Status_Count += ROBOT_TASK_DT;
+
+      break;
+    }
+    case(3):
+    {
+      Air_Status = Leg_UnAir;
+      if(Status_Count < 100){               //落地后的一段时间内存在力的波动，疑似落地的100ms内都不进行检测
         
-  //     }
-  //     else{
-  //       //100ms后如果还存在小力的情况就是误判了
-  //       if(FN < 30){
-  //         Status = 2;                       //力太小了认为80是误判，切回离地
-  //         Status_Count = 0;
-  //       }
-  //       else if(FN > 50 || Status_Count > 30000){       //大力或者时间过长
-  //         Status = 0;
-  //         Status_Count = 0;
-  //       }
-  //     }
+      }
+      else{
+        //100ms后如果还存在小力的情况就是误判了
+        if(FN < 30){
+          Status = 2;                       //力太小了认为80是误判，切回离地
+          Status_Count = 0;
+        }
+        else if(FN > 50 || Status_Count > 3000){       //大力或者时间过长
+          Status = 0;
+          Status_Count = 0;
+        }
+      }
 
-  //     Status_Count += ROBOT_TASK_DT;
+      Status_Count += ROBOT_TASK_DT;
 
-  //     break;
-  //   }
+      break;
+    }
+  }
+
+  // if(FN < 15.0f){                 //两个参数和逻辑有待加强
+  //   Air_Status = Leg_Air;
   // }
 
-  if(FN < 15.0f){                 //两个参数和逻辑有待加强
-    Air_Status = Leg_Air;
-  }
-
-  if(FN > 60.0f){
-    Air_Status = Leg_UnAir;
-  }
+  // if(FN > 60.0f){
+  //   Air_Status = Leg_UnAir;
+  // }
 
 }
 
@@ -302,6 +307,7 @@ void Class_Leg::Disable()
   Wheel_T = 0.0f;
 
   X = 0.0f;
+  L0 = 0.16f;
 
   Air_Status = Leg_UnAir;
 

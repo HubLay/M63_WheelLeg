@@ -20,7 +20,9 @@
             "dvc_dwt.h": "c",
             "task.h": "c",
             "drv_can.h": "c",
-            "stm32h7xx_hal.h": "c"
+            "stm32h7xx_hal.h": "c",
+            "drv_uart.h": "c",
+            "gpio.h": "c"
         },
         "commentTranslate.multiLineMerge": true
     },

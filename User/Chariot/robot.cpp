@@ -73,7 +73,7 @@ void Gimbal_Offline_CallbackFunction(void *Param){
 }
 
 void Robot_Init(){
-  // __disable_irq();
+  __disable_irq();
 
   DWT_Init(480);          //必须最先初始化
 
@@ -89,7 +89,7 @@ void Robot_Init(){
 
   osTaskCreate();             //任务创建    每个电机或者需要的外设应该在初始化的时候注册守护任务
 
-  // __enable_irq();
+  __enable_irq();
 
 }
 
