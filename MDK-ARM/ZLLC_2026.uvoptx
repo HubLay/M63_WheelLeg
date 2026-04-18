@@ -260,6 +260,21 @@
           <WinNumber>1</WinNumber>
           <ItemText>RCC</ItemText>
         </Ww>
+        <Ww>
+          <count>20</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Test_Flag,0x10</ItemText>
+        </Ww>
+        <Ww>
+          <count>21</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>\\ZLLC_2026\../User/Chariot/Chassis/Src/balance_chassis.cpp\Balance_Chassis.Chassis_Control_Type</ItemText>
+        </Ww>
+        <Ww>
+          <count>22</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Test_cnt,0x0A</ItemText>
+        </Ww>
       </WatchWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>
