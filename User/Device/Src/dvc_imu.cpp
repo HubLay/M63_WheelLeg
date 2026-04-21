@@ -27,9 +27,9 @@ void Class_IMU::Init()
     IMU_MahonyAHRS.init(INS_Quat);
  
     //EKF初始化                         第三个加速度参数加大，减小运动过程中的影响    过于不相信加速度导致静止到目标收敛慢，看起来在飘
-    IMU_QuaternionEKF_Init(10, 0.01, 10000000, 0.9996, 0.273, -0.0011f, &QEKF_INS);
+    IMU_QuaternionEKF_Init(10, 0.01, 10000000, 0.9996, 0.05, -0.0011f, &QEKF_INS);
 
-    INS.AccelLPF = 0.273f;
+    INS.AccelLPF = 0.05f;
 
     //初始化温控pid参数 积分和输出限幅是一周期满占空比的计数240M/24/10000=1000
     PID_IMU_Tempture.Init(200, 300, 0, 0.0, 250, 500);
@@ -55,6 +55,13 @@ void Class_IMU::TIM_Calculate_PeriodElapsedCallback(void)
     INS.Gyro[0] = BMI088_Raw_Data.Gyro[0];
     INS.Gyro[1] = BMI088_Raw_Data.Gyro[1];
     INS.Gyro[2] = BMI088_Raw_Data.Gyro[2];
+
+    //离心加速度补偿 
+    float offset_angle = atan2f(H7_Offset_X, H7_Offset_Y);
+    float Distance_Offset = 0.0f;
+    arm_sqrt_f32(H7_Offset_X * H7_Offset_X + H7_Offset_Y * H7_Offset_Y, &Distance_Offset);
+    INS.Accel[0] = INS.Accel[0] - Distance_Offset * INS.Gyro[2] * INS.Gyro[2] * arm_sin_f32(offset_angle);
+    INS.Accel[1] = INS.Accel[1] - Distance_Offset * INS.Gyro[2] * INS.Gyro[2] * arm_cos_f32(offset_angle);
 
     // 核心函数,EKF更新四元数
     IMU_QuaternionEKF_Update(INS.Gyro[0], INS.Gyro[1], INS.Gyro[2], INS.Accel[0], INS.Accel[1], INS.Accel[2], INS_DWT_Dt, &QEKF_INS);
@@ -208,6 +215,21 @@ float Class_IMU::Get_Accel_Y_n(void)
 float Class_IMU::Get_Accel_Z_n(void)
 {
   return (INS.MotionAccel_n[2]);
+}
+
+float Class_IMU::Get_Accel_X_b(void)
+{
+  return (INS.MotionAccel_b[0]);
+}
+
+float Class_IMU::Get_Accel_Y_b(void)
+{
+  return (INS.MotionAccel_b[1]);
+}
+
+float Class_IMU::Get_Accel_Z_b(void)
+{
+  return (INS.MotionAccel_b[2]);
 }
 
 float Class_IMU::Get_Rad_Roll(void)

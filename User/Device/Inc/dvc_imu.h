@@ -18,6 +18,7 @@
 //#include "dvc_boardc_ist8310.h"
 #include "alg_MahonyAHRS.h"
 #include "alg_pid.h"
+#include "config.h"
 
 //----------------------------------------------------------------------------------------------------
 
@@ -82,6 +83,10 @@ class Class_IMU
     float Get_Accel_X_n(void);
     float Get_Accel_Y_n(void);
     float Get_Accel_Z_n(void);
+
+    float Get_Accel_X_b(void);
+    float Get_Accel_Y_b(void);
+    float Get_Accel_Z_b(void);
 
 
     Enum_IMU_Status Get_IMU_Status(void);

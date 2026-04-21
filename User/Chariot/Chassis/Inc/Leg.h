@@ -6,18 +6,18 @@
 #include "my_kalman.h"
 
 const float Poly_Coefficient[12][4] = {
-    {-117.8182, 147.5706, -81.4761, -0.7362},  // a11
-    {-2.4241, 3.3451, -6.8757, 0.0938},        // a12
-    {-14.6635, 15.3427, -5.5542, -1.0088},     // a13
-    {-19.8497, 20.9435, -8.1377, -1.5422},     // a14
-    {-364.5918, 443.4160, -207.6234, 44.7239}, // a15
-    {-12.7319, 17.6359, -9.7807, 3.1466},      // a16
-    {136.3975, -116.1036, 18.5507, 15.8494},   // a21
-    {15.2673, -15.2873, 3.3829, 1.0890},       // a22
-    {-74.7571, 89.0693, -40.1957, 7.7662},     // a23
-    {-111.1846, 131.4041, -58.8783, 11.3638},  // a24
-    {1728.2, -1828.7, 677.0310, 77.8553},      // a25（“1.7282e+03”对应1728.2，“-1.8287e+03”对应-1828.7）
-    {111.2040, -124.2318, 50.5259, -1.1936}    // a26
+    {-102.8302, 129.9481, -75.4332, -2.4717},  // a11
+    {-1.7440, 2.1554, -6.7381, -0.0226},       // a12
+    {-0.9324, 0.8300, -0.2028, -2.4342},       // a13
+    {-0.0635, 0.1230, -0.6927, -2.9844},       // a14
+    {-541.8021, 607.9104, -254.0789, 34.9168}, // a15
+    {-28.9754, 34.0174, -15.3526, 3.4914},     // a16
+    {32.8254, -36.4382, 13.2004, 3.3826},      // a21
+    {0.5478, -0.3824, -1.6099, 0.1500},        // a22
+    {-23.0344, 25.5361, -10.3895, 1.1512},     // a23
+    {-27.0292, 29.9520, -12.3588, 1.3272},     // a24
+    {159.4684, -158.6926, 52.9696, 217.3252},  // a25（无科学计数法，直接原值填入）
+    {32.8830, -36.7975, 15.4845, 5.3032}       // a26
 };
 
 enum Enum_Leg_Air_Status{
@@ -55,6 +55,8 @@ class Class_Leg{
 
     inline float Get_LQR_Tp();
     inline float Get_LQR_Wheel_T();
+    inline float Get_Length();
+    inline float Get_Target_L0();
     inline Enum_Leg_Air_Status Get_Air_Status();
 
   protected:
@@ -93,7 +95,7 @@ class Class_Leg{
     float l1, l2, l3, l4, l5;     //m
     float XB, YB, XD, YD, XC, YC;
     float d_XC, d_YC;
-    float alpha, d_alpha;
+    float alpha, d_alpha;       //-PI -- PI
     float lBD;            //BD两点的距离
     float phi1, phi2, phi3, phi4, phi0;
     float d_phi1, d_phi4, d_phi0;
@@ -120,6 +122,16 @@ inline float Class_Leg::Get_LQR_Tp()
 inline float Class_Leg::Get_LQR_Wheel_T()
 {
   return (LQR_Wheel_T[6]);
+}
+
+inline float Class_Leg::Get_Length()
+{
+  return (L0);
+}
+
+inline float Class_Leg::Get_Target_L0()
+{
+  return Target_L0;
 }
 
 inline Enum_Leg_Air_Status Class_Leg::Get_Air_Status()

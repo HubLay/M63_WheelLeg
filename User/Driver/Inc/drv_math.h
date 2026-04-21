@@ -76,7 +76,7 @@ float Normalize_Angle_Radian_PI_to_PI(float Angle_Radian);
  * @param Max 最大值
  */
 template <typename Type>
-void Math_Constrain(Type *x, Type Min, Type Max)
+void Math_Constrain(volatile Type *x, Type Min, Type Max)
 {
     if (*x < Min)
     {

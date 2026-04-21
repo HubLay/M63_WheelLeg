@@ -29,7 +29,7 @@ uint8_t GlobalDebugMode = 7;
  * @param Target_Angle 
  * @param Now_Angle 
  */
-void Angle_Continuity_Process(float* Target_Angle, float Now_Angle){
+void Angle_Continuity_Process(volatile float* Target_Angle, float Now_Angle){
     float Diff_Angle = *Target_Angle - Now_Angle;
     while (Diff_Angle > 180.0f)
     {

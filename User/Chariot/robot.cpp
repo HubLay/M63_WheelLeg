@@ -64,6 +64,17 @@ void DR16_UART5_Callback(uint8_t *Buffer, uint16_t Length)
   Balance_Chassis.DR16.DR16_UART_RxCpltCallback(Buffer);
 }
 
+/**
+ * @brief UART裁判系统回调函数
+ *
+ * @param Buffer UART收到的消息
+ * @param Length 长度
+ */
+void Referee_UART10_Callback(uint8_t *Buffer, uint16_t Length)
+{
+  Balance_Chassis.Referee.UART_RxCpltCallback(Buffer,Length);
+}
+
 void Device_SPI2_Callback(uint8_t *Tx_Buffer, uint8_t *Rx_Buffer, uint16_t Length){
 
 }
@@ -84,6 +95,8 @@ void Robot_Init(){
   SPI_Init(&hspi2, Device_SPI2_Callback);
 
   UART_Init(&huart5, DR16_UART5_Callback, 18);
+
+  UART_Init(&huart10, Referee_UART10_Callback, 128);
   
   Balance_Chassis.Init();
 

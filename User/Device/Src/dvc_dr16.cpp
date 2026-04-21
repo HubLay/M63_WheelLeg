@@ -94,7 +94,7 @@ void Class_DR16::Init(UART_HandleTypeDef *huart_1,UART_HandleTypeDef *huart_2)
  * @brief 判断拨动开关状态
  *
  */
-void Class_DR16::Judge_Switch(Enum_DR16_Switch_Status *Switch, uint8_t Status, uint8_t Pre_Status)
+void Class_DR16::Judge_Switch(volatile Enum_DR16_Switch_Status *Switch, uint8_t Status, uint8_t Pre_Status)
 {
     //带触发的判断
     switch (Pre_Status)

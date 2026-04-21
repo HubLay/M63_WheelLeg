@@ -6,6 +6,7 @@ uint8_t Test_Flag = 0;
 
 void CMDProcessTask()
 {
+  Test_Flag = 0;
   // 任意一个电机离线或者云台指令掉线都进入急停
   if (!Get_Device_Status(Balance_Chassis.Left_Leg.Front_Joint.daemon_instance) ||
       !Get_Device_Status(Balance_Chassis.Left_Leg.Back_Joint.daemon_instance) ||
@@ -40,17 +41,15 @@ void CMDProcessTask()
 
     return;
   }
-  Test_Flag = 0;
 
   // 理论上这里应该使用订阅转发机制，保证同一层级之间的模块可以转发消息
   Balance_Chassis.CMD_Data.Left_X = Balance_Chassis.DR16.Get_Left_X();
   Balance_Chassis.CMD_Data.Left_Y = Balance_Chassis.DR16.Get_Left_Y();
   Balance_Chassis.CMD_Data.Right_X = Balance_Chassis.DR16.Get_Right_X();
   Balance_Chassis.CMD_Data.Right_Y = Balance_Chassis.DR16.Get_Right_Y();
-  Balance_Chassis.CMD_Data.Control_Type = 1; // 遥控器在线就正常
 
   // 失能模式下，所有电机正常的话
-  if (Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_DISABLE && Balance_Chassis.CMD_Data.Control_Type == 1)
+  if (Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_DISABLE)
   {
     // 失能模式下恢复正常，先进入自救
     Balance_Chassis.Set_Reserve_Status(Reserve_Disable);
@@ -59,19 +58,26 @@ void CMDProcessTask()
     return;
   }
 
-  if (Balance_Chassis.CMD_Data.Control_Type == 0)
-  {
-    Balance_Chassis.Set_Chassis_Control_Type(Chassis_Control_Type_DISABLE);
-    return;
-  }
+  float tmp_target_yaw = Balance_Chassis.Get_Target_Yaw_Angle();
 
-  // if(Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_RESERVE){
-  //   return;
-  // }
+  if(Balance_Chassis.IS_NORMAL()){
+    if(Balance_Chassis.DR16.Get_Left_Switch() == DR16_Switch_Status_UP){
+      Balance_Chassis.Set_Spin_Omega(8.0f);
+      Balance_Chassis.Set_Chassis_Control_Type(Chassis_Control_Type_SPIN);
+    }
+    else if(Balance_Chassis.DR16.Get_Left_Switch() == DR16_Switch_Status_MIDDLE){
+      if(Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_SPIN){
+        tmp_target_yaw = Balance_Chassis.Get_Yaw_Angle();
+      }
+      Balance_Chassis.Set_Chassis_Control_Type(Chassis_Control_Type_UNFLLOW);
+    }
+    else if(Balance_Chassis.DR16.Get_Left_Switch() == DR16_Switch_Status_DOWN){
+      Balance_Chassis.Set_Chassis_Control_Type(Chassis_Control_Type_UNFLLOW);
+    }
+  }
 
   // 所有都正常的情况下
   float tmp_target_v = 0.0f;
-  float tmp_target_yaw = Balance_Chassis.Get_Target_Yaw_Angle();
   float tmp_target_length = Balance_Chassis.Get_Target_Length();
 
   tmp_target_v = Balance_Chassis.CMD_Data.Left_Y * V_MAX;

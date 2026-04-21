@@ -144,8 +144,8 @@ struct Struct_DR16_Data
     float Right_Y;
     float Left_X;
     float Left_Y;
-    Enum_DR16_Switch_Status Left_Switch;
-    Enum_DR16_Switch_Status Right_Switch;
+    volatile Enum_DR16_Switch_Status Left_Switch;
+    volatile Enum_DR16_Switch_Status Right_Switch;
     float Mouse_X;
     float Mouse_Y;
     float Mouse_Z;
@@ -264,7 +264,7 @@ protected:
 
     //内部函数
 
-    void Judge_Switch(Enum_DR16_Switch_Status *Switch, uint8_t Status, uint8_t Pre_Status);
+    void Judge_Switch(volatile Enum_DR16_Switch_Status *Switch, uint8_t Status, uint8_t Pre_Status);
     void Judge_Key(Enum_DR16_Key_Status *Key, uint8_t Status, uint8_t Pre_Status);
     void Judge_Updata(Struct_DR16_UART_Data Pre_UART_Rx_Data,Struct_DR16_UART_Data Now_UART_Rx_Data);
     void DR16_Data_Process();

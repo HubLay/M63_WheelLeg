@@ -77,6 +77,11 @@ void Class_Balance_Chassis::Set_Target_Length(float __Target_Length)
   Target_Length = __Target_Length;
 }
 
+void Class_Balance_Chassis::Set_Spin_Omega(float __Spin_Omega)
+{
+  Spin_Omega = __Spin_Omega;
+}
+
 void Class_Balance_Chassis::Set_Target_Yaw_Angle(float __Target_Yaw_Angle)
 {
   Target_Yaw_Angle = __Target_Yaw_Angle;
@@ -122,11 +127,11 @@ void Class_Balance_Chassis::CAN_Chassis_Rx_Gimbal_Callback(uint8_t *Rx_Data)
 
 float test_tp = 0.0f;
 uint8_t start_flag = 0;
-uint8_t Test_Flag_2 = 1;
+uint32_t Test_cnt = 0;
 void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
 {
   //控制量的更改和模式什么的一般在中断里边实现
-  Test_Flag_2 = 0;
+  Test_cnt ++;
 
   ParamUpdata();
 
@@ -144,12 +149,21 @@ void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
     Chassis_Disable();
   }
   else if(Chassis_Control_Type == Chassis_Control_Type_RESERVE){
-    Reserve_FSM();
+    Reserve_FSM();            //自救的逻辑还需要完善，比如腿在前方的时候
     LengthControl();          //腿长和Roll
     ReserveOutput();          //自救模式下的力矩输出
 
     Left_Leg.VMCProject();
     Right_Leg.VMCProject();
+  }
+  else if(Chassis_Control_Type == Chassis_Control_Type_JUMP_1){
+    JUMP_1_FSM();
+    LengthControl();
+    JUMP_1_Output();
+
+    Left_Leg.VMCProject();
+    Right_Leg.VMCProject(); 
+
   }
   else{             //随动 小陀螺 跳跃 不随动
     SynthesizeMotion();       //转向和防劈叉
@@ -159,14 +173,29 @@ void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
     Left_Leg.VMCProject();
     Right_Leg.VMCProject();   
 
-    if(Chassis_Stable_Count >= 2000){
+    Chassis_Stable_Count++;
+    //刚起立时腿部不太稳定，可能会错误进入离地
+    if(Chassis_Stable_Count >= 500){
+      //用脚踩Pitch会导致摆角向后摆，为了维持腿长会使腿触地只有一个圆周的范围，所以会导致离地
       Left_Leg.ForceSlove();
       Right_Leg.ForceSlove();
+
+      //在腿部稳定的情况下，如果开启了上台阶模式，进入到达台阶的判断
+      if(Jump_Enable_Flag == 1 && Chassis_Control_Type == Chassis_Control_Type_UNFLLOW){
+        if(Left_Leg.L0 > 0.30f && Left_Leg.alpha > 0.4f && Right_Leg.L0 > 0.30f && Right_Leg.alpha < -0.4f && Chassis_Control_Type == Chassis_Control_Type_UNFLLOW){
+          Chassis_Control_Type = Chassis_Control_Type_JUMP_1;     //磕上台阶
+        }
+      }
+
+      if(Chassis_Stable_Count == 500){
+        // X = Target_X = 0.0f;
+      }
+
     }
     else{
       Left_Leg.Air_Status = Leg_UnAir;
       Right_Leg.Air_Status = Leg_UnAir;
-      Chassis_Stable_Count++;
+      Chassis_Control_Type = Chassis_Control_Type_UNFLLOW;
     }
 
   }
@@ -207,7 +236,7 @@ void Class_Balance_Chassis::LengthControl()
   Roll_PID.Set_Target(0.0f);
   Roll_PID.TIM_Adjust_PeriodElapsedCallback();
 
-  if(Left_Leg.Air_Status == Leg_UnAir && Right_Leg.Air_Status == Leg_UnAir){
+  if(Left_Leg.Air_Status == Leg_UnAir && Right_Leg.Air_Status == Leg_UnAir && IS_NORMAL()){
     float tan_beta = ((Right_Leg.L0 - Left_Leg.L0) * arm_cos_f32(Roll_Angle) + 2.0f * Chassis_Half_Width * arm_sin_f32(Roll_Angle)) / ((Left_Leg.L0 - Right_Leg.L0) * arm_sin_f32(Roll_Angle) + 2.0f * Chassis_Half_Width * arm_cos_f32(Roll_Angle));
     float Compensite_Length = 2.0f * Chassis_Half_Width * tan_beta;
     // Compensite_Length = 0.0f;
@@ -216,8 +245,13 @@ void Class_Balance_Chassis::LengthControl()
     Right_Leg.Target_L0 = Target_Length + Compensite_Length / 2.0f;
   }
   else{
-    Left_Leg.Target_L0 = Target_Length;
-    Right_Leg.Target_L0 = Target_Length;
+    // if(Chassis_Control_Type == Chassis_Control_Type_RESERVE){
+
+    // }
+    // else{
+    //   Left_Leg.Target_L0 = Target_Length;
+    //   Right_Leg.Target_L0 = Target_Length;
+    // }
   }
 
   Left_Leg.Length_Calc();
@@ -271,7 +305,7 @@ void Class_Balance_Chassis::SpeedUpdata()
   Right_Leg.X  = -X;
   Right_Leg.Vx = -Vx;
 
-  float theta_offset = 0.08f + (Target_Vx - Vx) * 0.08f;
+  float theta_offset = 0.05f + (Target_Vx - Vx) * 0.08f;
   Math_Constrain(&theta_offset, -0.15f, 0.15f);
 
   Left_Leg.pitch_offset = -0.03f;
@@ -288,15 +322,31 @@ void Class_Balance_Chassis::ParamUpdata()
   Yaw_Angle   = IMU.Get_Angle_Yaw();              
   Roll_Angle  = IMU.Get_Rad_Roll();
   Pitch_Angle = IMU.Get_Rad_Pitch();
-  Accel_X   = IMU.Get_Accel_Y_n();              //注意看是不是对应了
-  Accel_Z   = IMU.Get_Accel_Z_n();
+  Accel_X   = IMU.Get_Accel_Y_b();              //注意看是不是对应了
+  Accel_Z   = IMU.Get_Accel_Z_b();
   GyroYaw   = IMU.Get_Gyro_Yaw();
   GyroRoll  = IMU.Get_Gyro_Roll();              //Roll和Pitch陀螺仪速度应该换一下（可能）
   GyroPitch = IMU.Get_Gyro_Pitch();
 
-  Target_X = 0.0f;          //速控的方案
+  // Target_X = 0.0f;          //速控的方案
 
   Math_Constrain(&Target_Vx, -V_MAX, V_MAX);
+
+  //小陀螺行进
+  if(Chassis_Control_Type == Chassis_Control_Type_SPIN){
+    Math_Constrain(&Target_Vx, -V_MAX_SPIN, V_MAX_SPIN);
+    float tmp_yaw_rad = Normalize_Angle_Radian_0_to_2PI(Yaw_Angle * PI / 180.0f);
+    True_Target_Vx = Target_Vx * arm_cos_f32(tmp_yaw_rad);
+    // Target_X = 0.0f;
+  }
+  else{
+    // Target_X = Target_X + Target_Vx * ROBOT_TASK_DT / 1000.0f;
+    True_Target_Vx = Target_Vx;
+  }
+
+  //功率限制限制速度
+  Power_Control_Task(&True_Target_Vx);
+
   Math_Constrain(&Target_Length, Length_MIN, Length_MAX);
 
   // TD_SetTarget(&Target_Vx_Td, Target_Vx);
@@ -305,14 +355,14 @@ void Class_Balance_Chassis::ParamUpdata()
   //IMU安装方式前Y，右X，这也是IMU解算算法的坐标系
   Left_Leg.Pitch      = Pitch_Angle;
   Left_Leg.Target_X   = Target_X;
-  Left_Leg.Target_Vx  = Target_Vx;
+  Left_Leg.Target_Vx  = True_Target_Vx;
   Left_Leg.GyroPitch  = GyroPitch;
   Left_Leg.Accel_Z    = Accel_Z;
   
   
   Right_Leg.Pitch     = -Pitch_Angle;
   Right_Leg.Target_X  = -Target_X;
-  Right_Leg.Target_Vx = -Target_Vx;
+  Right_Leg.Target_Vx = -True_Target_Vx;
   Right_Leg.GyroPitch = -GyroPitch;
   Right_Leg.Accel_Z   = Accel_Z;
   
@@ -323,15 +373,20 @@ void Class_Balance_Chassis::ParamUpdata()
     // Right_Leg.Target_L0 = 0.2f;
   }
 
-  if(Left_Leg.Get_Air_Status() == Leg_Air || Right_Leg.Get_Air_Status() == Leg_Air){
+  if((Left_Leg.Get_Air_Status() == Leg_Air || Right_Leg.Get_Air_Status()) == Leg_Air && IS_NORMAL()){
     // Left_Leg.Target_L0 = Right_Leg.Target_L0 = Target_Length = 0.2f;
     Target_Yaw_Angle = Yaw_Angle;
-    Target_Omega = 0.0f;
-
     Target_Length = pre_Target_Length;            //离地的时候不能变腿长
 
   }
   else{
+    if(Chassis_Control_Type == Chassis_Control_Type_SPIN)
+    {
+      Target_Omega = Spin_Omega;
+      // float tmp = ((V_MAX_SPIN - fabs(Target_Vx)) / V_MAX_SPIN) < (1.0f/2.0f) ? (1.0f/.0f) : ((V_MAX_SPIN - fabs(Target_Vx)) / V_MAX_SPIN);
+      // Target_Omega = tmp * Spin_Omega;
+    }
+
     pre_Target_Length = Target_Length;
   }
 
@@ -358,10 +413,10 @@ void Class_Balance_Chassis::SpeedEstimate()
     aver_v = 0.0f;
   }
   else if(Right_Leg.Get_Air_Status() == Leg_Air){
-    aver_v = Left_Leg.leg_v_true;
+    aver_v = (Left_Leg.leg_v_true + Vx) / 2.0f;
   }
   else if(Left_Leg.Get_Air_Status() == Leg_Air){
-    aver_v = -Right_Leg.leg_v_true;
+    aver_v = (-Right_Leg.leg_v_true + Vx) / 2.0f;
   }
   
   V_EstimateKF.MeasuredVector[0] = aver_v;
@@ -370,8 +425,11 @@ void Class_Balance_Chassis::SpeedEstimate()
 
   Vx = V_EstimateKF.FilteredValue[0];
 
-  if(fabs(Target_Vx) < 0.1){
+  // X = X + Vx * ROBOT_TASK_DT * 1.3f/ 1000.0f;
+
+  if(fabs(Target_Vx) < 0.1f){
     X = X + Vx * ROBOT_TASK_DT / 1000.0f;
+    Target_X = 0.0f;
   }
   else{
     X = 0.0f;
@@ -380,12 +438,17 @@ void Class_Balance_Chassis::SpeedEstimate()
 
 }
 
+void Class_Balance_Chassis::Power_Control_Task(float *Target_Vx)
+{
+  
+}
+
 void Class_Balance_Chassis::NormalOutput()
 {
   //最终力的输出
   if(Left_Leg.Get_Air_Status() == Leg_UnAir && Right_Leg.Get_Air_Status() == Leg_UnAir){
-    Left_Leg.F0  = 69.0f + Left_Leg.dLength_PID.Get_Out() + Roll_PID.Get_Out() - Compensite_F0;         //F0是机体受到的向上的力
-    Right_Leg.F0 = 69.0f + Right_Leg.dLength_PID.Get_Out() - Roll_PID.Get_Out() + Compensite_F0; 
+    Left_Leg.F0  = 69.0f / arm_cos_f32(Left_Leg.theta) + Left_Leg.dLength_PID.Get_Out() + Roll_PID.Get_Out() - Compensite_F0;         //F0是机体受到的向上的力
+    Right_Leg.F0 = 69.0f / arm_cos_f32(Right_Leg.theta) + Right_Leg.dLength_PID.Get_Out() - Roll_PID.Get_Out() + Compensite_F0; 
 
     Left_Leg.Tp = Left_Leg.Get_LQR_Tp() + Tp_PID.Get_Out();
     Left_Leg.Wheel_T = Left_Leg.Get_LQR_Wheel_T() -  Turn_Omega_PID.Get_Out();        //顺时针切割x为正
@@ -414,6 +477,18 @@ void Class_Balance_Chassis::NormalOutput()
   Math_Constrain(&Right_Leg.Wheel_T, -4.2f, 4.2f);
 }
 
+void Class_Balance_Chassis::JUMP_1_Output()
+{
+  Left_Leg.F0  = Left_Leg.dLength_PID.Get_Out();
+  Right_Leg.F0 = Right_Leg.dLength_PID.Get_Out();
+
+  Math_Constrain(&Left_Leg.F0, -200.0f, 200.0f);
+  Math_Constrain(&Left_Leg.Wheel_T, -4.2f, 4.2f);
+
+  Math_Constrain(&Right_Leg.F0, -200.0f, 200.0f);
+  Math_Constrain(&Right_Leg.Wheel_T, -4.2f, 4.2f);
+}
+
 void Class_Balance_Chassis::ReserveOutput()
 {
   Left_Leg.F0  = Left_Leg.dLength_PID.Get_Out();
@@ -428,9 +503,10 @@ void Class_Balance_Chassis::ReserveOutput()
 
 void Class_Balance_Chassis::Chassis_Disable()
 {
-  X = 0.0f;
+  Target_X = X = 0.0f;
   Chassis_Stable_Count = 0;
   Target_Yaw_Angle = Yaw_Angle;
+  jump_state = JUMP_BACK_SWING;
   Reserve_Status = Reserve_Disable;
 
   Left_Leg.Disable();
@@ -440,7 +516,6 @@ void Class_Balance_Chassis::Chassis_Disable()
   Roll_PID.Set_Integral_Error(0.0f);
   Turn_Omega_PID.Set_Integral_Error(0.0f);
   Turn_Angle_PID.Set_Integral_Error(0.0f);
-
 }
 
 void Class_Balance_Chassis::V_EstimateKF_Init()
@@ -457,13 +532,16 @@ void Class_Balance_Chassis::V_EstimateKF_Init()
 void Class_Balance_Chassis::Reserve_FSM()
 {
   static uint16_t status_cnt = 0;
+  static uint8_t Left_Alpha_Status = 0, Right_Alpha_Status = 0;     //切到1的时候代表偏角过大，先速度环在切回角度环
   static float resver_alpha_Kp = 30.0f, reserve_d_alpha_Kp = 8.0f;
-  static float Target_Left_Alpha = 0.25f, Target_Right_Alpha = -0.25f;     //左右坐标系不一致
+  static float resver_alpha_Kd = 1.0f;
+  static float Target_Left_Alpha = 0.40f, Target_Right_Alpha = -0.40f;     //左右坐标系不一致
   switch (Reserve_Status)
   {
     case(Reserve_Disable):
     {
       status_cnt = 0;
+      Left_Alpha_Status = Right_Alpha_Status = 0;
       Left_Leg.Disable();
       Right_Leg.Disable();
       if(Pitch_Angle > -70.0f / 57.3f && Pitch_Angle < 70.0f / 57.3f){
@@ -483,10 +561,10 @@ void Class_Balance_Chassis::Reserve_FSM()
         Left_Leg.Wheel_T = 0.0f;
         Right_Leg.Wheel_T = 0.0f;
         Left_Leg.Tp  = reserve_d_alpha_Kp * (2.5f - Left_Leg.d_alpha_true);
-        Right_Leg.Tp = -reserve_d_alpha_Kp * (2.5f - Left_Leg.d_alpha_true);
+        Right_Leg.Tp = reserve_d_alpha_Kp * (-2.5f - Right_Leg.d_alpha_true);
       }
       else{
-        Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.32f;
+        Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.35f;
 
         Left_Leg.Wheel_T = 0.0f;
         Right_Leg.Wheel_T = 0.0f;
@@ -507,25 +585,60 @@ void Class_Balance_Chassis::Reserve_FSM()
       break;
     }
     case(Reserve_Status_2):{
+      float Left_Error = 0.0f, Right_Error = 0.0f;
 
-      Angle_Continuity_Process(&Target_Left_Alpha, Left_Leg.alpha);
-      Angle_Continuity_Process(&Target_Right_Alpha, Right_Leg.alpha);
+      if(Left_Leg.alpha < -1.20f && Left_Alpha_Status == 0){        //偏角过大了，先用速度环摆正
+        Left_Alpha_Status = 1;
+      }
 
-      float Left_Error = Target_Left_Alpha - Left_Leg.alpha;
-      float Right_Error = Target_Right_Alpha - Right_Leg.alpha;
+      if(Right_Leg.alpha > 1.20f && Right_Alpha_Status == 0){
+        Right_Alpha_Status = 1;
+      }
 
-      Left_Leg.Wheel_T = 0.0f;
-      Right_Leg.Wheel_T = 0.0f;
-      Left_Leg.Tp  = resver_alpha_Kp * Left_Error;
-      Right_Leg.Tp = resver_alpha_Kp * Right_Error;
+      if(Left_Alpha_Status == 1){     //用速度环摆正
+        Left_Leg.Target_L0 = 0.30f;
+        Left_Leg.Tp = reserve_d_alpha_Kp * (-2.5f - Left_Leg.d_alpha_true);
 
-      Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.18f;
+        if(fabs(Left_Leg.alpha - 1.5f) < 0.05f){      //接近1.5rad认为可以切换角度换控制
+          Left_Alpha_Status = 0;
+        }
+      }
+      else{
+        Angle_Continuity_Process(&Target_Left_Alpha, Left_Leg.alpha);
+        float Left_Error = Target_Left_Alpha - Left_Leg.alpha;
+        Left_Leg.Tp  = resver_alpha_Kp * Left_Error - resver_alpha_Kd * Left_Leg.d_alpha_true;
+        Left_Leg.Target_L0 = 0.20f;
+      }
+
+      if(Right_Alpha_Status == 1){     //用速度环摆正
+        Right_Leg.Target_L0 = 0.30f;
+        Right_Leg.Tp = reserve_d_alpha_Kp * (2.5f - Right_Leg.d_alpha_true);
+
+        if(fabs(Right_Leg.alpha - (-1.5f)) < 0.05f){
+          Right_Alpha_Status = 0;
+        }
+      }
+      else{
+        Angle_Continuity_Process(&Target_Right_Alpha, Right_Leg.alpha);
+        Right_Error = Target_Right_Alpha - Right_Leg.alpha;
+        Right_Leg.Tp = resver_alpha_Kp * Right_Error - resver_alpha_Kd * Right_Leg.d_alpha_true;
+        Right_Leg.Target_L0 = 0.20f;
+      }
 
       Math_Constrain(&Left_Leg.Tp, -10.0f, 10.0f);
       Math_Constrain(&Right_Leg.Tp, -10.0f, 10.0f);
 
-      if(fabs(Right_Error) < 0.5f && fabs(Left_Error) < 0.5){
-        Reserve_Status = Reserve_Complete;
+      Left_Leg.Wheel_T = 0.0f;
+      Right_Leg.Wheel_T = 0.0f;
+
+      //左右腿都是角度换算了，并且都在合理范围内了，就认为自救完成了
+      if(fabs(Right_Error) < 0.3f && fabs(Left_Error) < 0.3f && Left_Alpha_Status == 0 && Right_Alpha_Status == 0){
+        status_cnt ++;
+      }
+
+      if(status_cnt > 500){
+        status_cnt = 0;
+        Reserve_Status = Reserve_Complete; 
       }
 
       break;
@@ -539,7 +652,7 @@ void Class_Balance_Chassis::Reserve_FSM()
       Target_Vx = 0.0f;
       Target_Yaw_Angle = Yaw_Angle;
       Target_Roll_Angle = 0.0f;
-      Target_Length = Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.15f;
+      Target_Length = Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.20f;
       Reserve_Status = Reserve_Disable;
 
       // Left_Leg.Disable();
@@ -563,6 +676,7 @@ void Class_Balance_Chassis::Reserve_FSM()
       Right_Leg.Air_Status = Leg_UnAir;
 
       // Chassis_Control_Type = Chassis_Control_Type_RESERVE;
+      // Chassis_Control_Type = Chassis_Control_Type_JUMP_1;
 
       #ifdef UNFLLOW_ENABLE
       Chassis_Control_Type = Chassis_Control_Type_UNFLLOW;        //切回正常lqr
@@ -580,7 +694,172 @@ void Class_Balance_Chassis::Reserve_FSM()
       Left_Leg.Tp  = 0.0f;
       Right_Leg.Tp = 0.0f;
 
-      Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.18f;
+      Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.20f;
+      break;
+    }
+  }
+}
+
+void Class_Balance_Chassis::JUMP_1_FSM()
+{
+  static uint16_t state_cnt = 0;
+
+  // 参数（建议后续调参）
+  float L_LONG = 0.32f;
+  float L_SHORT = 0.16f;
+
+  float BACK_TARGET_ALPHA_L = 2.8f;   // 左腿后摆
+  float BACK_TARGET_ALPHA_R = -2.8f;
+
+  float NORMAL_ALPHA_L = 0.40f;
+  float NORMAL_ALPHA_R = -0.40f;
+
+  float Left_Target_Alpha_Omega = 2.5f;         //向后转动
+  float Right_Target_Alpha_Omega = -2.5f;
+
+  float KP_Omega_ALPHA = 8.0f;
+  float KP_ALPHA = 20.0f;
+  float KD_ALPHA = 0.3f;
+
+  //清零轮电机的输出
+  Left_Leg.Wheel_T = 0.0f;
+  Right_Leg.Wheel_T = 0.0f;
+
+  Left_Leg.Air_Status = Leg_Air;
+  Right_Leg.Air_Status = Leg_Air;
+
+  Chassis_Stable_Count = 0;
+
+  switch(jump_state)
+  {
+    case JUMP_BACK_SWING:
+    {
+      // 保持长腿
+      Left_Leg.Target_L0  = L_LONG;
+      Right_Leg.Target_L0 = L_LONG;
+
+      // // 角度连续处理
+      Angle_Continuity_Process(&BACK_TARGET_ALPHA_L, Left_Leg.alpha);
+      Angle_Continuity_Process(&BACK_TARGET_ALPHA_R, Right_Leg.alpha);
+
+      float err_l = BACK_TARGET_ALPHA_L - Left_Leg.alpha;
+      float err_r = BACK_TARGET_ALPHA_R - Right_Leg.alpha;
+
+      Left_Leg.Tp  = KP_Omega_ALPHA * (Left_Target_Alpha_Omega - Left_Leg.d_alpha_true);
+      Right_Leg.Tp = KP_Omega_ALPHA * (Right_Target_Alpha_Omega - Right_Leg.d_alpha_true);
+
+      if(fabs(err_l) < 0.2f){
+        Left_Leg.Tp  = KP_ALPHA * err_l - KD_ALPHA * Left_Leg.d_alpha_true;
+      }
+
+      if(fabs(err_r) < 0.2f){
+        Right_Leg.Tp = KP_ALPHA * err_r - KD_ALPHA * Right_Leg.d_alpha_true;
+      }
+
+      Math_Constrain(&Left_Leg.Tp, -10.0f, 10.0f);
+      Math_Constrain(&Right_Leg.Tp, -10.0f, 10.0f);
+
+      // 到位判断
+      if(fabs(err_l) < 0.2f && fabs(err_r) < 0.2f)
+      {
+        state_cnt += ROBOT_TASK_DT;
+      }
+      else{
+        state_cnt = 0;
+      }
+
+      if(state_cnt > 500)
+      {
+        state_cnt = 0;
+        jump_state = JUMP_RECOVER;
+      }
+
+      break;
+    }
+    case JUMP_RECOVER:
+    {
+      // 恢复到正常长度
+      Left_Leg.Target_L0  = L_SHORT;
+      Right_Leg.Target_L0 = L_SHORT;
+
+      Angle_Continuity_Process(&NORMAL_ALPHA_L, Left_Leg.alpha);
+      Angle_Continuity_Process(&NORMAL_ALPHA_R, Right_Leg.alpha);
+
+      float err_l = NORMAL_ALPHA_L - Left_Leg.alpha;
+      float err_r = NORMAL_ALPHA_R - Right_Leg.alpha;
+
+      Left_Leg.Tp  = KP_Omega_ALPHA * (-Left_Target_Alpha_Omega - Left_Leg.d_alpha_true);
+      Right_Leg.Tp = KP_Omega_ALPHA * (-Right_Target_Alpha_Omega - Right_Leg.d_alpha_true);
+
+      if(fabs(err_l) < 0.2f){
+        Left_Leg.Tp  = KP_ALPHA * err_l - KD_ALPHA * Left_Leg.d_alpha_true;
+      }
+
+      if(fabs(err_r) < 0.2f){
+        Right_Leg.Tp = KP_ALPHA * err_r - KD_ALPHA * Right_Leg.d_alpha_true;
+      }
+
+      Math_Constrain(&Left_Leg.Tp, -10.0f, 10.0f);
+      Math_Constrain(&Right_Leg.Tp, -10.0f, 10.0f);
+
+      if(fabs(err_l) < 0.2f && fabs(err_r) < 0.2f)
+      {
+        state_cnt += ROBOT_TASK_DT;
+      }
+      else{
+        state_cnt = 0;
+      }
+
+      if(state_cnt > 500)
+      {
+        state_cnt = 0;
+        jump_state = JUMP_DONE;
+      }
+
+      break;
+    }
+
+    case JUMP_DONE:
+    {
+      // 清状态，回归正常控制
+      state_cnt = 0;
+      jump_state = JUMP_BACK_SWING;
+
+      //相关状态重置
+      X = Vx = 0.0f;
+      Target_X = Target_Vx = 0.0f;
+      Target_Roll_Angle = 0.0f;
+      Target_Yaw_Angle = Yaw_Angle;
+
+      Target_Length = 0.20f;
+      Left_Leg.Target_L0  = 0.20f;
+      Right_Leg.Target_L0 = 0.20f;
+
+      // Left_Leg.Tp = 0.0f;
+      // Right_Leg.Tp = 0.0f;
+
+      Angle_Continuity_Process(&NORMAL_ALPHA_L, Left_Leg.alpha);
+      Angle_Continuity_Process(&NORMAL_ALPHA_R, Right_Leg.alpha);
+
+      float err_l = NORMAL_ALPHA_L - Left_Leg.alpha;
+      float err_r = NORMAL_ALPHA_R - Right_Leg.alpha;
+
+      Left_Leg.Tp  = KP_ALPHA * err_l - KD_ALPHA * Left_Leg.d_alpha_true;
+      Right_Leg.Tp = KP_ALPHA * err_r - KD_ALPHA * Right_Leg.d_alpha_true;
+
+      Math_Constrain(&Left_Leg.Tp, -10.0f, 10.0f);
+      Math_Constrain(&Right_Leg.Tp, -10.0f, 10.0f);
+
+      // Chassis_Control_Type = Chassis_Control_Type_FLLOW;
+      Chassis_Control_Type = Chassis_Control_Type_UNFLLOW;
+      // Chassis_Control_Type = Chassis_Control_Type_JUMP_1;
+
+      break;
+    }
+
+    default:{
+      state_cnt = 0;
+      jump_state = JUMP_BACK_SWING;
       break;
     }
   }

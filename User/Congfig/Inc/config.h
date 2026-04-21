@@ -69,11 +69,15 @@
 #define UNFLLOW_ENABLE              //单底盘调试状态
 
 #define V_MAX 2.5f
+#define V_MAX_SPIN 0.35f
 #define Yaw_Angle_Resolution 1.5f
 #define Length_Angle_Resolution 0.008f
 
 #define Length_MIN 0.15f
 #define Length_MAX 0.35f
+
+#define H7_Offset_X -0.04f       //IMU距离车体中心的距离，IMU自身坐标系 m 量不出来硬调
+#define H7_Offset_Y -0.02f         //IMU距离车体中心的距离，IMU自身坐标系 m
 
 #endif
 
