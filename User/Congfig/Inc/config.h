@@ -70,7 +70,7 @@
 
 #define V_MAX 2.5f
 #define V_MAX_SPIN 0.35f
-#define Yaw_Angle_Resolution 1.5f
+#define Yaw_Angle_Resolution (1.5f / 57.3f)
 #define Length_Angle_Resolution 0.008f
 
 #define Length_MIN 0.15f

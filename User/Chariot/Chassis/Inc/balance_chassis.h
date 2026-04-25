@@ -118,16 +118,17 @@ class Class_Balance_Chassis{
 
     float True_Target_Vx = 0.0f;
     volatile float Target_X = 0.0f, Target_Vx = 0.0f;
-    volatile float Target_theta = 0.0f;
+    volatile float Target_l_theta = 0.0f, Target_l_dtheta = 0.0f;
+    volatile float Target_r_theta = 0.0f, Target_r_dtheta = 0.0f;
+    volatile float Target_Pitch_Angle = 0.0f, Target_Picth_Omega = 0.0f;      //rad
     volatile float Target_Length = 0.16f;
-    volatile float Target_Yaw_Angle = 0.0f;
+    volatile float Target_Yaw_Angle = 0.0f;                                   //rad
     volatile float Target_Roll_Angle = 0.0f;
-    volatile float Target_Pitch_Angle = 0.0f;
 
     volatile float Spin_Omega = 0.0f;
     volatile float Target_Omega = 0.0f;
 
-    uint8_t Jump_Enable_Flag = 1;
+    uint8_t Jump_Enable_Flag = 0;
 
     TD_HandleTypeDef Target_Vx_Td;
 
@@ -138,6 +139,7 @@ class Class_Balance_Chassis{
     JumpState_e jump_state = JUMP_BACK_SWING;
 
   private:
+    void LQR_Calc();
     void LengthControl();         // 腿长控制，Roll保持机体水平
     void SynthesizeMotion();      // 转向和抗劈叉
     void SpeedUpdata();
@@ -152,11 +154,14 @@ class Class_Balance_Chassis{
     void ReserveOutput();
     void Chassis_Disable();
 
+    void Get_Polyfit_K();              //根据当前腿长获取K矩阵
     void V_EstimateKF_Init();
 
     //相关中间变量小写
     float aver_v;
     float theta_error;
+    float K[4][10];
+    float LQR_Out[4];                  //Tr, Tl, WTr, WTl
 };
 
 

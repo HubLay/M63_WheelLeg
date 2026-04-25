@@ -5,25 +5,15 @@
 #include "dvc_dmmotor.h"              //记得检查达妙数据接收喝发送，使能是否正常
 #include "my_kalman.h"
 
-const float Poly_Coefficient[12][4] = {
-    {-102.8302, 129.9481, -75.4332, -2.4717},  // a11
-    {-1.7440, 2.1554, -6.7381, -0.0226},       // a12
-    {-0.9324, 0.8300, -0.2028, -2.4342},       // a13
-    {-0.0635, 0.1230, -0.6927, -2.9844},       // a14
-    {-541.8021, 607.9104, -254.0789, 34.9168}, // a15
-    {-28.9754, 34.0174, -15.3526, 3.4914},     // a16
-    {32.8254, -36.4382, 13.2004, 3.3826},      // a21
-    {0.5478, -0.3824, -1.6099, 0.1500},        // a22
-    {-23.0344, 25.5361, -10.3895, 1.1512},     // a23
-    {-27.0292, 29.9520, -12.3588, 1.3272},     // a24
-    {159.4684, -158.6926, 52.9696, 217.3252},  // a25（无科学计数法，直接原值填入）
-    {32.8830, -36.7975, 15.4845, 5.3032}       // a26
-};
-
 enum Enum_Leg_Air_Status{
   Leg_UnAir = 0,
   Leg_Air,
 };
+
+typedef enum{
+  Left,
+  Right
+}Enum_Leg;
 
 extern void PrintfTask();
 
@@ -49,6 +39,8 @@ class Class_Leg{
     void ForceSlove();
     void ParamUpdata();                             //更新VMC相关的参数
     void VMCProject();                              //VMC参数的映射
+
+    template <Enum_Leg T>
     void Torque_Output();
 
     void Disable();
@@ -64,21 +56,14 @@ class Class_Leg{
     //重要的变量
     float Pitch = 0.0f;
     float GyroPitch = 0.0f;
-    float X = 0.0f, Vx = 0.0f;             //m   m/s
     float theta = 0.0f, d_theta = 0.0f;
     float L0 = 0.0f, d_L0 = 0.0f;           //m
     float FN = 0.0f, Accel_Z = 0.0f;
     float d_alpha_true, d_theta_true, d_L0_true;
 
-    float Target_X = 0.0f;
-    float Target_Vx = 0.0f;
-    float Target_theta = 0.0f;
-    float Target_dtheta = 0.0f;
-    float Target_Pitch = 0.0f;
-    float Target_L0 = 0.14f;
+    float Target_L0 = 0.16f;
 
     float Tp, F0, Wheel_T, T_Front, T_Back;
-    float LQR_K[12], LQR_Tp[7], LQR_Wheel_T[7];             //第七位是lqr计算输出之和
 
     float Wheel_Speed  = 0.0f;
 
@@ -87,8 +72,8 @@ class Class_Leg{
     float pitch_offset = 0.0f;
     float theta_offset = 0.0f, d_theta_offset = 0.0f;
 
-  private:
-    my_kalman Wheel_Speed_Kalman, leg_v_Kalman;
+    my_kalman Wheel_Speed_Kalman;
+    my_kalman leg_v_Kalman;
     my_kalman d_L0_Kalman, d_alpha_Kalman, d_theta_Kalman;
 
     //vmc 相关变量
@@ -114,16 +99,6 @@ class Class_Leg{
 
 };
 
-inline float Class_Leg::Get_LQR_Tp()
-{
-  return (LQR_Tp[6]);
-}
-
-inline float Class_Leg::Get_LQR_Wheel_T()
-{
-  return (LQR_Wheel_T[6]);
-}
-
 inline float Class_Leg::Get_Length()
 {
   return (L0);
@@ -138,5 +113,36 @@ inline Enum_Leg_Air_Status Class_Leg::Get_Air_Status()
 {
   return Air_Status;
 }
+
+template <Enum_Leg T>
+void Class_Leg::Torque_Output()
+{
+  Front_Joint.Set_DM_Motor_Control_Method(DM_Motor_Control_Method_MIT_TORQUE);
+  Back_Joint.Set_DM_Motor_Control_Method(DM_Motor_Control_Method_MIT_TORQUE);
+  Wheel_Motor.Set_DJI_Motor_Control_Method(DJI_Motor_Control_Method_TORQUE);
+
+  if(T == Left){
+    Front_Joint.Set_Output_Torque(T_Front);
+    Back_Joint.Set_Output_Torque(T_Back);
+  }
+  else if(T == Right){        //输出轴方向不一致，需要加负号
+    Front_Joint.Set_Output_Torque(-T_Front);
+    Back_Joint.Set_Output_Torque(-T_Back);
+  }
+  else{
+    Front_Joint.Set_Output_Torque(0.0f);
+    Back_Joint.Set_Output_Torque(0.0f);
+  }
+  
+  Wheel_Motor.Set_Target_Torque(Wheel_T);
+  // Front_Joint.Set_Output_Torque(0.0f);
+  // Back_Joint.Set_Output_Torque(0.0f);
+  // Wheel_Motor.Set_Target_Torque(0.0f);
+
+  Front_Joint.TIM_Process_PeriodElapsedCallback();
+  Back_Joint.TIM_Process_PeriodElapsedCallback();
+  Wheel_Motor.TIM_PID_PeriodElapsedCallback();              //实际不是PID，是一个线性映射
+}
+
 
 #endif

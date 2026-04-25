@@ -104,49 +104,13 @@ void Class_Leg::VMC_Calc()
 
 void Class_Leg::LQR_Calc()
 {
-  for (int i = 0; i < 12; i++)                                //多项式拟合计算K
-	{
-		LQR_K[i] = LQR_K_calc(&Poly_Coefficient[i][0], L0);
-	}
-
-  for(int i = 0;i < 7;i++){         //先全部清零
-    LQR_Wheel_T[i] = 0.0f;
-    LQR_Tp[i] = 0.0f;
-  }
-
-  if(Air_Status == Leg_Air){
-    LQR_Tp[0] = LQR_K[6] * (0.0f - theta);
-    LQR_Tp[1] = LQR_K[7] * (0.0f - d_theta_true);
-
-    LQR_Tp[6] = LQR_Tp[0] + LQR_Tp[1];
-    LQR_Wheel_T[6] = 0.0f;
-  }
-  else{
-    LQR_Wheel_T[0] = LQR_K[0] * (0.0f + theta_offset - theta);
-    LQR_Wheel_T[1] = LQR_K[1] * (0.0f - d_theta_true + d_theta_offset);
-    LQR_Wheel_T[2] = LQR_K[2] * (Target_X - X);
-    LQR_Wheel_T[3] = LQR_K[3] * (Target_Vx - Vx);
-    LQR_Wheel_T[4] = LQR_K[4] * (0.0f - Pitch + pitch_offset);
-    LQR_Wheel_T[5] = LQR_K[5] * (0.0f - GyroPitch);
-
-    LQR_Tp[0] = LQR_K[6] * (0.0f + theta_offset - theta);
-    LQR_Tp[1] = LQR_K[7] * (0.0f - d_theta_true + d_theta_offset);
-    LQR_Tp[2] = LQR_K[8] * (Target_X - X);
-    LQR_Tp[3] = LQR_K[9] * (Target_Vx - Vx);
-    LQR_Tp[4] = LQR_K[10] * (0.0f - Pitch + pitch_offset);
-    LQR_Tp[5] = LQR_K[11] * (0.0f - GyroPitch);
-
-    for(int i = 0;i<6;i++){
-      LQR_Tp[6] += LQR_Tp[i];
-      LQR_Wheel_T[6] += LQR_Wheel_T[i];
-    }
-  }
 
 }
 
 void Class_Leg::Leg_V_Calc()
 {
-  w_ed = Wheel_Speed + d_alpha_true - GyroPitch;           //w的正方向和Gyropitch是相反的
+  //HK建模，Pitch方向和哈工程相反了，所以直接在Pitch上加一个负号就可以
+  w_ed = Wheel_Speed + d_alpha_true + GyroPitch;           
   leg_v = w_ed * Wheel_Diameter + L0 * d_theta_true * arm_cos_f32(theta) + d_L0_true * arm_sin_f32(theta);
 
   //速度滤波                  
@@ -260,14 +224,7 @@ void Class_Leg::ForceSlove()
 
 void Class_Leg::ParamUpdata()
 {
-  phi1 = -PI / 2.0f + Back_Joint.Get_Now_Angle();                //原本应该+pi/2.0f 但是因为解包的时候偏移了+pi，所以应该-pi + pi/2.0 = -pi/2.0
-  phi4 = -PI / 2.0f + Front_Joint.Get_Now_Angle();
 
-  d_phi1 = Back_Joint.Get_Now_Omega();
-  d_phi4 = Front_Joint.Get_Now_Omega();
-
-  Kalman_PeriodElapsedCallback(&Wheel_Speed_Kalman, Wheel_Motor.Get_Now_Omega_Radian());
-  Wheel_Speed = -Kalman_Get_Out(Wheel_Speed_Kalman);          //注意轮速的坐标系是反过来的
 }
 
 void Class_Leg::VMCProject()
@@ -280,24 +237,6 @@ void Class_Leg::VMCProject()
 
 }
 
-void Class_Leg::Torque_Output()
-{
-  Front_Joint.Set_DM_Motor_Control_Method(DM_Motor_Control_Method_MIT_TORQUE);
-  Back_Joint.Set_DM_Motor_Control_Method(DM_Motor_Control_Method_MIT_TORQUE);
-  Wheel_Motor.Set_DJI_Motor_Control_Method(DJI_Motor_Control_Method_TORQUE);
-
-  Front_Joint.Set_Output_Torque(T_Front);
-  Back_Joint.Set_Output_Torque(T_Back);
-  Wheel_Motor.Set_Target_Torque(Wheel_T);
-  // Front_Joint.Set_Output_Torque(0.0f);
-  // Back_Joint.Set_Output_Torque(0.0f);
-  // Wheel_Motor.Set_Target_Torque(0.0f);
-
-  Front_Joint.TIM_Process_PeriodElapsedCallback();
-  Back_Joint.TIM_Process_PeriodElapsedCallback();
-  Wheel_Motor.TIM_PID_PeriodElapsedCallback();              //实际不是PID，是一个线性映射
-}
-
 void Class_Leg::Disable()
 {
   Tp = 0.0f;
@@ -306,8 +245,7 @@ void Class_Leg::Disable()
   T_Front = 0.0f;
   Wheel_T = 0.0f;
 
-  X = 0.0f;
-  L0 = 0.16f;
+  Target_L0 = 0.16f;
 
   Air_Status = Leg_UnAir;
 

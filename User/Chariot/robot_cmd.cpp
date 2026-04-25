@@ -67,7 +67,7 @@ void CMDProcessTask()
     }
     else if(Balance_Chassis.DR16.Get_Left_Switch() == DR16_Switch_Status_MIDDLE){
       if(Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_SPIN){
-        tmp_target_yaw = Balance_Chassis.Get_Yaw_Angle();
+        tmp_target_yaw = Balance_Chassis.Get_Yaw_Angle();         //小陀螺切回来保持当前角度
       }
       Balance_Chassis.Set_Chassis_Control_Type(Chassis_Control_Type_UNFLLOW);
     }

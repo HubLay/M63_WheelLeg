@@ -6,6 +6,60 @@
 
 #define RAD_TO_ANGLE (180.0f / 3.14159f)
 
+// K矩阵拟合系数 K_Fit_Coefficients[40][6]
+// 第n个K元素: K_n = p00 + p10*l_l + p01*l_r + p20*l_l^2 + p11*l_l*l_r + p02*l_r^2
+
+float K_Fit_Coefficients[40][6] = {
+    {    -20.3058f,      43.3473f,      27.8592f,     -40.4492f,     -53.4769f,       11.028f},  // K[0][0]
+    {    -38.7981f,      80.3825f,      62.0245f,     -66.3855f,     -115.386f,      10.4703f},  // K[0][1]
+    {   -0.599791f,     0.969982f,     -3.53717f,     0.216263f,     -6.16998f,      5.96969f},  // K[0][2]
+    {   -0.234892f,      1.09479f,     -1.85676f,    -0.739107f,     -2.51527f,      2.90579f},  // K[0][3]
+    {    -3.37153f,     -5.91669f,      307.344f,     -280.961f,      389.022f,     -403.749f},  // K[0][4]
+    {     -1.4682f,     0.158036f,      13.0124f,      -15.018f,      33.9025f,      -18.507f},  // K[0][5]
+    {    -115.047f,     -27.9595f,      231.484f,      47.1084f,     -284.135f,     -46.6293f},  // K[0][6]
+    {    -3.40993f,       5.1633f,     -3.35554f,     -4.15231f,     -22.9544f,       12.182f},  // K[0][7]
+    {     234.615f,     -430.824f,      983.362f,       551.93f,     -238.596f,     -1119.86f},  // K[0][8]
+    {    -1.21419f,     -1.90499f,      43.8615f,      5.38723f,      -25.371f,     -38.0259f},  // K[0][9]
+    {    -17.6837f,       15.359f,      49.4147f,        23.74f,     -41.8243f,     -52.6486f},  // K[1][0]
+    {     -33.802f,      29.9699f,      99.7816f,      45.0126f,     -91.4686f,     -100.852f},  // K[1][1]
+    {    0.594811f,      3.28915f,     -0.70858f,     -5.50633f,      6.03537f,    -0.562693f},  // K[1][2]
+    {    0.239548f,      1.64477f,    -0.902688f,     -2.52549f,       2.1853f,     0.704731f},  // K[1][3]
+    {    -151.043f,      279.358f,     -41.6657f,      31.0328f,     -470.589f,      146.001f},  // K[1][4]
+    {    -3.55408f,     -5.23561f,      4.56802f,      18.9296f,     -31.0174f,    -0.182421f},  // K[1][5]
+    {    -8.89639f,      262.203f,     -33.9195f,     -241.911f,      156.309f,     -107.575f},  // K[1][6]
+    {    -1.29802f,       10.488f,     -0.57479f,     -10.5505f,      22.4316f,     -8.36176f},  // K[1][7]
+    {     183.028f,      1089.04f,     -357.466f,     -1159.35f,     -376.084f,       547.67f},  // K[1][8]
+    {    -1.60678f,       41.931f,     -1.03536f,     -31.8203f,     -29.9473f,      7.28382f},  // K[1][9]
+    {    0.497721f,      0.25234f,       2.5638f,    0.0343306f,     -1.77306f,     -2.15693f},  // K[2][0]
+    {      1.0865f,     0.497209f,      3.86878f,    -0.542899f,     -1.73716f,     -3.78608f},  // K[2][1]
+    {   -0.595393f,    -0.565948f,     0.575492f,     0.522088f,    -0.131687f,    -0.372195f},  // K[2][2]
+    {   -0.223963f,      -0.2752f,     0.274404f,       0.2511f,   -0.0734148f,    -0.168353f},  // K[2][3]
+    {     3.42192f,      27.4372f,     -12.2853f,      -23.539f,      4.15749f,      1.50123f},  // K[2][4]
+    {    0.202487f,      1.72227f,    -0.600093f,     0.187914f,    -0.585834f,    0.0363365f},  // K[2][5]
+    {     3.95683f,     -14.6443f,      29.7733f,      8.18589f,    -0.997038f,       -23.17f},  // K[2][6]
+    {    0.216353f,    -0.924573f,      2.14502f,      0.81368f,     -1.34494f,     0.373919f},  // K[2][7]
+    {     16.7404f,     -30.9757f,     -33.2178f,      8.44866f,      55.8879f,      10.0589f},  // K[2][8]
+    {     1.38764f,     -2.57431f,      -2.1105f,      1.00731f,      3.86834f,      0.32151f},  // K[2][9]
+    {    0.485419f,      2.32874f,     0.486193f,      -1.8732f,     -1.85532f,    -0.235847f},  // K[3][0]
+    {      1.0648f,      4.15793f,     0.200089f,     -3.76185f,     -2.28052f,     -0.15708f},  // K[3][1]
+    {    0.595675f,    -0.567407f,     0.567346f,     0.365885f,     0.128877f,    -0.521392f},  // K[3][2]
+    {    0.224054f,    -0.271975f,     0.274514f,     0.165333f,    0.0776299f,    -0.252423f},  // K[3][3]
+    {     4.00611f,      34.6074f,     -17.3108f,     -24.2462f,     -6.70518f,      12.7716f},  // K[3][4]
+    {    0.213294f,      2.30165f,     -1.01621f,     0.510047f,     -1.68601f,     0.994121f},  // K[3][5]
+    {     3.51098f,     -9.47963f,      23.3419f,     -3.15192f,       9.8802f,     -23.2751f},  // K[3][6]
+    {    0.204536f,    -0.504025f,      1.59676f,    -0.132365f,    -0.260374f,    0.0420083f},  // K[3][7]
+    {     16.9753f,     -27.8701f,     -36.8292f,      2.44865f,      55.6332f,      16.5452f},  // K[3][8]
+    {     1.38901f,     -1.83681f,     -2.83405f,  -0.00922064f,         3.83f,      1.34422f}   // K[3][9]
+};
+
+// 平衡点偏移拟合系数 Offset_Fit_Coefficients[3][6]
+// [0]: theta_l_eq, [1]: theta_r_eq, [2]: theta_b_eq
+float Offset_Fit_Coefficients[3][6] = {
+    {    0.263778f,     -1.02246f, -1.08035e-15f,      1.12212f,  1.40525e-15f,  9.57244e-16f},  // theta_l_eq
+    {    0.263778f, -1.72924e-15f,     -1.02246f,  2.03469e-15f,  1.82904e-15f,      1.12212f},  // theta_r_eq
+    {    0.205574f, -1.49773e-15f,  -7.3906e-16f,  1.95703e-15f,  1.36727e-15f,  3.40354e-16f}   // theta_b_eq
+};
+
 
 float vaEstimateKF_F[4] = {1.0f, 0.001f, 
                            0.0f, 1.0f};	   // 状态转移矩阵，控制周期为0.001s
@@ -37,13 +91,14 @@ void Class_Balance_Chassis::Init()
 
   V_EstimateKF_Init();            //卡尔曼速度观测初始化
 
+  //使用香港大学的建模，右腿前电机ID为A2
   Left_Leg.Wheel_Motor.Init(&hfdcan2, DJI_Motor_ID_0x203, DJI_Motor_Control_Method_TORQUE, 15.765f, 4.925f);
   Left_Leg.Front_Joint.Init(&hfdcan2, DM_Motor_ID_0xA1, DM_Motor_Control_Method_MIT_TORQUE, 0, 45.0f, JOINT_MAX_TORQUE);
   Left_Leg.Back_Joint.Init(&hfdcan2, DM_Motor_ID_0xA2, DM_Motor_Control_Method_MIT_TORQUE, 0, 45.0f, JOINT_MAX_TORQUE);
 
   Right_Leg.Wheel_Motor.Init(&hfdcan1, DJI_Motor_ID_0x204, DJI_Motor_Control_Method_TORQUE, 15.765f, 4.925f);         //4.925 = 20 * 0.3 * 15.765 / (3591/187)
-  Right_Leg.Front_Joint.Init(&hfdcan1, DM_Motor_ID_0xA1, DM_Motor_Control_Method_MIT_TORQUE, 0, 45.0f, JOINT_MAX_TORQUE);
-  Right_Leg.Back_Joint.Init(&hfdcan1, DM_Motor_ID_0xA2, DM_Motor_Control_Method_MIT_TORQUE, 0, 45.0f, JOINT_MAX_TORQUE);
+  Right_Leg.Front_Joint.Init(&hfdcan1, DM_Motor_ID_0xA2, DM_Motor_Control_Method_MIT_TORQUE, 0, 45.0f, JOINT_MAX_TORQUE);
+  Right_Leg.Back_Joint.Init(&hfdcan1, DM_Motor_ID_0xA1, DM_Motor_Control_Method_MIT_TORQUE, 0, 45.0f, JOINT_MAX_TORQUE);
 
   Left_Leg.Init();
   Right_Leg.Init();
@@ -142,8 +197,7 @@ void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
 
   SpeedUpdata();        //速度传参更新
 
-  Left_Leg.LQR_Calc();
-  Right_Leg.LQR_Calc();
+  LQR_Calc();
 
   if(Chassis_Control_Type == Chassis_Control_Type_DISABLE){
     Chassis_Disable();
@@ -200,31 +254,77 @@ void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
 
   }
 
-  if(start_flag){
-    //测试代码
-    // LengthControl();
-    // SynthesizeMotion();       //转向和防劈叉
-    // Right_Leg.Tp = Right_Leg.Get_LQR_Tp() + Tp_PID.Get_Out();
-    // Right_Leg.F0 = Right_Leg.dLength_PID.Get_Out();
-    // Left_Leg.Tp = Left_Leg.Get_LQR_Tp() + Tp_PID.Get_Out();
-    // Left_Leg.F0 = Left_Leg.dLength_PID.Get_Out();
+  // if(start_flag){
+  //   //测试代码    
+  //   Target_Length = Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.20f;
 
-    // Right_Leg.Wheel_T = 0.0f;//Turn_Omega_PID.Get_Out();
+  //   Left_Leg.Air_Status = Leg_Air;
+  //   Right_Leg.Air_Status = Leg_Air;
 
-    // Left_Leg.VMCProject();
-    // Right_Leg.VMCProject();
+  //   SynthesizeMotion();       //转向和防劈叉
+  //   LengthControl();          //腿长和Roll
+  //   NormalOutput();
 
-    // Reserve_FSM();
-    // LengthControl();          //腿长和Roll
-    // ReserveOutput();          //自救模式下的力矩输出
+  //   Left_Leg.VMCProject();
+  //   Right_Leg.VMCProject();
+  // }
 
-    // Left_Leg.VMCProject();
-    // Right_Leg.VMCProject();
+  Left_Leg.Torque_Output<Left>();
+  Right_Leg.Torque_Output<Right>();
 
+}
+
+void Class_Balance_Chassis::LQR_Calc()
+{
+  Target_l_theta = Offset_Fit_Coefficients[0][0] + Offset_Fit_Coefficients[0][1]*Left_Leg.L0 + Offset_Fit_Coefficients[0][2]*Right_Leg.L0 
+                 + Offset_Fit_Coefficients[0][3]*Left_Leg.L0 * Left_Leg.L0 + Offset_Fit_Coefficients[0][4]*Left_Leg.L0 * Right_Leg.L0 
+                 + Offset_Fit_Coefficients[0][5]*Right_Leg.L0 * Right_Leg.L0;
+
+  Target_r_theta = Offset_Fit_Coefficients[1][0] + Offset_Fit_Coefficients[1][1]*Left_Leg.L0 + Offset_Fit_Coefficients[1][2]*Right_Leg.L0 
+                 + Offset_Fit_Coefficients[1][3]*Left_Leg.L0 * Left_Leg.L0 + Offset_Fit_Coefficients[1][4]*Left_Leg.L0 * Right_Leg.L0 
+                 + Offset_Fit_Coefficients[1][5]*Right_Leg.L0 * Right_Leg.L0;
+
+  Target_Pitch_Angle = Offset_Fit_Coefficients[2][0] + Offset_Fit_Coefficients[2][1]*Left_Leg.L0 + Offset_Fit_Coefficients[2][2]*Right_Leg.L0 
+                 + Offset_Fit_Coefficients[2][3]*Left_Leg.L0 * Left_Leg.L0 + Offset_Fit_Coefficients[2][4]*Left_Leg.L0 * Right_Leg.L0 
+                 + Offset_Fit_Coefficients[2][5]*Right_Leg.L0 * Right_Leg.L0;
+
+  Get_Polyfit_K();
+
+  Angle_Continuity_Process(&Target_Yaw_Angle, Yaw_Angle);
+
+  //T(r-b)
+  LQR_Out[0] = K[0][0] * (Target_X - X) + K[0][1] * (True_Target_Vx - Vx) + K[0][2] * (Target_Yaw_Angle - Yaw_Angle)
+              + K[0][3] * (Target_Omega - GyroYaw) + K[0][4] * (Target_l_theta - Left_Leg.theta) + K[0][5] * (Target_l_dtheta - Left_Leg.d_theta_true)
+              + K[0][6] * (Target_r_theta - Right_Leg.theta) + K[0][7] * (Target_r_dtheta - Right_Leg.d_theta_true) 
+              + K[0][8] * (Target_Pitch_Angle - Pitch_Angle) + K[0][9] * (Target_Picth_Omega - GyroPitch);
+
+  //T(l-b)
+  LQR_Out[1] = K[1][0] * (Target_X - X) + K[1][1] * (True_Target_Vx - Vx) + K[1][2] * (Target_Yaw_Angle - Yaw_Angle)
+              + K[1][3] * (Target_Omega - GyroYaw) + K[1][4] * (Target_l_theta - Left_Leg.theta) + K[1][5] * (Target_l_dtheta - Left_Leg.d_theta_true)
+              + K[1][6] * (Target_r_theta - Right_Leg.theta) + K[1][7] * (Target_r_dtheta - Right_Leg.d_theta_true) 
+              + K[1][8] * (Target_Pitch_Angle - Pitch_Angle) + K[1][9] * (Target_Picth_Omega - GyroPitch);
+  
+  //T(wr-r)
+  LQR_Out[2] = K[2][0] * (Target_X - X) + K[2][1] * (True_Target_Vx - Vx) + K[2][2] * (Target_Yaw_Angle - Yaw_Angle)
+              + K[2][3] * (Target_Omega - GyroYaw) + K[2][4] * (Target_l_theta - Left_Leg.theta) + K[2][5] * (Target_l_dtheta - Left_Leg.d_theta_true)
+              + K[2][6] * (Target_r_theta - Right_Leg.theta) + K[2][7] * (Target_r_dtheta - Right_Leg.d_theta_true) 
+              + K[2][8] * (Target_Pitch_Angle - Pitch_Angle) + K[2][9] * (Target_Picth_Omega - GyroPitch);
+  
+  //T(wl-l)
+  LQR_Out[3] = K[3][0] * (Target_X - X) + K[3][1] * (True_Target_Vx - Vx) + K[3][2] * (Target_Yaw_Angle - Yaw_Angle)
+              + K[3][3] * (Target_Omega - GyroYaw) + K[3][4] * (Target_l_theta - Left_Leg.theta) + K[3][5] * (Target_l_dtheta - Left_Leg.d_theta_true)
+              + K[3][6] * (Target_r_theta - Right_Leg.theta) + K[3][7] * (Target_r_dtheta - Right_Leg.d_theta_true) 
+              + K[3][8] * (Target_Pitch_Angle - Pitch_Angle) + K[3][9] * (Target_Picth_Omega - GyroPitch);
+  
+  if(Left_Leg.Get_Air_Status() == Leg_Air){
+    LQR_Out[1] = K[1][4] * (Target_l_theta - Left_Leg.theta) + K[1][5] * (Target_l_dtheta - Left_Leg.d_theta_true);
+    LQR_Out[3] = 0.0f;
   }
 
-  Left_Leg.Torque_Output();
-  Right_Leg.Torque_Output();
+  if(Right_Leg.Get_Air_Status() == Leg_Air){
+    LQR_Out[0] = K[0][6] * (Target_r_theta - Right_Leg.theta) + K[0][7] * (Target_r_dtheta - Right_Leg.d_theta_true);
+    LQR_Out[2] = 0.0f;
+  }
 
 }
 
@@ -265,53 +365,11 @@ void Class_Balance_Chassis::LengthControl()
 
 void Class_Balance_Chassis::SynthesizeMotion()
 {
-  theta_error = Left_Leg.theta + Right_Leg.theta;
-  Tp_PID.Set_Now(theta_error);
-  Turn_Angle_PID.Set_Now(Yaw_Angle);
-  Turn_Omega_PID.Set_Now(GyroYaw);
-
-  Tp_PID.Set_Target(0.0f);
-  Angle_Continuity_Process(&Target_Yaw_Angle, Yaw_Angle);
-  Turn_Angle_PID.Set_Target(Target_Yaw_Angle);
-
-  Tp_PID.TIM_Adjust_PeriodElapsedCallback();
-
-  //Disable直接不输出了
-  if(Chassis_Control_Type == Chassis_Control_Type_SPIN){
-    Turn_Omega_PID.Set_Target(Target_Omega);
-    Turn_Omega_PID.TIM_Adjust_PeriodElapsedCallback();
-  }
-  else{       //JUMP RESERVE FLLOW
-    Turn_Angle_PID.TIM_Adjust_PeriodElapsedCallback();
-    Turn_Omega_PID.Set_Target(Turn_Angle_PID.Get_Out());
-    Turn_Omega_PID.TIM_Adjust_PeriodElapsedCallback();
-  }
-
-  
-
-  if(Left_Leg.Get_Air_Status() == Leg_UnAir && Right_Leg.Get_Air_Status() == Leg_UnAir){        //两个腿都在地上
-    
-  }
-  else{
-    
-  }
 
 }
 
 void Class_Balance_Chassis::SpeedUpdata()
 {
-  Left_Leg.X   = X;
-  Left_Leg.Vx  = Vx;
-  Right_Leg.X  = -X;
-  Right_Leg.Vx = -Vx;
-
-  float theta_offset = 0.05f + (Target_Vx - Vx) * 0.08f;
-  Math_Constrain(&theta_offset, -0.15f, 0.15f);
-
-  Left_Leg.pitch_offset = -0.03f;
-  Right_Leg.pitch_offset = 0.03f;
-  Left_Leg.theta_offset = theta_offset;
-  Right_Leg.theta_offset = -theta_offset;
 
 }
 
@@ -319,14 +377,22 @@ void Class_Balance_Chassis::ParamUpdata()
 {
   static float pre_Target_Length = 0.16f; 
 
-  Yaw_Angle   = IMU.Get_Angle_Yaw();              
+  Yaw_Angle   = IMU.Get_Rad_Yaw();              
   Roll_Angle  = IMU.Get_Rad_Roll();
-  Pitch_Angle = IMU.Get_Rad_Pitch();
+  Pitch_Angle = -IMU.Get_Rad_Pitch();
   Accel_X   = IMU.Get_Accel_Y_b();              //注意看是不是对应了
   Accel_Z   = IMU.Get_Accel_Z_b();
   GyroYaw   = IMU.Get_Gyro_Yaw();
   GyroRoll  = IMU.Get_Gyro_Roll();              //Roll和Pitch陀螺仪速度应该换一下（可能）
-  GyroPitch = IMU.Get_Gyro_Pitch();
+  GyroPitch = -IMU.Get_Gyro_Pitch();
+
+  //IMU安装方式前Y，右X，这也是IMU解算算法的坐标系
+  Left_Leg.GyroPitch  = GyroPitch;
+  Left_Leg.Accel_Z    = Accel_Z;
+  
+  //香港大学建模两腿都是X朝前
+  Right_Leg.GyroPitch = GyroPitch;
+  Right_Leg.Accel_Z   = Accel_Z;
 
   // Target_X = 0.0f;          //速控的方案
 
@@ -337,10 +403,10 @@ void Class_Balance_Chassis::ParamUpdata()
     Math_Constrain(&Target_Vx, -V_MAX_SPIN, V_MAX_SPIN);
     float tmp_yaw_rad = Normalize_Angle_Radian_0_to_2PI(Yaw_Angle * PI / 180.0f);
     True_Target_Vx = Target_Vx * arm_cos_f32(tmp_yaw_rad);
-    // Target_X = 0.0f;
+    Target_X = 0.0f;
   }
   else{
-    // Target_X = Target_X + Target_Vx * ROBOT_TASK_DT / 1000.0f;
+    Target_X = Target_X + Target_Vx * ROBOT_TASK_DT / 1000.0f;
     True_Target_Vx = Target_Vx;
   }
 
@@ -349,55 +415,50 @@ void Class_Balance_Chassis::ParamUpdata()
 
   Math_Constrain(&Target_Length, Length_MIN, Length_MAX);
 
-  // TD_SetTarget(&Target_Vx_Td, Target_Vx);
-  // TD_Update(&Target_Vx_Td);
-
-  //IMU安装方式前Y，右X，这也是IMU解算算法的坐标系
-  Left_Leg.Pitch      = Pitch_Angle;
-  Left_Leg.Target_X   = Target_X;
-  Left_Leg.Target_Vx  = True_Target_Vx;
-  Left_Leg.GyroPitch  = GyroPitch;
-  Left_Leg.Accel_Z    = Accel_Z;
-  
-  
-  Right_Leg.Pitch     = -Pitch_Angle;
-  Right_Leg.Target_X  = -Target_X;
-  Right_Leg.Target_Vx = -True_Target_Vx;
-  Right_Leg.GyroPitch = -GyroPitch;
-  Right_Leg.Accel_Z   = Accel_Z;
-  
-  if(Left_Leg.Get_Air_Status() == Leg_Air){
-    // Left_Leg.Target_L0 = 0.2f;
-  }
-  if(Right_Leg.Get_Air_Status() == Leg_Air){
-    // Right_Leg.Target_L0 = 0.2f;
-  }
-
   if((Left_Leg.Get_Air_Status() == Leg_Air || Right_Leg.Get_Air_Status()) == Leg_Air && IS_NORMAL()){
     // Left_Leg.Target_L0 = Right_Leg.Target_L0 = Target_Length = 0.2f;
+    Target_Omega = 0.0f;
     Target_Yaw_Angle = Yaw_Angle;
     Target_Length = pre_Target_Length;            //离地的时候不能变腿长
-
   }
   else{
     if(Chassis_Control_Type == Chassis_Control_Type_SPIN)
     {
       Target_Omega = Spin_Omega;
-      // float tmp = ((V_MAX_SPIN - fabs(Target_Vx)) / V_MAX_SPIN) < (1.0f/2.0f) ? (1.0f/.0f) : ((V_MAX_SPIN - fabs(Target_Vx)) / V_MAX_SPIN);
-      // Target_Omega = tmp * Spin_Omega;
+      Target_Yaw_Angle = Yaw_Angle;
+    }
+    else if(Chassis_Control_Type == Chassis_Control_Type_UNFLLOW){
+      Target_Omega = 0.0f;
+      Target_Yaw_Angle = Target_Yaw_Angle;
     }
 
     pre_Target_Length = Target_Length;
   }
-
-  // Left_Leg.Target_L0 = Right_Leg.Target_L0 = Target_Length;
-
-  // if(Left_Leg.Get_Air_Status() == Leg_UnAir && Right_Leg.Get_Air_Status() == Leg_UnAir){
-  //   // Left_Leg.Target_L0 = Right_Leg.Target_L0 = Target_Length;         //后续考虑的应该是加上Roll轴的考虑，目标腿长不应直接这样
-  // }
   
   Left_Leg.ParamUpdata();
   Right_Leg.ParamUpdata();
+
+  //腿部数据的更新
+  //左腿
+  Left_Leg.phi1 = -PI / 2.0f + Left_Leg.Back_Joint.Get_Now_Angle();                //原本应该+pi/2.0f 但是因为解包的时候偏移了+pi，所以应该-pi + pi/2.0 = -pi/2.0
+  Left_Leg.phi4 = -PI / 2.0f + Left_Leg.Front_Joint.Get_Now_Angle();
+
+  Left_Leg.d_phi1 = Left_Leg.Back_Joint.Get_Now_Omega();
+  Left_Leg.d_phi4 = Left_Leg.Front_Joint.Get_Now_Omega();
+
+  //右腿
+  Right_Leg.phi1 = -PI / 2.0f - Right_Leg.Back_Joint.Get_Now_Angle();                //原本应该+pi/2.0f 但是因为解包的时候偏移了+pi，所以应该-pi + pi/2.0 = -pi/2.0
+  Right_Leg.phi4 = -PI / 2.0f - Right_Leg.Front_Joint.Get_Now_Angle();
+
+  Right_Leg.d_phi1 = -Right_Leg.Back_Joint.Get_Now_Omega();
+  Right_Leg.d_phi4 = -Right_Leg.Front_Joint.Get_Now_Omega();
+
+  //轮子自身力矩都遵循右手系，面朝Y负方向看过去逆时针为正（这里加负号和电机安装方式相关）
+  Kalman_PeriodElapsedCallback(&Left_Leg.Wheel_Speed_Kalman, -Left_Leg.Wheel_Motor.Get_Now_Omega_Radian());
+  Kalman_PeriodElapsedCallback(&Right_Leg.Wheel_Speed_Kalman, Right_Leg.Wheel_Motor.Get_Now_Omega_Radian());
+
+  Left_Leg.Wheel_Speed = Kalman_Get_Out(Left_Leg.Wheel_Speed_Kalman);
+  Right_Leg.Wheel_Speed = Kalman_Get_Out(Right_Leg.Wheel_Speed_Kalman);
 
 }
 
@@ -407,7 +468,7 @@ void Class_Balance_Chassis::SpeedEstimate()
   Right_Leg.Leg_V_Calc();
 
   if(Left_Leg.Get_Air_Status() == Leg_UnAir && Right_Leg.Get_Air_Status() == Leg_UnAir){
-    aver_v = (Left_Leg.leg_v_true - Right_Leg.leg_v_true) / 2.0f;
+    aver_v = (Left_Leg.leg_v_true + Right_Leg.leg_v_true) / 2.0f;
   }
   else if(Left_Leg.Get_Air_Status() == Leg_Air && Right_Leg.Get_Air_Status() == Leg_Air){
     aver_v = 0.0f;
@@ -416,7 +477,7 @@ void Class_Balance_Chassis::SpeedEstimate()
     aver_v = (Left_Leg.leg_v_true + Vx) / 2.0f;
   }
   else if(Left_Leg.Get_Air_Status() == Leg_Air){
-    aver_v = (-Right_Leg.leg_v_true + Vx) / 2.0f;
+    aver_v = (Right_Leg.leg_v_true + Vx) / 2.0f;
   }
   
   V_EstimateKF.MeasuredVector[0] = aver_v;
@@ -425,16 +486,16 @@ void Class_Balance_Chassis::SpeedEstimate()
 
   Vx = V_EstimateKF.FilteredValue[0];
 
-  // X = X + Vx * ROBOT_TASK_DT * 1.3f/ 1000.0f;
+  X = X + Vx * ROBOT_TASK_DT * 1.1f/ 1000.0f;
 
-  if(fabs(Target_Vx) < 0.1f){
-    X = X + Vx * ROBOT_TASK_DT / 1000.0f;
-    Target_X = 0.0f;
-  }
-  else{
-    X = 0.0f;
-    Target_X = 0.0f;
-  }
+  // if(fabs(Target_Vx) < 0.1f){
+  //   X = X + Vx * ROBOT_TASK_DT / 1000.0f;
+  //   Target_X = 0.0f;
+  // }
+  // else{
+  //   X = 0.0f;
+  //   Target_X = 0.0f;
+  // }
 
 }
 
@@ -449,26 +510,21 @@ void Class_Balance_Chassis::NormalOutput()
   if(Left_Leg.Get_Air_Status() == Leg_UnAir && Right_Leg.Get_Air_Status() == Leg_UnAir){
     Left_Leg.F0  = 69.0f / arm_cos_f32(Left_Leg.theta) + Left_Leg.dLength_PID.Get_Out() + Roll_PID.Get_Out() - Compensite_F0;         //F0是机体受到的向上的力
     Right_Leg.F0 = 69.0f / arm_cos_f32(Right_Leg.theta) + Right_Leg.dLength_PID.Get_Out() - Roll_PID.Get_Out() + Compensite_F0; 
-
-    Left_Leg.Tp = Left_Leg.Get_LQR_Tp() + Tp_PID.Get_Out();
-    Left_Leg.Wheel_T = Left_Leg.Get_LQR_Wheel_T() -  Turn_Omega_PID.Get_Out();        //顺时针切割x为正
-
-    Right_Leg.Tp = Right_Leg.Get_LQR_Tp() + Tp_PID.Get_Out();
-    Right_Leg.Wheel_T = Right_Leg.Get_LQR_Wheel_T() - Turn_Omega_PID.Get_Out();
   }
   else{
     Left_Leg.F0  = Left_Leg.dLength_PID.Get_Out();
     Right_Leg.F0 = Right_Leg.dLength_PID.Get_Out(); 
-
-    Left_Leg.Tp = Left_Leg.Get_LQR_Tp();
-    Left_Leg.Wheel_T = Left_Leg.Get_LQR_Wheel_T();        //注意坐标系是面朝腿外侧，顺时针
-
-    Right_Leg.Tp = Right_Leg.Get_LQR_Tp();
-    Right_Leg.Wheel_T = Right_Leg.Get_LQR_Wheel_T();
   }
 
-  Left_Leg.Wheel_T  = -Left_Leg.Wheel_T;          //由于坐标系问题，3508逆时针为正，建模里是顺时针为正
-  Right_Leg.Wheel_T = -Right_Leg.Wheel_T;
+  Left_Leg.Tp = -LQR_Out[1];
+  Left_Leg.Wheel_T = -LQR_Out[3];
+
+  Right_Leg.Tp = -LQR_Out[0];
+  Right_Leg.Wheel_T = -LQR_Out[2];
+
+  //对应上转速的建模，面朝Y负方向，逆时针为正，电机安装方式导致左轮需要加负号
+  Left_Leg.Wheel_T  = -Left_Leg.Wheel_T;
+  Right_Leg.Wheel_T = Right_Leg.Wheel_T;
 
   Math_Constrain(&Left_Leg.F0, -200.0f, 200.0f);
   Math_Constrain(&Left_Leg.Wheel_T, -4.2f, 4.2f);
@@ -505,6 +561,7 @@ void Class_Balance_Chassis::Chassis_Disable()
 {
   Target_X = X = 0.0f;
   Chassis_Stable_Count = 0;
+  Target_Omega = 0.0f;
   Target_Yaw_Angle = Yaw_Angle;
   jump_state = JUMP_BACK_SWING;
   Reserve_Status = Reserve_Disable;
@@ -516,6 +573,20 @@ void Class_Balance_Chassis::Chassis_Disable()
   Roll_PID.Set_Integral_Error(0.0f);
   Turn_Omega_PID.Set_Integral_Error(0.0f);
   Turn_Angle_PID.Set_Integral_Error(0.0f);
+}
+
+void Class_Balance_Chassis::Get_Polyfit_K()
+{
+  for (int n = 0; n < 40; n++) {
+    int row = n / 10;
+    int col = n % 10;
+    K[row][col] = K_Fit_Coefficients[n][0] 
+                + K_Fit_Coefficients[n][1] * Left_Leg.L0
+                + K_Fit_Coefficients[n][2] * Right_Leg.L0
+                + K_Fit_Coefficients[n][3] * Left_Leg.L0 * Left_Leg.L0 
+                + K_Fit_Coefficients[n][4] * Left_Leg.L0 * Right_Leg.L0 
+                + K_Fit_Coefficients[n][5] * Right_Leg.L0 * Right_Leg.L0;
+  }
 }
 
 void Class_Balance_Chassis::V_EstimateKF_Init()
@@ -535,7 +606,7 @@ void Class_Balance_Chassis::Reserve_FSM()
   static uint8_t Left_Alpha_Status = 0, Right_Alpha_Status = 0;     //切到1的时候代表偏角过大，先速度环在切回角度环
   static float resver_alpha_Kp = 30.0f, reserve_d_alpha_Kp = 8.0f;
   static float resver_alpha_Kd = 1.0f;
-  static float Target_Left_Alpha = 0.40f, Target_Right_Alpha = -0.40f;     //左右坐标系不一致
+  static float Target_Left_Alpha = 0.40f, Target_Right_Alpha = 0.40f;     //左右坐标系不一致
   switch (Reserve_Status)
   {
     case(Reserve_Disable):
@@ -561,7 +632,7 @@ void Class_Balance_Chassis::Reserve_FSM()
         Left_Leg.Wheel_T = 0.0f;
         Right_Leg.Wheel_T = 0.0f;
         Left_Leg.Tp  = reserve_d_alpha_Kp * (2.5f - Left_Leg.d_alpha_true);
-        Right_Leg.Tp = reserve_d_alpha_Kp * (-2.5f - Right_Leg.d_alpha_true);
+        Right_Leg.Tp = reserve_d_alpha_Kp * (2.5f - Right_Leg.d_alpha_true);
       }
       else{
         Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.35f;
@@ -591,7 +662,7 @@ void Class_Balance_Chassis::Reserve_FSM()
         Left_Alpha_Status = 1;
       }
 
-      if(Right_Leg.alpha > 1.20f && Right_Alpha_Status == 0){
+      if(Right_Leg.alpha < -1.20f && Right_Alpha_Status == 0){
         Right_Alpha_Status = 1;
       }
 
@@ -612,9 +683,9 @@ void Class_Balance_Chassis::Reserve_FSM()
 
       if(Right_Alpha_Status == 1){     //用速度环摆正
         Right_Leg.Target_L0 = 0.30f;
-        Right_Leg.Tp = reserve_d_alpha_Kp * (2.5f - Right_Leg.d_alpha_true);
+        Right_Leg.Tp = reserve_d_alpha_Kp * (-2.5f - Right_Leg.d_alpha_true);
 
-        if(fabs(Right_Leg.alpha - (-1.5f)) < 0.05f){
+        if(fabs(Right_Leg.alpha - 1.5f) < 0.05f){
           Right_Alpha_Status = 0;
         }
       }
@@ -709,13 +780,13 @@ void Class_Balance_Chassis::JUMP_1_FSM()
   float L_SHORT = 0.16f;
 
   float BACK_TARGET_ALPHA_L = 2.8f;   // 左腿后摆
-  float BACK_TARGET_ALPHA_R = -2.8f;
+  float BACK_TARGET_ALPHA_R = 2.8f;
 
   float NORMAL_ALPHA_L = 0.40f;
-  float NORMAL_ALPHA_R = -0.40f;
+  float NORMAL_ALPHA_R = 0.40f;
 
   float Left_Target_Alpha_Omega = 2.5f;         //向后转动
-  float Right_Target_Alpha_Omega = -2.5f;
+  float Right_Target_Alpha_Omega = 2.5f;
 
   float KP_Omega_ALPHA = 8.0f;
   float KP_ALPHA = 20.0f;

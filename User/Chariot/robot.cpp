@@ -13,12 +13,12 @@
 
 void Chassis_Device_CAN1_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage){
   switch (CAN_RxMessage->Header.Identifier){
-    case(0xA1):
+    case(0xA2):
     {
       Balance_Chassis.Right_Leg.Front_Joint.CAN_RxCpltCallback(CAN_RxMessage->Data);
       break;
     }
-    case(0xA2):
+    case(0xA1):
     {
       Balance_Chassis.Right_Leg.Back_Joint.CAN_RxCpltCallback(CAN_RxMessage->Data);
       break;

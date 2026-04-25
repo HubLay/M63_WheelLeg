@@ -280,6 +280,16 @@
           <WinNumber>1</WinNumber>
           <ItemText>mod500,0x0A</ItemText>
         </Ww>
+        <Ww>
+          <count>24</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>\\ZLLC_2026\../User/Chariot/Chassis/Src/balance_chassis.cpp\Balance_Chassis.Accel_X</ItemText>
+        </Ww>
+        <Ww>
+          <count>25</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>\\ZLLC_2026\../User/Chariot/Chassis/Src/balance_chassis.cpp\Balance_Chassis.Right_Leg.Wheel_Motor.daemon_instance</ItemText>
+        </Ww>
       </WatchWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>
