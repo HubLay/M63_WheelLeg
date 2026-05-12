@@ -112,6 +112,7 @@ struct Ordinary_Least_Squares_t
 }__attribute__((packed));
 
 void Angle_Continuity_Process(volatile float* Target_Angle, float Now_Angle);
+void Angle_Continuity_Process_Rad(volatile float* Target_Angle, float Now_Angle);
 
 //快速开方
 float Sqrt(float x);

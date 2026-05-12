@@ -25,6 +25,7 @@
 #define DAEMON_TASK_DT   10                 //离线守护任务周期
 #define CAN_TRANSMIT_TASK_DT  1             //can发送任务周期
 #define CMDProcess_TASK_DT 5                //控制命令处理周期  5ms
+#define EMERGENCY_STOP_TASK_DT 10           //紧急停止任务周期
 
 //功率控制相关
 #define POWER_CONTROL 1 //启用功率控制
@@ -59,25 +60,32 @@
 
 #ifdef BALANCE_CHASSIS
 
-#define Robot_Mg       13.0f        //Kg
-#define Chassis_Width  0.40f        //车宽 m
+#define Robot_Mg       18.0f        //Kg
+#define Chassis_Width  0.3789        //车宽 m
 #define Chassis_Half_Width (Chassis_Width / 2.0f)
-#define Wheel_Diameter 0.075f       // 轮子半径，单位为m
+#define Wheel_Diameter 0.060f       // 轮子半径，单位为m
 
-#define JOINT_MAX_TORQUE 15.0f      //关节电机的最大输出力矩，要和上位机对应
+#define JOINT_MAX_TORQUE 35.0f      //关节电机的最大输出力矩，要和上位机对应
 
-#define UNFLLOW_ENABLE              //单底盘调试状态
+// #define UNFLLOW_ENABLE              //单底盘调试状态
 
-#define V_MAX 2.5f
-#define V_MAX_SPIN 0.35f
+#ifndef UNFLLOW_ENABLE
+#define NORMAL_CHASSIS
+#endif
+
+#define V_MAX 2.0f
+#define V_MAX_SPIN 0.3f
 #define Yaw_Angle_Resolution (1.5f / 57.3f)
 #define Length_Angle_Resolution 0.008f
+#define SPIN_OMEGA 9.0f 
+
+#define Reference_Rad (3.6547091f)
 
 #define Length_MIN 0.15f
-#define Length_MAX 0.35f
+#define Length_MAX 0.30f
 
-#define H7_Offset_X -0.04f       //IMU距离车体中心的距离，IMU自身坐标系 m 量不出来硬调
-#define H7_Offset_Y -0.02f         //IMU距离车体中心的距离，IMU自身坐标系 m
+// #define H7_Offset_X -0.12f       //IMU距离车体中心的距离，IMU自身坐标系 m 量不出来硬调
+// #define H7_Offset_Y -0.0f         //IMU距离车体中心的距离，IMU自身坐标系 m
 
 #endif
 

@@ -13,30 +13,6 @@
 
 void Chassis_Device_CAN1_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage){
   switch (CAN_RxMessage->Header.Identifier){
-    case(0xA2):
-    {
-      Balance_Chassis.Right_Leg.Front_Joint.CAN_RxCpltCallback(CAN_RxMessage->Data);
-      break;
-    }
-    case(0xA1):
-    {
-      Balance_Chassis.Right_Leg.Back_Joint.CAN_RxCpltCallback(CAN_RxMessage->Data);
-      break;
-    }
-    case(0x204):
-    {
-      Balance_Chassis.Right_Leg.Wheel_Motor.CAN_RxCpltCallback(CAN_RxMessage->Data);
-      break;
-    }
-    case(0x77):
-    {
-      Balance_Chassis.CAN_Chassis_Rx_Gimbal_Callback(CAN_RxMessage->Data);
-    }
-  }
-}
-
-void Chassis_Device_CAN2_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage){
-  switch (CAN_RxMessage->Header.Identifier){
     case(0xA1):
     {
       Balance_Chassis.Left_Leg.Front_Joint.CAN_RxCpltCallback(CAN_RxMessage->Data);
@@ -47,7 +23,7 @@ void Chassis_Device_CAN2_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage){
       Balance_Chassis.Left_Leg.Back_Joint.CAN_RxCpltCallback(CAN_RxMessage->Data);
       break;
     }
-    case(0x203):
+    case(0x204):
     {
       Balance_Chassis.Left_Leg.Wheel_Motor.CAN_RxCpltCallback(CAN_RxMessage->Data);
       break;
@@ -55,8 +31,39 @@ void Chassis_Device_CAN2_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage){
   }
 }
 
-void Chassis_Device_CAN3_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage){
+void Chassis_Device_CAN2_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage){
+  switch (CAN_RxMessage->Header.Identifier){
+    case(0xA1):
+    {
+      Balance_Chassis.Right_Leg.Front_Joint.CAN_RxCpltCallback(CAN_RxMessage->Data);
+      break;
+    }
+    case(0xA2):
+    {
+      Balance_Chassis.Right_Leg.Back_Joint.CAN_RxCpltCallback(CAN_RxMessage->Data);
+      break;
+    }
+    case(0x201):
+    {
+      Balance_Chassis.Right_Leg.Wheel_Motor.CAN_RxCpltCallback(CAN_RxMessage->Data);
+      break;
+    }
+  }
+}
 
+void Chassis_Device_CAN3_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage){
+    switch (CAN_RxMessage->Header.Identifier){
+    case(0x205):
+    {
+      Balance_Chassis.Motor_Yaw.CAN_RxCpltCallback(CAN_RxMessage->Data);
+      break;
+    }
+    case(0x77):
+    {
+      Balance_Chassis.CAN_Chassis_Rx_Gimbal_Callback(CAN_RxMessage->Data);
+      break;
+    }
+  }
 }
 
 void DR16_UART5_Callback(uint8_t *Buffer, uint16_t Length)
@@ -116,6 +123,7 @@ void osTaskCreate(){
   xTaskCreate(CMDProcess_Task, "CMDProcess_Task", 128, NULL, 2, &CMD_TaskHandle); 
 
   xTaskCreate(Printf_Task, "Printf_Task", 512, NULL, 1, &Printf_TaskHandle);
+  xTaskCreate(Emergency_Stop_Task, "Emergency_Stop_Task", 128, NULL, 3, &Emergency_Stop_TaskHandle); 
 
   CanTransmit_TaskCreate();
 

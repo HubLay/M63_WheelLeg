@@ -43,6 +43,25 @@ void Angle_Continuity_Process(volatile float* Target_Angle, float Now_Angle){
     }
 }
 
+/**
+ * @brief 对于电机角度控制时的突变点处理
+ * @param Target_Angle 
+ * @param Now_Angle 
+ */
+void Angle_Continuity_Process_Rad(volatile float* Target_Angle, float Now_Angle){
+    float Diff_Angle = *Target_Angle - Now_Angle;
+    while (Diff_Angle > PI)
+    {
+        *Target_Angle -= (2.0f * PI);
+        Diff_Angle = *Target_Angle - Now_Angle;
+    }
+    while (Diff_Angle < -PI)
+    {
+        *Target_Angle += (2 * PI);
+        Diff_Angle = *Target_Angle - Now_Angle;
+    }
+}
+
 //快速开方
 float Sqrt(float x)
 {

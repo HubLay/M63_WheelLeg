@@ -6,6 +6,7 @@
 #include "dvc_dwt.h"
 #include "robot_task.h"
 #include "printf_task.h"
+#include "emergency_stop.h"
 #include "robot_cmd.h"
 #include "balance_chassis.h"
 
@@ -14,11 +15,13 @@ TaskHandle_t Daemon_TaskHandle;
 TaskHandle_t Robot_TaskHandle;
 TaskHandle_t CMD_TaskHandle;
 TaskHandle_t Printf_TaskHandle;
+TaskHandle_t Emergency_Stop_TaskHandle;
 
 struct_DwtTime CanTransmit_dwt;
 struct_DwtTime CMDProcess_dwt;
 struct_DwtTime Daemon_dwt;
 struct_DwtTime Robot_dwt;
+struct_DwtTime Emergency_Stop_dwt;
 
 void Printf_Task(void *Para){
   while (1)
@@ -50,6 +53,18 @@ void CMDProcess_Task(void *Para){
     CMDProcessTask();
 
     vTaskDelay(CMDProcess_TASK_DT);       //200Hz 
+  }
+}
+
+void Emergency_Stop_Task(void *Para){
+  while (1)
+  {
+    /* code */
+    Emergency_Stop_dwt.dt = DWT_GetDeltaT(&Emergency_Stop_dwt.cnt_last);
+
+    Emergency_StopTask();
+
+    vTaskDelay(EMERGENCY_STOP_TASK_DT);       //200Hz 
   }
   
 }

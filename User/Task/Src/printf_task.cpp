@@ -11,9 +11,30 @@
 char Mes[100];
 extern UART_HandleTypeDef huart7;
 
+extern float tmp_Pitch_Err;
+extern float tmp_wt;
+extern float LQR_Tp_L[10];
 extern uint8_t Test_Flag;
 
 void PrintfTask(){
-  sprintf(Mes, "%f,%f,%f,%d,%d\n",  Balance_Chassis.Left_Leg.FN, Balance_Chassis.Left_Leg.F0, Balance_Chassis.Left_Leg.Tp, Balance_Chassis.Left_Leg.Air_Status,Balance_Chassis.Get_Chassis_Control_Type());           //128根本不够
+  // sprintf(Mes, "%f,%f,%f,%f,%f,%f,%f,%f,%d\n", 
+  // Balance_Chassis.Left_Leg.Get_Theta(),
+  // Balance_Chassis.Get_Target_Vx(),
+  // Balance_Chassis.Get_True_Vx(),
+  // Balance_Chassis.Compensite_F0,
+  // Balance_Chassis.Left_Leg.Target_L0,
+  // Balance_Chassis.Left_Leg.dLength_PID.Get_Out(),
+  // Balance_Chassis.Get_Pitch_Angle(),
+  // Balance_Chassis.Get_Roll_Angle(),
+  // Balance_Chassis.Get_Chassis_Control_Type());           //128根本不够
+  sprintf(Mes, "%f,%f,%f,%f,%d,%d\n", 
+  Balance_Chassis.Left_Leg.Target_L0,
+  Balance_Chassis.Left_Leg.theta,
+  Balance_Chassis.Left_Leg.Tp,
+  Balance_Chassis.Get_Pitch_Angle(),
+  Balance_Chassis.Get_Jump_State(),
+  Balance_Chassis.Get_Chassis_Control_Type());           //128根本不够
+  //   sprintf(Mes, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", 
+  // LQR_Tp_L[0], LQR_Tp_L[1],LQR_Tp_L[2],LQR_Tp_L[3],LQR_Tp_L[4],LQR_Tp_L[5],LQR_Tp_L[6],LQR_Tp_L[7],LQR_Tp_L[8],LQR_Tp_L[9]);           //128根本不够
 	HAL_UART_Transmit_DMA(&huart7, (uint8_t *)Mes, strlen(Mes));
 }

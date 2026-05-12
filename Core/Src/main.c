@@ -71,7 +71,7 @@ uint32_t reset_flag;
   * @retval int
   */
 int main(void)
- {
+   {
 
   /* USER CODE BEGIN 1 */
 

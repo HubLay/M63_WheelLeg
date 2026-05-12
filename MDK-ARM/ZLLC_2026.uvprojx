@@ -989,6 +989,11 @@
               <FileType>8</FileType>
               <FilePath>..\User\Task\Src\printf_task.cpp</FilePath>
             </File>
+            <File>
+              <FileName>emergency_stop.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\User\Task\Src\emergency_stop.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

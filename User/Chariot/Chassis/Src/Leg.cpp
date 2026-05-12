@@ -6,24 +6,25 @@ void Class_Leg::Init()
 {
   // 左上第一条边为l1，逆时针编号
   l5 = 0.0f; // AE长度 m
-  l1 = 0.215f;
+  l1 = 0.216f;
   l2 = 0.258f;
   l3 = 0.258f;
-  l4 = 0.214f;
+  l4 = 0.216f;
 
   dt = ROBOT_TASK_DT;
 
   Front_Joint.TIM_Process_PeriodElapsedCallback();                //处理一次数据防止上电时刻0的数组线性映射到力矩不为0
   Back_Joint.TIM_Process_PeriodElapsedCallback();
 
-  Length_PID.Init(14.0f, 0.0f, 0.20f, 0.0f, 0.0f, 2.0f);
-  dLength_PID.Init(60.0f, 0.0f, 0.0f, 0.0f, 0.0f, 50.0f);         //腿太硬了回没有缓冲，容易进入离地
+  Length_PID.Init(20.0f, 0.0f, 0.15f, 0.0f, 0.0f, 1.5f);
+  dLength_PID.Init(100.0f, 0.0f, 0.0f, 0.0f, 0.0f, 200.0f);         //腿太硬了回没有缓冲，容易进入离地
 
   kalman_Init(&d_L0_Kalman, 0.99f, 0.01f, 0.0f, 1.0f);
   kalman_Init(&d_alpha_Kalman, 0.99f, 0.01f, 0.0f, 1.0f);
   kalman_Init(&d_theta_Kalman, 0.99f, 0.01f, 0.0f, 1.0f);
   kalman_Init(&Wheel_Speed_Kalman, 0.99f, 0.002f, 0.0f, 1.0f);
   kalman_Init(&leg_v_Kalman, 0.99f, 0.01f, 0.0f, 1.0f);
+  kalman_Init(&FN_KF, 0.99f,0.0005f,0.0f,1.0f);
 }
 
 void Class_Leg::VMC_Calc()
@@ -110,8 +111,8 @@ void Class_Leg::LQR_Calc()
 void Class_Leg::Leg_V_Calc()
 {
   //HK建模，Pitch方向和哈工程相反了，所以直接在Pitch上加一个负号就可以
-  w_ed = Wheel_Speed + d_alpha_true + GyroPitch;           
-  leg_v = w_ed * Wheel_Diameter + L0 * d_theta_true * arm_cos_f32(theta) + d_L0_true * arm_sin_f32(theta);
+  w_ed = Wheel_Speed + d_alpha + GyroPitch;           
+  leg_v = w_ed * Wheel_Diameter + L0 * d_theta * arm_cos_f32(theta) + d_L0_true * arm_sin_f32(theta);
 
   //速度滤波                  
   Kalman_PeriodElapsedCallback(&leg_v_Kalman, leg_v);
@@ -134,23 +135,24 @@ void Class_Leg::Length_Calc()
  */
 void Class_Leg::ForceSlove()
 {
-  static uint32_t Status_Count = 0;
-  static uint8_t Status = 0;
+  // static uint8_t Status = 0;
   static float Pre_FN = 0.0f;
 
   //腿部机构的力+轮子重力，这里忽略了轮子质量*驱动轮竖直方向运动加速度
-  float tmp_FN = F0*arm_cos_f32(theta) + Tp*arm_sin_f32(theta)/L0 + 0.6f * (9.81f + Accel_Z);
+  float tmp_FN = F0*arm_cos_f32(theta) + Tp*arm_sin_f32(theta)/L0 + 0.588f * (9.81f + Accel_Z);
 
   FN = tmp_FN;//0.5f * tmp_FN + 0.5f * Pre_FN;
 
   Pre_FN = FN;
 
+  Kalman_PeriodElapsedCallback(&FN_KF, FN);
+
   switch(Status){
     case(0):                        //正常不离地状态
     {
       Air_Status = Leg_UnAir;
-      if(FN < 50){
-        Status = 1;                 //可能离地状态
+      if(FN < 30){
+        Status = 2;                 //可能离地状态
         Status_Count = 0;
       }
 
@@ -166,7 +168,7 @@ void Class_Leg::ForceSlove()
         Status_Count = 0;
       }
 
-      if (FN > 50 || Status_Count > 100)              //小于40后的100ms内没有小于20，认为是误判了
+      if (FN > 100 || Status_Count > 100)              //小于50后的100ms内没有小于30，认为是误判了
       {
         Status = 0;
         Status_Count = 0;
@@ -179,7 +181,7 @@ void Class_Leg::ForceSlove()
     case(2):                        //真正离地状态
     {
       Air_Status = Leg_Air;
-      if(FN > 40){
+      if(FN > 100){
         Status = 3;                 //切到可能落地状态
         Status_Count = 0;
       }
@@ -191,7 +193,7 @@ void Class_Leg::ForceSlove()
     case(3):
     {
       Air_Status = Leg_UnAir;
-      if(Status_Count < 100){               //落地后的一段时间内存在力的波动，疑似落地的100ms内都不进行检测
+      if(Status_Count < 50){               //落地后的一段时间内存在力的波动，疑似落地的100ms内都不进行检测
         
       }
       else{
@@ -200,7 +202,7 @@ void Class_Leg::ForceSlove()
           Status = 2;                       //力太小了认为80是误判，切回离地
           Status_Count = 0;
         }
-        else if(FN > 50 || Status_Count > 3000){       //大力或者时间过长
+        else if(FN > 100 || Status_Count > 1000){       //大力或者时间过长
           Status = 0;
           Status_Count = 0;
         }
@@ -212,13 +214,15 @@ void Class_Leg::ForceSlove()
     }
   }
 
-  // if(FN < 15.0f){                 //两个参数和逻辑有待加强
+  // if(FN < 10.0f){                 //两个参数和逻辑有待加强
   //   Air_Status = Leg_Air;
   // }
 
-  // if(FN > 60.0f){
+  // if(FN > 80.0f){
   //   Air_Status = Leg_UnAir;
   // }
+
+  Air_Status = Leg_UnAir;
 
 }
 
@@ -237,6 +241,11 @@ void Class_Leg::VMCProject()
 
 }
 
+float Class_Leg::Get_Theta()
+{
+  return theta;
+}
+
 void Class_Leg::Disable()
 {
   Tp = 0.0f;
@@ -248,6 +257,9 @@ void Class_Leg::Disable()
   Target_L0 = 0.16f;
 
   Air_Status = Leg_UnAir;
+
+  Status = 0;
+  Status_Count = 0;
 
   Length_PID.Set_Integral_Error(0.0f);
   dLength_PID.Set_Integral_Error(0.0f);

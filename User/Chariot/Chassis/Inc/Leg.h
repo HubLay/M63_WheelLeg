@@ -40,6 +40,8 @@ class Class_Leg{
     void ParamUpdata();                             //更新VMC相关的参数
     void VMCProject();                              //VMC参数的映射
 
+    float Get_Theta();
+
     template <Enum_Leg T>
     void Torque_Output();
 
@@ -67,6 +69,9 @@ class Class_Leg{
 
     float Wheel_Speed  = 0.0f;
 
+    uint8_t Status = 0;
+    uint32_t Status_Count = 0;
+
     //相关中间变量小写
     float w_ed = 0.0f, leg_v = 0.0f, leg_v_true = 0.0f;                    //没有进行融合的腿部速度，修正后的机体轮速
     float pitch_offset = 0.0f;
@@ -75,6 +80,7 @@ class Class_Leg{
     my_kalman Wheel_Speed_Kalman;
     my_kalman leg_v_Kalman;
     my_kalman d_L0_Kalman, d_alpha_Kalman, d_theta_Kalman;
+    my_kalman FN_KF;
 
     //vmc 相关变量
     float l1, l2, l3, l4, l5;     //m

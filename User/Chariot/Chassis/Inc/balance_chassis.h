@@ -32,11 +32,26 @@ enum Enum_Chassis_Control_Type : uint8_t
   Chassis_Control_Type_DISABLE = 0,
   Chassis_Control_Type_FLLOW,
   Chassis_Control_Type_SPIN,
-  Chassis_Control_Type_JUMP_1,
+  Chassis_Control_Type_JUMP_1,            //蹭上台阶
   Chassis_Control_Type_UNFLLOW,           //适用于无云台下的正常运动调试
   Chassis_Control_Type_RESERVE,           //倒地自启
 
 };
+
+typedef struct {
+  float Target_Velocity_X;
+  float Target_Delta_Length;
+  float Target_Delta_Yaw;
+  Enum_Chassis_Control_Type Target_Control_Type;
+} Target_CMD_s;
+
+struct Gimbal_To_Chassis_s{
+  int16_t tmp_Velocity_X;
+  int16_t dr16_left_y;
+  uint16_t reserve_1;
+  uint8_t Supercap_Mode;
+  Enum_Chassis_Control_Type control_type;
+}__attribute__((packed));
 
 enum Enum_Reserve_Status : uint8_t
 {
@@ -69,6 +84,7 @@ class Class_Balance_Chassis{
     Class_DR16 DR16;
 
     Class_Referee Referee;
+    Class_DJI_Motor_GM6020 Motor_Yaw;
 
     void Init();
 
@@ -84,15 +100,19 @@ class Class_Balance_Chassis{
     inline float Get_Target_Omega();
     inline float Get_Now_Omega();
     inline float Get_Pitch_Angle();
+    inline float Get_Roll_Angle();
     inline float Get_Yaw_Angle();
+    inline JumpState_e Get_Jump_State();
     inline Enum_Chassis_Control_Type Get_Chassis_Control_Type();
 
     void Set_Target_V(float __Target_Vx);
     void Set_Target_Length(float __Target_Length);
+    void Set_Target_Omega(float __Target_Omega);
     void Set_Spin_Omega(float __Spin_Omega);
     void Set_Target_Yaw_Angle(float __Target_Yaw_Angle);
     void Set_Reserve_Status(Enum_Reserve_Status __Reserve_Status);
     void Set_Chassis_Control_Type(Enum_Chassis_Control_Type __Chassis_Control_Type);
+    void Reset_Chassis_Stable_Count();
 
     void CAN_Chassis_Rx_Gimbal_Callback(uint8_t *Rx_Data);
 
@@ -100,26 +120,28 @@ class Class_Balance_Chassis{
 
     DaemonInstance *Gimbal_Daemon;
 
-    #ifdef UNFLLOW_ENABLE
-    CMD_Data_s CMD_Data;
-    #endif
+    Target_CMD_s Target_CMD_Data;
 
+    uint8_t Emergency_Stop_Flag = 0;
     uint32_t Chassis_Stable_Count = 0;
+
+    volatile float Target_l_theta = 0.0f, Target_l_dtheta = 0.0f;
+    volatile float Target_r_theta = 0.0f, Target_r_dtheta = 0.0f;
+
+    float Compensite_F0 = 0.0f;                             //转向前馈补偿力
 
   protected:
 
     float X = 0.0f;
     float Vx = 0.0f;
     float Accel_X = 0.0f, Accel_Z = 0.0f;
-    float Compensite_F0 = 0.0f;                             //转向前馈补偿力
     float Pitch_Angle = 0.0f, GyroPitch = 0.0f;             //rad
     float Roll_Angle = 0.0f, GyroRoll = 0.0f;               //rad
     float Yaw_Angle = 0.0f, GyroYaw = 0.0f;                 //angle
 
     float True_Target_Vx = 0.0f;
     volatile float Target_X = 0.0f, Target_Vx = 0.0f;
-    volatile float Target_l_theta = 0.0f, Target_l_dtheta = 0.0f;
-    volatile float Target_r_theta = 0.0f, Target_r_dtheta = 0.0f;
+
     volatile float Target_Pitch_Angle = 0.0f, Target_Picth_Omega = 0.0f;      //rad
     volatile float Target_Length = 0.16f;
     volatile float Target_Yaw_Angle = 0.0f;                                   //rad
@@ -128,15 +150,15 @@ class Class_Balance_Chassis{
     volatile float Spin_Omega = 0.0f;
     volatile float Target_Omega = 0.0f;
 
-    uint8_t Jump_Enable_Flag = 0;
+    uint8_t Jump_Enable_Flag = 1;
 
     TD_HandleTypeDef Target_Vx_Td;
 
     KalmanFilter_t V_EstimateKF;
 
-    volatile Enum_Chassis_Control_Type Chassis_Control_Type = Chassis_Control_Type_DISABLE;
-    Enum_Reserve_Status Reserve_Status = Reserve_Disable;
     JumpState_e jump_state = JUMP_BACK_SWING;
+    Enum_Reserve_Status Reserve_Status = Reserve_Disable;
+    volatile Enum_Chassis_Control_Type Chassis_Control_Type = Chassis_Control_Type_DISABLE;
 
   private:
     void LQR_Calc();
@@ -162,6 +184,14 @@ class Class_Balance_Chassis{
     float theta_error;
     float K[4][10];
     float LQR_Out[4];                  //Tr, Tl, WTr, WTl
+
+    #ifdef UNFLLOW_ENABLE
+    CMD_Data_s CMD_Data;
+    #endif
+
+    #ifdef NORMAL_CHASSIS
+    Gimbal_To_Chassis_s Gimbal_To_Chassis_Data;
+    #endif
 };
 
 
@@ -170,7 +200,7 @@ class Class_Balance_Chassis{
  */
 inline uint8_t Class_Balance_Chassis::IS_NORMAL()
 {
-  return ((Chassis_Control_Type == Chassis_Control_Type_FLLOW || Chassis_Control_Type == Chassis_Control_Type_SPIN || Chassis_Control_Type == Chassis_Control_Type_UNFLLOW) && (Chassis_Stable_Count >= 500));
+  return ((Chassis_Control_Type == Chassis_Control_Type_FLLOW || Chassis_Control_Type == Chassis_Control_Type_SPIN || Chassis_Control_Type == Chassis_Control_Type_UNFLLOW) && (Chassis_Stable_Count >= 1500));
 }
 
 inline float Class_Balance_Chassis::Get_aver_v()
@@ -228,6 +258,11 @@ inline float Class_Balance_Chassis::Get_Pitch_Angle()
   return Pitch_Angle;
 }
 
+inline float Class_Balance_Chassis::Get_Roll_Angle()
+{
+  return (Roll_Angle);
+}
+
 inline float Class_Balance_Chassis::Get_Yaw_Angle()
 {
   return Yaw_Angle; 
@@ -238,5 +273,9 @@ inline Enum_Chassis_Control_Type Class_Balance_Chassis::Get_Chassis_Control_Type
   return Chassis_Control_Type;
 }
 
+inline JumpState_e Class_Balance_Chassis::Get_Jump_State()
+{
+  return jump_state;
+}
 
 #endif
