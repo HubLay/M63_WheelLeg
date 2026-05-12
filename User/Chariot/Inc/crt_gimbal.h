@@ -236,14 +236,9 @@ public:
     //imu对象
     Class_IMU Boardc_BMI;
 
-    Class_External_IMU External_IMU;
-
     Class_MiniPC *MiniPC;
 
     /*后期yaw pitch这两个类要换成其父类，大疆电机类*/
-
-    // LK电机 大Yaw
-    Class_LK_Motor Motor_Main_Yaw;
 
     // yaw轴电机
     Class_DJI_Motor_GM6020 Motor_Yaw;
@@ -253,31 +248,25 @@ public:
     Class_DJI_Motor_GM6020 Motor_Pitch;
     Class_LESO Motor_Pitch_LESO;
 
-    Class_Filter_Kalman External_IMU_Gyro_Yaw;
-    Class_Filter_Kalman External_IMU_Gyro_Pitch;
+    Class_Filter_Kalman IMU_Gyro_Yaw;
+    Class_Filter_Kalman IMU_Gyro_Pitch;
     Class_Filter_Kalman Motor_Yaw_Angle_Filter;
 
     void Init();
 
-    inline float Get_Target_Main_Yaw_Angle();
+    inline float Get_Target_Yaw_Angle();
     inline float Get_Target_Pitch_Angle();
     inline Enum_Gimbal_Control_Type Get_Gimbal_Control_Type();
     inline int Get_last_Cruise_Mode();
 
     inline void Set_Gimbal_Control_Type(Enum_Gimbal_Control_Type __Gimbal_Control_Type);
-    inline void Set_Target_Main_Yaw_Angle(float __Target_Yaw_Angle);
+    inline void Set_Target_Yaw_Angle(float __Target_Yaw_Angle);
     inline void Set_Target_Pitch_Angle(float __Target_Pitch_Angle);
 
 
     void TIM_Calculate_PeriodElapsedCallback();
 
-    uint32_t Single_time = 0;
 protected:
-    //初始化相关常量
-    float Gimbal_Head_Angle;
-    //常量
-    float CRUISE_SPEED_YAW = 100.f;
-    float CRUISE_SPEED_PITCH = 70.f;
     // yaw轴最小值
     float Min_Yaw_Angle = - 180.0f;
     // yaw轴最大值
@@ -290,7 +279,7 @@ protected:
     // pitch轴最小值
     float Min_Pitch_Angle = -25.0f;
     // pitch轴最大值
-    float Max_Pitch_Angle = 22.0f ; //多10°
+    float Max_Pitch_Angle = 13.0f ; //多10°
 
     float Yaw_Compensite_KF = 150.0f;
     float Yaw_Compensite_Output = 0.0f;
@@ -299,20 +288,6 @@ protected:
     //内部变量 
 
     //读变量
-// ---------- 巡航正弦参数（常量）----------
-    static constexpr float YAW_AMPLITUDE   = 60.0f;   // 振幅，范围 [-60, 60]
-    static constexpr float YAW_OFFSET      = 0.0f;    // 偏置
-    static constexpr float YAW_FREQ        = 1.0f;    // 频率 (Hz)
-
-    static constexpr float PITCH_AMPLITUDE = 23.5f;   // 振幅，范围 [-25, 22]
-    static constexpr float PITCH_OFFSET    = -1.5f;   // 偏置
-    static constexpr float PITCH_FREQ      = 4.6f;    // 频率 (Hz)
-
-    // ---------- 巡航状态变量 ----------
-    float phi0_yaw          = 0.0f;   // Yaw 初始相位（弧度）
-    float phi0_pitch        = 0.0f;   // Pitch 初始相位（弧度）
-    uint32_t cruise_start_time = 0;   // 进入巡航时刻的时间戳
-    int last_mode_for_cruise  = -1;   // 上一次上位机 mode 值
 
     //写变量
 
@@ -320,9 +295,6 @@ protected:
     Enum_Gimbal_Control_Type Gimbal_Control_Type = Gimbal_Control_Type_DISABLE ;
 
     //读写变量
-
-    // Main_Yaw轴角度
-    float Target_Main_Yaw_Angle = 0.0f;
 
     // 小Yaw目标角度
     float Target_Yaw_Angle = 0.0f;
@@ -341,16 +313,11 @@ protected:
 
 /* Exported function declarations --------------------------------------------*/
 
-
-/**
- * @brief 获取yaw轴角度
- *
- * @return float yaw轴角度
- */
-float Class_Gimbal::Get_Target_Main_Yaw_Angle()
+inline float Class_Gimbal::Get_Target_Yaw_Angle()
 {
-    return (Target_Main_Yaw_Angle);
+  return (Target_Yaw_Angle);
 }
+
 /**
  * @brief 获取yaw轴角度
  *
@@ -360,15 +327,7 @@ float Class_Gimbal::Get_Target_Pitch_Angle()
 {
     return (Target_Pitch_Angle);
 }
-/**
- * @brief 获取上一次巡航模式
- *
- * @return int 上一次巡航模式
- */
-int Class_Gimbal::Get_last_Cruise_Mode()
-{
-    return (last_mode_for_cruise);
-}
+
 /**
  * @brief 获取云台控制类型
  *
@@ -388,14 +347,15 @@ void Class_Gimbal::Set_Gimbal_Control_Type(Enum_Gimbal_Control_Type __Gimbal_Con
 {
     Gimbal_Control_Type = __Gimbal_Control_Type;
 }
+
 /**
- * @brief 设定yaw轴角度
- *
+ * @brief 设定目标Yaw轴角度
  */
-void Class_Gimbal::Set_Target_Main_Yaw_Angle(float __Target_Main_Yaw_Angle)
+inline void Class_Gimbal::Set_Target_Yaw_Angle(float __Target_Yaw_Angle)
 {
-    Target_Main_Yaw_Angle = __Target_Main_Yaw_Angle;
+    Target_Yaw_Angle = __Target_Yaw_Angle;
 }
+
 /**
  * @brief 设定pitch轴角度
  *

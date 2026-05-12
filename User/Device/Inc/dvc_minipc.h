@@ -420,7 +420,6 @@ public:
     void TIM_Write_PeriodElapsedCallback();
     Enum_MiniPC_Self_Color Get_Self_Color();
     Class_IMU *IMU;
-    Class_IMU *External_IMU;
     Class_Referee *Referee;
     Class_Supercap *Supercap;
 

@@ -80,9 +80,12 @@ enum Enum_Sprint_Status : uint8_t
  */
 enum Enum_Chassis_Control_Type :uint8_t
 {
-    Chassis_Control_Type_DISABLE = 0,
-    Chassis_Control_Type_FLLOW,
-    Chassis_Control_Type_SPIN,
+  Chassis_Control_Type_DISABLE = 0,
+  Chassis_Control_Type_FLLOW,
+  Chassis_Control_Type_SPIN,
+  Chassis_Control_Type_JUMP_1,
+  Chassis_Control_Type_UNFLLOW,           //适用于无云台下的正常运动调试   云台不可设置
+  Chassis_Control_Type_RESERVE,           //倒地自启                     云台不可设置
 };
 
 /**

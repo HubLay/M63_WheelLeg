@@ -308,18 +308,7 @@ void Class_Referee::TIM1msMod50_Alive_PeriodElapsedCallback()
  */
 void Class_Referee::TIM_UART_Tx_PeriodElapsedCallback()
 {
-    //雷达发送
-    Sentry_To_Radar.Sender = Get_ID();
-    if(Get_ID() == Referee_Data_Robots_ID_RED_SENTRY_7)
-    {
-        Sentry_To_Radar.Receiver = Referee_Data_Robots_ID_RED_RADAR_9;
-    }
-    else if (Get_ID() == Referee_Data_Robots_ID_BLUE_SENTRY_7)
-    {
-        Sentry_To_Radar.Receiver = Referee_Data_Robots_ID_BLUE_RADAR_9;
-    }
-    Referee_UI_Packed_Data(&Sentry_To_Radar);
-    HAL_UART_Transmit_IT(UART_Manage_Object->UART_Handler, UART_Manage_Object->Tx_Buffer, UART_Manage_Object->Tx_Length);
+
 }
 
 /**
@@ -329,10 +318,7 @@ void Class_Referee::TIM_UART_Tx_PeriodElapsedCallback()
  */
 void Class_Referee::Sentry_Auto_cmd_Transmit()
 {
-    //哨兵自主决策
-    Sentry_cmd.Sender = Get_ID();
-    Referee_UI_Packed_Data(&Sentry_cmd);
-    HAL_UART_Transmit_IT(UART_Manage_Object->UART_Handler, UART_Manage_Object->Tx_Buffer, UART_Manage_Object->Tx_Length);
+
 }
 
 

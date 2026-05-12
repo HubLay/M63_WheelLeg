@@ -1,0 +1,32 @@
+
+
+GraphedExpression="(((chariot).Gimbal).Motor_Yaw).Transform_Angle", Color=#e56a6f, Show=0
+GraphedExpression="(((chariot).Gimbal).Motor_Yaw).Transform_Omega", Color=#35792b, Show=0
+GraphedExpression="(((chariot).Gimbal).Motor_Yaw).Target_Angle", Color=#769dda, Show=0
+GraphedExpression="((((chariot).Gimbal).Motor_Yaw).PID_Omega).Target", Color=#b14f0d, Show=0
+GraphedExpression="((((chariot).Gimbal).Motor_Pitch).PID_Angle).Target", Color=#b3c38e
+GraphedExpression="((((chariot).Gimbal).Motor_Pitch).PID_Angle).Now", Color=#ab7b05
+GraphedExpression="((((chariot).Gimbal).Motor_Pitch).PID_Omega).Target", Color=#7fd3b7
+GraphedExpression="((((chariot).Gimbal).Motor_Pitch).PID_Omega).Now", Color=#50328f
+OpenDocument="startup_stm32h723xx.s", FilePath="C:/Users/HLlll/Desktop/m63code/code/ZLLC_2026_M63_Gimbal/MDK-ARM/startup_stm32h723xx.s", Line=245
+OpenDocument="main.c", FilePath="C:/Users/HLlll/Desktop/m63code/code/ZLLC_2026_M63_Gimbal/Core/Src/main.c", Line=65
+OpenToolbar="Debug", Floating=0, x=0, y=0
+OpenWindow="Call Stack", DockArea=RIGHT, x=0, y=0, w=874, h=685, TabPos=2, TopOfStack=0, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Registers 1", DockArea=LEFT, x=0, y=0, w=494, h=183, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, FilteredItems=[], RefreshRate=1
+OpenWindow="Source Files", DockArea=LEFT, x=0, y=1, w=494, h=501, TabPos=0, TopOfStack=0, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Disassembly", DockArea=LEFT, x=0, y=1, w=494, h=501, TabPos=1, TopOfStack=1, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Memory 1", DockArea=BOTTOM, x=0, y=0, w=369, h=717, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, EditorAddress=0x40020040
+OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=0, w=874, h=685, TabPos=0, TopOfStack=1, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Data Sampling", DockArea=RIGHT, x=0, y=0, w=874, h=685, TabPos=1, TopOfStack=0, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VisibleTab=0, UniformSampleSpacing=0
+OpenWindow="Timeline", DockArea=BOTTOM, x=1, y=0, w=2190, h=717, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=1, DataPaneShown=1, PowerPaneShown=0, CodePaneShown=0, PinCursor="Cursor Movable", TimePerDiv="1 s / Div", TimeStampFormat="Time", DataGraphDrawAsPoints=0, DataGraphLegendShown=1, DataGraphUniformSampleSpacing=0, DataGraphLegendPosition="0;0", DataGraphShowNamesAtCursor=0, PowerGraphDrawAsPoints=0, PowerGraphLegendShown=0, PowerGraphAvgFilterTime=Off, PowerGraphAvgFilterLen=Off, PowerGraphUniformSampleSpacing=0, PowerGraphLegendPosition="1963;0", CodeGraphLegendShown=0, CodeGraphLegendPosition="1978;0"
+SmartViewPlugin="", Page="", Toolbar="Hidden", Window="SmartView 1"
+TableHeader="Call Stack", SortCol="Function", SortOrder="ASCENDING", VisibleCols=["Function";"Stack Frame";"Source";"PC";"Return Address";"Stack Used"], ColWidths=[474;144;174;104;154;100]
+TableHeader="Source Files", SortCol="File", SortOrder="DESCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[262;100;100;100;982]
+TableHeader="Data Sampling Table", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";" (((chariot).Gimbal).Motor_Yaw).Transform_Angle";" (((chariot).Gimbal).Motor_Yaw).Transform_Omega";" (((chariot).Gimbal).Motor_Yaw).Target_Angle";" ((((chariot).Gimbal).Motor_Yaw).PID_Omega).Target";" ((((chariot).Gimbal).Motor_Pitch).PID_Angle).Target";" ((((chariot).Gimbal).Motor_Pitch).PID_Angle).Now";" ((((chariot).Gimbal).Motor_Pitch).PID_Omega).Target";" ((((chariot).Gimbal).Motor_Pitch).PID_Omega).Now"], ColWidths=[100;100;100;100;100;100;100;100;100;100]
+TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[422;100;164;124;124;144;110;134;126]
+TableHeader="Power Sampling", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
+TableHeader="Registers 1", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Description"], ColWidths=[100;144;250]
+TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh";"Access"], ColWidths=[514;374;134;100;104]
+TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
+TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[200;100;100;340]
+WatchedExpression="chariot", Window=Watched Data 1

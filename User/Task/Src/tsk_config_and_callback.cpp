@@ -232,24 +232,18 @@ void Gimbal_Device_CAN1_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
             chariot.Booster.Motor_Friction_Right.CAN_RxCpltCallback(CAN_RxMessage->Data);
             break;
         }
-        case(0x205):
-        {
-            
-            chariot.Gimbal.Motor_Yaw.CAN_RxCpltCallback(CAN_RxMessage->Data);
-            break;
-        }
         case(0x206):
         {
             Y_Dt = DWT_GetDeltaT(&Y_CNTT);
             chariot.Gimbal.Motor_Pitch.CAN_RxCpltCallback(CAN_RxMessage->Data);
             break;
         }
-        case(0xA1):
-        {
-            Dt = DWT_GetDeltaT(&CNTTT);
-            chariot.Gimbal.Motor_Pitch.CAN_RxCpltCallback(CAN_RxMessage->Data);
-            break;
-        }
+        // case(0xA1):
+        // {
+        //     Dt = DWT_GetDeltaT(&CNTTT);
+        //     chariot.Gimbal.Motor_Pitch.CAN_RxCpltCallback(CAN_RxMessage->Data);
+        //     break;
+        // }
 	}
 }
 #endif
@@ -264,14 +258,15 @@ void Gimbal_Device_CAN2_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
 {
     switch (CAN_RxMessage->Header.Identifier)
     {
-        case(0x141):
-        {
-            chariot.Gimbal.Motor_Main_Yaw.CAN_RxCpltCallback(CAN_RxMessage->Data);
-            break;
-        }
-        case(0x202):
+        case(0x201):
         {
             chariot.Booster.Motor_Driver.CAN_RxCpltCallback(CAN_RxMessage->Data);
+            break;
+        }
+        case(0x205):
+        {
+            
+            chariot.Gimbal.Motor_Yaw.CAN_RxCpltCallback(CAN_RxMessage->Data);
             break;
         }
 
@@ -427,7 +422,7 @@ void SuperCAP_UART1_Callback(uint8_t *Buffer, uint16_t Length)
 #ifdef GIMBAL
 void IMUB_USART7_Callback(uint8_t *Buffer, uint16_t Length)
 {
-    chariot.Gimbal.External_IMU.UART_BMI_Data_Process(Buffer);
+
 }
 #endif
 
@@ -476,28 +471,13 @@ void Task100us_TIM4_Callback()
 
         //开始比赛但是遥控器断连了
          #ifdef USE_DR16  
-        if(chariot.Referee.Get_Game_Stage() == Referee_Game_Status_Stage_BATTLE && chariot.DR16.Get_DR16_Status() == DR16_Status_DISABLE && chariot.Referee.Get_Referee_Status() == Referee_Status_ENABLE){                               //比赛开始状态
-            chariot.DR16.Set_Left_Switch(DR16_Switch_Status_DOWN);                  //保险 强制上位机
-            chariot.DR16.Set_Right_Switch(DR16_Switch_Status_DOWN);                 //强制上位机自动打弹
-            chariot.TIM_Control_Callback();                                         //里面上位机离线的相关处理了
-        }
-        else{      
-                                                                          //非比赛状态/遥控器在线
-            chariot.FSM_Alive_Control.Reload_TIM_Status_PeriodElapsedCallback();    //遥控器离线失能保护
-           
-            
-            if(chariot.DR16.Get_DR16_Status() == DR16_Status_ENABLE && 
-                chariot.Gimbal.External_IMU.Get_IMU_Status() == IMU_Status_ENABLE){               //如果遥控器不在线也跑，就会和FSM抢状态，车子不能正确失能了
-                chariot.TIM_Control_Callback();
-            }
-        }
         
-        // chariot.FSM_Alive_Control.Reload_TIM_Status_PeriodElapsedCallback();    //遥控器离线失能保护
+        chariot.FSM_Alive_Control.Reload_TIM_Status_PeriodElapsedCallback();    //遥控器离线失能保护
 
-        // if(chariot.DR16.Get_DR16_Status() == DR16_Status_ENABLE && 
-        //     chariot.Gimbal.External_IMU.Get_IMU_Status() == IMU_Status_ENABLE){               //如果遥控器不在线也跑，就会和FSM抢状态，车子不能正确失能了
-        //     chariot.TIM_Control_Callback();
-        // }
+        if(chariot.DR16.Get_DR16_Status() == DR16_Status_ENABLE){
+            chariot.TIM_Control_Callback();
+        }
+
         #elif defined(USE_FS_i6X)
          if(chariot.Referee.Get_Game_Stage() == Referee_Game_Status_Stage_BATTLE && chariot.FS_i6X.Get_FS_Status() == FS_Status_DISABLE && chariot.Referee.Get_Referee_Status() == Referee_Status_ENABLE){                               //比赛开始状态
             chariot.FS_i6X.Set_Switch_0(FS_Switch_Status_DOWN);                  //保险 强制上位机
@@ -515,26 +495,11 @@ void Task100us_TIM4_Callback()
             }
         }
             #endif
-        if (chariot.Gimbal.External_IMU.Get_IMU_Status() == IMU_Status_DISABLE)
-        { // IMU失能保护
-            chariot.Booster.Set_Booster_Control_Type(Booster_Control_Type_DISABLE);
-            chariot.Gimbal.Set_Gimbal_Control_Type(Gimbal_Control_Type_DISABLE);
-            chariot.Chassis.Set_Chassis_Control_Type(Chassis_Control_Type_DISABLE);
-        }
-        else
-        {
-            chariot.Gimbal.External_IMU.TIM_Calculate_PeriodElapsedCallback();
-        }
-
-        // chariot.Gimbal.Motor_Pitch.TIM_Process_PeriodElapsedCallback();                 //为了和普通发送分开，避免仲裁
 
         //生成正弦信号测试
         Single_Time ++;
         Sin_Single = 15.0f * sinf(2.0f * PI * 5.0f * Single_Time / 1000.0f);
-        //用于生成控制巡航的正弦信号
-        if (chariot.Gimbal.Get_last_Cruise_Mode()==0){
-            chariot.Gimbal.Single_time ++;
-        }
+
 
 #endif
 }
@@ -658,10 +623,7 @@ extern "C" void Task_Init()
         //上位机串口
         UART_Init(&huart8, MiniPC_UART_Callback, 56);
 
-        UART_Init(&huart10, Referee_UART10_Callback, 128);
-
-        //外置IMU串口   接收长度14，但是串口空闲中断刚好接满14的时候不会进入空闲事件中断，只进入接收满中断
-        UART_Init(&huart7, IMUB_USART7_Callback, 14 * 2);           
+        UART_Init(&huart10, Referee_UART10_Callback, 128);   
 
     #endif
 

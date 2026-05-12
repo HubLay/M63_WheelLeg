@@ -355,7 +355,8 @@ void TIM_CAN_PeriodElapsedCallback()
     #elif defined (GIMBAL)
 
     // CAN_Send_Data(&hfdcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);          // Yaw Pitch 6020
-    CAN_Send_Data(&hfdcan1, 0x1fe, CAN1_0x1fe_Tx_Data, 8);          // Yaw Pitch 6020
+    CAN_Send_Data(&hfdcan1, 0x1fe, CAN1_0x1fe_Tx_Data, 8);          //Pitch 6020
+    CAN_Send_Data(&hfdcan2, 0x1fe, CAN2_0x1fe_Tx_Data, 8);          //Pitch 6020
 
     static uint8_t mod3 = 0;
     if(mod3 == 3){
@@ -367,7 +368,6 @@ void TIM_CAN_PeriodElapsedCallback()
 
     //  CAN3  下板
     CAN_Send_Data(&hfdcan2, 0x200, CAN2_0x200_Tx_Data, 8);         // 拨弹盘电机
-    CAN_Send_Data(&hfdcan2, 0x141, CAN2_0x141_Tx_Data, 8);         // 大yaw-MF9025  按照0x141 ID 发送 一次只能控制一个电机
 
     static uint8_t mod5 = 0,mod10 = 0,mod20 = 0;
     mod5++;
