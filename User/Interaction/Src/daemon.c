@@ -67,7 +67,12 @@ void DaemonTask()
             instance->Device_Status = Device_Online;
         }
         else{
-            instance->Callback_Function(instance->Param);
+            if(instance->Callback_Function != NULL){
+                instance->Callback_Function(instance->Param);
+            }
+            else{
+                
+            }
             instance->Device_Status = Device_Offline;
         }
     }

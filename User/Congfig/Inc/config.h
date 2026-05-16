@@ -73,16 +73,21 @@
 #define NORMAL_CHASSIS
 #endif
 
-#define V_MAX 2.0f
-#define V_MAX_SPIN 0.3f
+#define V_MAX 2.6f
+#define V_MAX_SPIN 0.7f
 #define Yaw_Angle_Resolution (1.5f / 57.3f)
 #define Length_Angle_Resolution 0.008f
-#define SPIN_OMEGA 9.0f 
+#define SPIN_OMEGA 8.0f
+#define Acc_Max_1 3.0f
+#define ACC_Max_2 3.3f
 
-#define Reference_Rad (3.6547091f)
+#define Reference_Rad (5.35205889f)
 
 #define Length_MIN 0.15f
-#define Length_MAX 0.30f
+#define Length_MAX 0.330f
+
+#define Length_MIN_SPIN 0.15f
+#define Length_MAX_SPIN 0.23f
 
 // #define H7_Offset_X -0.12f       //IMU距离车体中心的距离，IMU自身坐标系 m 量不出来硬调
 // #define H7_Offset_Y -0.0f         //IMU距离车体中心的距离，IMU自身坐标系 m

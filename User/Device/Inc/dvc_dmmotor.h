@@ -139,6 +139,7 @@ public:
     inline float Get_Transform_Angle();
     inline float Get_Transform_Omega();
     inline float Get_Output_Torque();
+    inline uint8_t Get_CAN_ID();
 
     inline void Set_DM_Motor_Control_Alg(Enum_DM_Motor_Control_Alg __DM_Motor_Control_Alg);
     inline void Set_DM_Motor_Control_Method(Enum_DM_Motor_Control_Method __DM_Motor_Control_Method);
@@ -363,6 +364,11 @@ inline float Class_DM_Motor_8009P::Get_Transform_Omega()
 inline float Class_DM_Motor_8009P::Get_Output_Torque()
 {
   return Output_Torque;
+}
+
+inline uint8_t Class_DM_Motor_8009P::Get_CAN_ID()
+{
+  return (Data.CAN_ID);
 }
 
 /**

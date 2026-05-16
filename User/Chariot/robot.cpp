@@ -48,6 +48,12 @@ void Chassis_Device_CAN2_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage){
       Balance_Chassis.Right_Leg.Wheel_Motor.CAN_RxCpltCallback(CAN_RxMessage->Data);
       break;
     }
+    case(0x67):
+    {
+      DaemonReload(Balance_Chassis.Supercap_Daemon);
+      Balance_Chassis.Supercap.CAN_RxCpltCallback(CAN_RxMessage->Data);
+      break;
+    }
   }
 }
 
@@ -79,6 +85,7 @@ void DR16_UART5_Callback(uint8_t *Buffer, uint16_t Length)
  */
 void Referee_UART10_Callback(uint8_t *Buffer, uint16_t Length)
 {
+  DaemonReload(Balance_Chassis.Referee_Daemon);
   Balance_Chassis.Referee.UART_RxCpltCallback(Buffer,Length);
 }
 

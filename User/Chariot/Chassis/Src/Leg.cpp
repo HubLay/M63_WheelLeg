@@ -16,7 +16,7 @@ void Class_Leg::Init()
   Front_Joint.TIM_Process_PeriodElapsedCallback();                //处理一次数据防止上电时刻0的数组线性映射到力矩不为0
   Back_Joint.TIM_Process_PeriodElapsedCallback();
 
-  Length_PID.Init(20.0f, 0.0f, 0.15f, 0.0f, 0.0f, 1.5f);
+  Length_PID.Init(22.0f, 0.0f, 0.08f, 0.0f, 0.0f, 1.5f);
   dLength_PID.Init(100.0f, 0.0f, 0.0f, 0.0f, 0.0f, 200.0f);         //腿太硬了回没有缓冲，容易进入离地
 
   kalman_Init(&d_L0_Kalman, 0.99f, 0.01f, 0.0f, 1.0f);

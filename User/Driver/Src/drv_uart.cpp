@@ -217,6 +217,17 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
         // HAL_UARTEx_ReceiveToIdle_DMA(huart, UART5_Manage_Object.Rx_Buffer, UART5_Manage_Object.Rx_Buffer_Length*2);
 		// __HAL_DMA_DISABLE_IT(&hdma_uart5_rx, DMA_IT_HT);
     }
+    if(huart->Instance == USART10){
+        huart->ErrorCode = 0;     
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_ORE);
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_PE);
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_FE);
+        __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_NE);
+
+        UART10_Manage_Object.Rx_Length = 0;
+        memset(UART10_Manage_Object.Rx_Buffer, 0, UART_BUFFER_SIZE);
+        HAL_UARTEx_ReceiveToIdle_DMA(huart, UART10_Manage_Object.Rx_Buffer, UART10_Manage_Object.Rx_Buffer_Length);
+    }
 }
 
 

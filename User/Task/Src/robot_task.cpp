@@ -39,7 +39,8 @@ void CanTransmit_Task(void *Para){            //非一发一收模式的报文�
     CanTransmit_dwt.dt = DWT_GetDeltaT(&CanTransmit_dwt.cnt_last);
 
     CAN_Send_Data(&hfdcan1, 0x200, CAN1_0x200_Tx_Data, 8);          
-    CAN_Send_Data(&hfdcan2, 0x200, CAN2_0x200_Tx_Data, 8); 
+    CAN_Send_Data(&hfdcan2, 0x200, CAN2_0x200_Tx_Data, 8);
+    CAN_Send_Data(&hfdcan2, 0x66, CAN_Supercap_Tx_Data, 8);
 
     vTaskDelay(CAN_TRANSMIT_TASK_DT);           //1000Hz
   }

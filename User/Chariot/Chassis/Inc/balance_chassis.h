@@ -7,6 +7,7 @@
 #include "dvc_dr16.h"
 #include "dvc_imu.h"
 #include "Td.h"
+#include "dvc_supercap.h"
 #include "dvc_referee.h"
 
 class Class_Balance_Chassis;
@@ -86,6 +87,8 @@ class Class_Balance_Chassis{
     Class_Referee Referee;
     Class_DJI_Motor_GM6020 Motor_Yaw;
 
+    Class_Supercap Supercap;
+
     void Init();
 
     inline uint8_t IS_NORMAL();
@@ -119,6 +122,8 @@ class Class_Balance_Chassis{
     void TIM_Calculate_PeriodElapsedCallback();             //周期性调用的逻辑函数
 
     DaemonInstance *Gimbal_Daemon;
+    DaemonInstance *Referee_Daemon;
+    DaemonInstance *Supercap_Daemon;
 
     Target_CMD_s Target_CMD_Data;
 
@@ -129,6 +134,7 @@ class Class_Balance_Chassis{
     volatile float Target_r_theta = 0.0f, Target_r_dtheta = 0.0f;
 
     float Compensite_F0 = 0.0f;                             //转向前馈补偿力
+    float Limit_Power_Vx_Max = 2.0f;
 
   protected:
 
@@ -150,6 +156,10 @@ class Class_Balance_Chassis{
     volatile float Spin_Omega = 0.0f;
     volatile float Target_Omega = 0.0f;
 
+    
+    float Limit_Power = 70.0f;
+    float Limit_Power_Kp = 0.3f;
+
     uint8_t Jump_Enable_Flag = 1;
 
     TD_HandleTypeDef Target_Vx_Td;
@@ -167,7 +177,7 @@ class Class_Balance_Chassis{
     void SpeedUpdata();
     void ParamUpdata();
     void SpeedEstimate();
-    void Power_Control_Task(float *Target_Vx);
+    void Power_Control_Task(float *__Target_Vx);
     void Reserve_FSM();           //倒地自起状态机
     void JUMP_1_FSM();            //蹭上台阶的状态机
 
@@ -200,7 +210,7 @@ class Class_Balance_Chassis{
  */
 inline uint8_t Class_Balance_Chassis::IS_NORMAL()
 {
-  return ((Chassis_Control_Type == Chassis_Control_Type_FLLOW || Chassis_Control_Type == Chassis_Control_Type_SPIN || Chassis_Control_Type == Chassis_Control_Type_UNFLLOW) && (Chassis_Stable_Count >= 1500));
+  return ((Chassis_Control_Type == Chassis_Control_Type_FLLOW || Chassis_Control_Type == Chassis_Control_Type_SPIN || Chassis_Control_Type == Chassis_Control_Type_UNFLLOW) && (Chassis_Stable_Count >= 100));
 }
 
 inline float Class_Balance_Chassis::Get_aver_v()

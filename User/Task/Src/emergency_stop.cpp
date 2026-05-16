@@ -56,8 +56,8 @@ void Emergency_StopTask()
   if(Balance_Chassis.IS_NORMAL()){      //机体正常运动下检测机体是否正常
     if(fabs(Balance_Chassis.Get_Roll_Angle()) * 57.3f > 35.0f ||
        fabs(Balance_Chassis.Get_Pitch_Angle()) * 57.3f > 50.0f ||
-       fabs(Balance_Chassis.Left_Leg.Get_Theta()) > 1.0f || 
-       fabs(Balance_Chassis.Right_Leg.Get_Theta()) > 1.0f)
+       fabs(Balance_Chassis.Left_Leg.Get_Theta()) > 1.2f || 
+       fabs(Balance_Chassis.Right_Leg.Get_Theta()) > 1.2f)
     {
         Balance_Chassis.Emergency_Stop_Flag = 1;
     }

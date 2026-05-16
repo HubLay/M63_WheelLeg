@@ -2,6 +2,8 @@
 
 #include "balance_chassis.h"
 
+uint8_t qqqq = 0;
+
 void CMDProcessTask()
 {
   if(Balance_Chassis.Emergency_Stop_Flag){                //整车急停
@@ -60,14 +62,7 @@ void CMDProcessTask()
     }
     else if(Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_SPIN){
 
-      //目标角速度斜坡输入
-      if(fabs(SPIN_OMEGA - Balance_Chassis.Get_Target_Omega()) * 1000.0f / CMDProcess_TASK_DT > 7.0f){
-        tmp_target_omega = Balance_Chassis.Get_Target_Omega() + ((SPIN_OMEGA-Balance_Chassis.Get_Target_Omega()) > 0 ? 1.0f : -1.0f) * 7.0f * CMDProcess_TASK_DT / 1000.0f;        //斜坡逼近目标转速
-      }
-      else{
-        tmp_target_omega = SPIN_OMEGA;
-      }
-
+      tmp_target_omega = SPIN_OMEGA;
       tmp_target_yaw = Balance_Chassis.Get_Yaw_Angle() + tmp_target_omega * CMDProcess_TASK_DT / 1000.0f;                           //小陀螺下不输出Yaw角度这一项
     }
     else if(Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_UNFLLOW){
@@ -80,12 +75,21 @@ void CMDProcessTask()
     }
 
     //目标速度的斜坡输入
-    if(fabs(tmp_target_v - Balance_Chassis.Get_Target_Vx()) * 1000.0f / CMDProcess_TASK_DT < 2.0f){
-      tmp_target_v = tmp_target_v;
+    if(tmp_target_v - Balance_Chassis.Get_Target_Vx() > 0.0f){
+      if((tmp_target_v - Balance_Chassis.Get_Target_Vx()) * 1000.0f / CMDProcess_TASK_DT < Acc_Max_1){
+        tmp_target_v = tmp_target_v;
+      }
+      else{
+        tmp_target_v = Balance_Chassis.Get_Target_Vx() + Acc_Max_1 * CMDProcess_TASK_DT * 1.0f / 1000.0f;
+      }
     }
     else{
-      //加速度过大，斜坡逼近目标
-      tmp_target_v = Balance_Chassis.Get_Target_Vx() + 2.0f * CMDProcess_TASK_DT * 1.0f / 1000.0f * ((tmp_target_v - Balance_Chassis.Get_Target_Vx()) > 0 ? 1.0f : -1.0f);
+      if((tmp_target_v - Balance_Chassis.Get_Target_Vx()) * 1000.0f / CMDProcess_TASK_DT > -ACC_Max_2){
+        tmp_target_v = tmp_target_v;
+      }
+      else{
+        tmp_target_v = Balance_Chassis.Get_Target_Vx() + ACC_Max_2 * CMDProcess_TASK_DT * -1.0f / 1000.0f;
+      }
     }
 
   }
@@ -99,11 +103,28 @@ void CMDProcessTask()
     tmp_target_yaw += 2.0f * PI;
   }
 
-  Math_Constrain(&tmp_target_v, -V_MAX, V_MAX);
-  Math_Constrain(&tmp_target_length, Length_MIN, Length_MAX);
+  
+
+  if(Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_SPIN){
+    Math_Constrain(&tmp_target_length, Length_MIN_SPIN, Length_MAX_SPIN);
+    Math_Constrain(&tmp_target_v, -V_MAX_SPIN, V_MAX_SPIN);
+  }
+  else{
+    Math_Constrain(&tmp_target_length, Length_MIN, Length_MAX);
+    Math_Constrain(&tmp_target_v, -V_MAX, V_MAX);
+
+    if(Balance_Chassis.Get_Target_Length() > 0.28){
+      Math_Constrain(&tmp_target_v, -1.5f, 1.5f);
+    }
+
+  }
 
   Balance_Chassis.Set_Target_V(tmp_target_v);
   Balance_Chassis.Set_Target_Omega(tmp_target_omega);
   Balance_Chassis.Set_Target_Yaw_Angle(tmp_target_yaw);
-  Balance_Chassis.Set_Target_Length(tmp_target_length);
+
+  if(Balance_Chassis.IS_NORMAL()){
+    Balance_Chassis.Set_Target_Length(tmp_target_length);
+  }
+  
 }
