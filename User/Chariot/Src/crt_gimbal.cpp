@@ -53,10 +53,10 @@ void Class_Gimbal::Init()
     Boardc_BMI.Init();
 
     // yaw轴电机  0.6876f
-    Motor_Yaw.PID_Angle.Init(0.3f, 0.0f, 0.0012f, 0.0f, 10, 10);
+    Motor_Yaw.PID_Angle.Init(0.6f, 0.0f, 0.0024f, 0.0f, 6.5, 6.5);
     //Kp给大容易因为大小Yaw联动的噪声出问题，达不到理想的想要，用大Ki补偿误差，还有Ki对抖动不敏感（积分，相位延迟）强制补偿掉，也可以尝试LESO，但他可能对噪声敏感一些（重在抗扰动）
     //Ki太大对阶跃信号抖动滞后，不用了
-    Motor_Yaw.PID_Omega.Init(-4000.0f, 0.0f, 0.0f, 0.0f, Motor_Yaw.Get_Output_Max(), Motor_Yaw.Get_Output_Max());
+    Motor_Yaw.PID_Omega.Init(-6000.0f, 0.0f, 0.0f, 0.0f, Motor_Yaw.Get_Output_Max(), Motor_Yaw.Get_Output_Max());
     Motor_Yaw.PID_Torque.Init(0.f, 0.0f, 0.0f, 0.0f, Motor_Yaw.Get_Output_Max(), Motor_Yaw.Get_Output_Max());
 
     Motor_Yaw.SMC_Control.Init(0.005, 85.0, 85.0, 5.0);
@@ -66,8 +66,8 @@ void Class_Gimbal::Init()
     // pitch轴电机
     // Motor_Pitch.PID_Angle.Init(0.70f, 0.0f, 0.00f, 0.0f, 10.0f, 10.0f);
     // Motor_Pitch.PID_Omega.Init(120.0f, 0.0f, 0.0f, 0.0f, 2048.0f, 2048.0f);
-    Motor_Pitch.PID_Angle.Init(0.3f, 0.0f, 0.0f, 0.0f, 7.0f, 7.0f);
-    Motor_Pitch.PID_Omega.Init(4000.0f, 0.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
+    Motor_Pitch.PID_Angle.Init(0.6f, 1.0f, 0.0f, 0.0f, 2.0f, 5.0f);
+    Motor_Pitch.PID_Omega.Init(7000.0f, 0.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
     // Motor_Pitch.PID_Angle.Init(0.55f, 0.0f, 0.0017, 0.0f, 7.0f, 7.0f);
     // Motor_Pitch.PID_Omega.Init(7000.0f, 5000.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
     // Motor_Pitch.PID_Angle.Init(0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 10.0f);
@@ -87,7 +87,7 @@ void Class_Gimbal::Init()
  * @brief 输出到电机
  *
  */
-float tmp_Target_Angle = 0.0f, tmp_Target_Pitch_Angle = 0.0f, test_c = 0;
+float tmp_Target_Angle = 0.0f, tmp_Target_Pitch_Angle = 0.0f, test_c = 5000.0f;
 extern float Sin_Single;
 
 void Class_Gimbal::Output()
@@ -129,8 +129,14 @@ void Class_Gimbal::Output()
         }
         else if (Gimbal_Control_Type == Gimbal_Control_Type_MINIPC && MiniPC->Get_MiniPC_Status() == MiniPC_Status_ENABLE)
         {
-            Target_Yaw_Angle = MiniPC->Get_Rx_Yaw_Angle();
-            Target_Pitch_Angle = MiniPC->Get_Rx_Pitch_Angle();
+            if(MiniPC->alive == 1){
+                Target_Yaw_Angle = MiniPC->Get_Rx_Yaw_Angle();
+                Target_Pitch_Angle = MiniPC->Get_Rx_Pitch_Angle();
+            }
+            else{
+                Target_Yaw_Angle = pre_yaw_angle;
+                Target_Pitch_Angle = pre_pitch_angle;
+            }
 
             Angle_Continuity_Process(&Target_Yaw_Angle, Motor_Yaw.Get_Transform_Angle());
 
@@ -225,15 +231,15 @@ void Class_Gimbal::TIM_Calculate_PeriodElapsedCallback()
     Motor_Yaw.TIM_PID_PeriodElapsedCallback();
     Motor_Pitch.TIM_PID_PeriodElapsedCallback();
 
-    // if(Get_Gimbal_Control_Type() != Gimbal_Control_Type_DISABLE){
-    //     Pitch_Compensite_Output = test_c * cosf(Motor_Pitch.Get_Transform_Angle() / 57.3f);
-    //     // Pitch_Compensite_Output = Motor_Pitch_LESO.Get_Compensation_Out();
-    //     Motor_Pitch.Compensite_Output(Pitch_Compensite_Output);
-    // }
-    // else{
-    //     Pitch_Compensite_Output = 0;
-    //     Motor_Pitch.Compensite_Output(Pitch_Compensite_Output);
-    // }
+    if(Get_Gimbal_Control_Type() != Gimbal_Control_Type_DISABLE){
+        Pitch_Compensite_Output = -test_c * cosf((Motor_Pitch.Get_Transform_Angle() - 32.41432237f) / 57.3f);
+        // Pitch_Compensite_Output = Motor_Pitch_LESO.Get_Compensation_Out();
+        Motor_Pitch.Compensite_Output(Pitch_Compensite_Output);
+    }
+    else{
+        Pitch_Compensite_Output = 0;
+        Motor_Pitch.Compensite_Output(Pitch_Compensite_Output);
+    }
 
 }
 

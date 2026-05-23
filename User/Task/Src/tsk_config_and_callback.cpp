@@ -234,9 +234,12 @@ void Gimbal_Device_CAN1_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
         }
         case(0x206):
         {
-            Y_Dt = DWT_GetDeltaT(&Y_CNTT);
             chariot.Gimbal.Motor_Pitch.CAN_RxCpltCallback(CAN_RxMessage->Data);
             break;
+        }
+        case(0xa1):
+        {
+            chariot.MiniPC.CAN_RxCpltCallback();
         }
         // case(0xA1):
         // {
@@ -265,7 +268,7 @@ void Gimbal_Device_CAN2_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
         }
         case(0x205):
         {
-            
+            Y_Dt = DWT_GetDeltaT(&Y_CNTT);
             chariot.Gimbal.Motor_Yaw.CAN_RxCpltCallback(CAN_RxMessage->Data);
             break;
         }
@@ -279,13 +282,13 @@ void Gimbal_Device_CAN2_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
         case(0x196):
         case(0x191):
         {
-            chariot.CAN_Gimbal_Rx_Chassis_Callback();
+            chariot.CAN_Gimbal_Rx_Chassis_Callback(CAN_RxMessage);
             break;
         }
 
         case(0x78):
         {
-            chariot.CAN_Gimbal_Rx_Chassis_Callback();
+            chariot.CAN_Gimbal_Rx_Chassis_Callback(CAN_RxMessage);
             break;
         }
 
@@ -352,12 +355,12 @@ void DR16_UART5_Callback(uint8_t *Buffer, uint16_t Length)
  * @param Length 长度
  */
 #ifdef GIMBAL
+uint32_t vt13_cnt = 0;
+float vt13_dt;
 void VT13_UART_Callback(uint8_t *Buffer, uint16_t Length)
 {
+    vt13_dt = DWT_GetDeltaT(&vt13_cnt);
     chariot.VT13.VT13_UART_RxCpltCallback(Buffer);
-
-    //底盘 云台 发射机构 的控制策略
-    chariot.TIM_Control_Callback();
 }
 #endif
 /**
@@ -474,8 +477,14 @@ void Task100us_TIM4_Callback()
         
         chariot.FSM_Alive_Control.Reload_TIM_Status_PeriodElapsedCallback();    //遥控器离线失能保护
 
-        if(chariot.DR16.Get_DR16_Status() == DR16_Status_ENABLE){
+        if(chariot.DR16.Get_DR16_Status() == DR16_Status_ENABLE 
+        || chariot.VT13.Get_VT13_Status() == VT13_Status_ENABLE){
             chariot.TIM_Control_Callback();
+        }
+
+        if(chariot.Chassis_To_Gimbal_Data.Chassis_Control_Type == Chassis_Control_Type_RESERVE){
+            chariot.Booster.Set_Booster_Control_Type(Booster_Control_Type_DISABLE);
+            chariot.Gimbal.Set_Gimbal_Control_Type(Gimbal_Control_Type_DISABLE);
         }
 
         #elif defined(USE_FS_i6X)
@@ -494,7 +503,7 @@ void Task100us_TIM4_Callback()
                 chariot.TIM_Control_Callback();
             }
         }
-            #endif
+        #endif
 
         //生成正弦信号测试
         Single_Time ++;
@@ -511,6 +520,8 @@ void Task100us_TIM4_Callback()
  *
  */
 extern Referee_Rx_A_t CAN3_Chassis_Rx_Data_A;
+float tim5_dt;
+uint32_t tim5_cnt;
 void Task1ms_TIM5_Callback()
 {
     static uint8_t mod2 = 0;
@@ -521,6 +532,7 @@ void Task1ms_TIM5_Callback()
     /************ 判断设备在线状态判断 50ms (所有device:电机，遥控器，裁判系统等) ***************/
     
     chariot.TIM1msMod50_Alive_PeriodElapsedCallback();
+    tim5_dt = DWT_GetDeltaT(&tim5_cnt);
     //HAL_IWDG_Refresh(&hiwdg1);
 
     /****************************** 交互层回调函数 1ms *****************************************/
@@ -613,6 +625,7 @@ extern "C" void Task_Init()
         //遥控器接收
         #ifdef USE_DR16
         UART_Init(&huart5, DR16_UART5_Callback, 18);
+        UART_Init(&huart1, VT13_UART_Callback, 30);
         #elif defined(USE_VT13)
         UART_Init(&huart9, VT13_UART_Callback, 30);
         #elif defined(USE_FS_i6X)

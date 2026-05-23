@@ -74,24 +74,20 @@ void Class_MiniPC::Data_Process(Enum_MiniPC_Data_Source Data_Source)
 {
   if (Data_Source == USB)
   {
-    if(!Verify_CRC16_Check_Sum(USB_Manage_Object->Rx_Buffer,USB_Manage_Object->Rx_Buffer_Length)) return;
-    memcpy(&Data_NUC_To_MCU, USB_Manage_Object->Rx_Buffer, PACKET_LEN);
-   
-    Rx_Chassis_Target_Omega               = Data_NUC_To_MCU.Chassis_Angular_Velocity_Yaw / 100.0f;
-    Rx_Chassis_Target_Velocity_X          = Data_NUC_To_MCU.Move_Linear_Velocity_X / 100.0f;
-    Rx_Chassis_Target_Velocity_Y          = Data_NUC_To_MCU.Move_Linear_Velocity_Y / 100.0f;
-    Rx_Gimbal_Angular_Velocity_Yaw_Main   = Data_NUC_To_MCU.Gimbal_Angular_Velocity_Yaw_Main / 100.0f;
-    //mode = Data_NUC_To_MCU.mode;
-    Rx_Angle_Yaw = Data_NUC_To_MCU.yaw;
-    Rx_Angle_Pitch = Data_NUC_To_MCU.pitch;
-    Math_Constrain(&Rx_Angle_Pitch, -25.0f, 22.0f);
 
-    if(mode == 2){
+  }
+  else if(Data_Source == CAN){
+    memcpy(&Data_NUC_To_MCU, &CAN_Manage_Object->Rx_Buffer.Data, 6);
+    
+    alive          = Data_NUC_To_MCU.alive;
+    Fire           = Data_NUC_To_MCU.Fire;
+    Rx_Angle_Yaw   = Data_NUC_To_MCU.yaw * 180.0f / PI / 10000.0f;
+    Rx_Angle_Pitch = Data_NUC_To_MCU.pitch * 180.0f / PI / 10000.0f;
+
+    if(Fire == 1){
       MiniPC_Fire_Updata_Flag = 1;
     }
 
-    //要发给裁判系统的数据
-    Referee->Set_Sentry_Cmd(Data_NUC_To_MCU.Sentry_Cmd);
   }
 }
 
@@ -109,7 +105,16 @@ extern Referee_Rx_G_t CAN3_Chassis_Rx_Data_G;
 volatile int index = 0;
 void Class_MiniPC::Output()
 {
+  float Yaw_rad = Now_Angle_Yaw * PI / 180.0f;
+  float Pitch_rad = Now_Angle_Pitch * PI / 180.0f;
+  float Roll_rad = Now_Angle_Roll * PI / 180.0f;
 
+  Data_MCU_To_NUC.q[3] = (int16_t)((arm_cos_f32(Roll_rad / 2.0f) * arm_cos_f32(Pitch_rad / 2.0f) * arm_cos_f32(Yaw_rad / 2.0f) + arm_sin_f32(Roll_rad / 2.0f) * arm_sin_f32(Pitch_rad / 2.0f) * arm_sin_f32(Yaw_rad / 2.0f)) * 10000.f);
+  Data_MCU_To_NUC.q[0] = (int16_t)((arm_sin_f32(Roll_rad / 2.0f) * arm_cos_f32(Pitch_rad / 2.0f) * arm_cos_f32(Yaw_rad / 2.0f) - arm_cos_f32(Roll_rad / 2.0f) * arm_sin_f32(Pitch_rad / 2.0f) * arm_sin_f32(Yaw_rad / 2.0f)) * 10000.f);
+  Data_MCU_To_NUC.q[1] = (int16_t)((arm_cos_f32(Roll_rad / 2.0f) * arm_sin_f32(Pitch_rad / 2.0f) * arm_cos_f32(Yaw_rad / 2.0f) + arm_sin_f32(Roll_rad / 2.0f) * arm_cos_f32(Pitch_rad / 2.0f) * arm_sin_f32(Yaw_rad / 2.0f)) * 10000.f);
+  Data_MCU_To_NUC.q[2] = (int16_t)((arm_cos_f32(Roll_rad / 2.0f) * arm_cos_f32(Pitch_rad / 2.0f) * arm_sin_f32(Yaw_rad / 2.0f) - arm_sin_f32(Roll_rad / 2.0f) * arm_sin_f32(Pitch_rad / 2.0f) * arm_cos_f32(Yaw_rad / 2.0f)) * 10000.f);
+
+  memcpy(CAN_MiniPC_Tx_Data, &Data_MCU_To_NUC, sizeof(Struct_MiniPC_Rx_Data));
 }
 
 /**
@@ -119,11 +124,6 @@ void Class_MiniPC::Output()
 void Class_MiniPC::TIM_Write_PeriodElapsedCallback()
 {
   Output();
-}
-
-uint8_t Class_MiniPC::Get_mode()
-{
-  return mode;
 }
 
 /**

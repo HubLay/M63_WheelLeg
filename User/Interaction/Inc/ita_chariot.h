@@ -110,6 +110,23 @@ enum Enum_VT13_Control_Type
     VT13_Control_Type_KEYBOARD,
     VT13_Control_Type_NONE,
 };
+
+// 添加活动控制器枚举类型
+enum Enum_Active_Controller
+{
+    Controller_NONE = 0,
+    Controller_DR16,
+    Controller_VT13
+};
+
+typedef struct __packed
+{
+  Enum_Chassis_Control_Type Chassis_Control_Type;
+  uint8_t reserve_1;
+  uint16_t reserve_2;
+  uint32_t reserve_3;
+}Chassis_To_Gimbal_Data_s;
+
 /**
  * @brief 机器人是否离线 控制模式有限自动机
  *
@@ -216,7 +233,7 @@ public:
 
         void MiniPC_Data_Updata();
 
-        void CAN_Gimbal_Rx_Chassis_Callback();
+        void CAN_Gimbal_Rx_Chassis_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage);
         void CAN_Gimbal_Tx_Chassis_Callback();
         
         void TIM_Control_Callback();
@@ -244,9 +261,9 @@ public:
     //底盘云台通讯数据
     float Gimbal_Tx_Pitch_Angle = 0;
 
-    void Judge_DR16_Control_Type();
+    Chassis_To_Gimbal_Data_s Chassis_To_Gimbal_Data;
 
-    void Control_Chassis();
+    void Judge_Active_Controller();
 
 protected:
 
@@ -339,11 +356,47 @@ protected:
         Enum_DR16_Control_Type DR16_Control_Type = DR16_Control_Type_REMOTE;
         Enum_VT13_Control_Type VT13_Control_Type = VT13_Control_Type_NONE;
 
-        // void Judge_DR16_Control_Type();
+        // 当前活动的控制器
+        Enum_Active_Controller Active_Controller = Controller_NONE;
 
-        // void Control_Chassis();
+        //内部函数
+        float Mouse_Chassis_Shift = 1.0f;
+
+        float VT13_Dead_Zone = 0.0f;
+
+        float VT13_Yaw_Angle_Resolution = 0.0009f * PI * 57.2957795130823f;
+        float VT13_Pitch_Angle_Resolution = 0.0009f * PI * 57.29577951308232f;
+
+        //鼠标云台yaw灵敏度系数, 不同鼠标不同参数
+        float Mouse_Yaw_Angle_Resolution = 57.8 * 1.0f;
+        //鼠标云台pitch灵敏度系数, 不同鼠标不同参数
+        float Mouse_Pitch_Angle_Resolution = 57.8 * 2.0f;
+
+        float KeyBoard_Delta_Length = 0.3f;
+
+        uint8_t Jump_Flag = 0;
+
+        uint8_t Switch_Chassis_Forward = 0;
+        
+        void Judge_DR16_Control_Type();
+
+        void Judge_VT13_Control_Type();
+
+        void Control_Chassis();
         void Control_Gimbal();
         void Control_Booster();
+
+        void DR16_Remote_Control_Chasssis();
+        void DR16_Remote_Control_Gimbal();
+        void DR16_Remote_Control_Booster();
+
+        void VT13_Remote_Control_Chasssis();
+        void VT13_Remote_Control_Gimbal();
+        void VT13_Remote_Control_Booster();
+
+        void VT13_Keyboard_Control_Chasssis();
+        void VT13_Keyboard_Control_Gimbal();
+        void VT13_Keyboard_Control_Booster();
 
         void Transform_Mouse_Axis();
     #endif

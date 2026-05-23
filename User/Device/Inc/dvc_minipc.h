@@ -213,30 +213,7 @@ enum Enum_Booster_Type
  */
 struct Struct_MiniPC_Rx_Data
 {
-    uint8_t header = 0xA5; // 帧头
-
-    // 导航数据
-    Enum_MiniPC_Chassis_Control_Mode Chassis_Control_Mode; // 底盘控制模式 不随动/随动/小陀螺
-    int16_t Chassis_Angular_Velocity_Yaw;                  // 底盘转动的角速度, rad/s
-    int16_t Move_Linear_Velocity_X;                        // 移动线速度x, m/s
-    int16_t Move_Linear_Velocity_Y;                        // 移动线速度y, m/s
-    int16_t Gimbal_Angular_Velocity_Yaw_Main;              // 云台Yaw转动的角速度，rad/s
-
-    // 自瞄数据
-    uint8_t mode;   // 云台控制模式 0: 不控制:巡航, 1: 控制云台但不开火，2: 控制云台且开火：自瞄
-    uint8_t cam_id; // HIK_Camera:0 逆时针旋转 USB小相机 左边：1  后面：2  右边：3   HIK和USB都没有瞄到发4
-    float yaw;
-    float yaw_vel;
-    float yaw_acc;
-    float pitch;
-    float pitch_vel;
-    float pitch_acc;
-
-    // 裁判系统
-    //  uint8_t SuperElectric_Control_Mode;  // 超电控制模式, 0关超电, 1开超电  电控控制
-    uint32_t Sentry_Cmd; // 裁判系统信息  bit0：判断是否复活  bit21-22：姿态控制模式 1是进攻姿态 2是防御姿态 3是移动姿态(默认)
-
-    uint16_t crc16;
+   int16_t q[4];
 } __attribute__((packed));
 
 /**
@@ -245,43 +222,10 @@ struct Struct_MiniPC_Rx_Data
  */
 struct Struct_MiniPC_Tx_Data
 {
-    uint8_t header = 0x5A; // 帧头
-    // 自瞄
-    uint8_t mode;       // 0: 空闲, 1: 自瞄, 2: 小符, 3: 大符  哨兵不开符状态下全为1
-    uint8_t self_color; // 0:红方 1：蓝方 2：中立方 3：紫方
-    float q[4];         // wxyz顺序
-    float yaw;
-    float yaw_vel;
-    float pitch;
-    float pitch_vel;
-    float bullet_speed;
-    uint16_t bullet_count; // 子弹累计发送次数
-
-    // 导航
-    int16_t Gimbal_Now_Yaw_Angle_Main; // 当前云台Yaw角度
-    int16_t Gimbal_Now_Yaw_Angle;      // 当前云台小Yaw角度
-    int16_t Chassis_Now_yaw_Angle;     // 当前底盘yaw角度
-
-    // 裁判系统
-    uint8_t Game_Progress;         // 比赛阶段
-    uint16_t Self_HP;              // 自身hp
-    uint16_t Self_Outpost_HP;      // 己方前哨战hp
-    uint16_t Enemy_Outpost_HP;     // 对方前哨站hp
-    uint16_t Self_Base_HP;         // 己方基地hp
-    uint16_t Projectile_Allowance; // 允许发弹量
-    uint16_t Remaining_Time;       // 比赛剩余时间
-
-    // 雷达站数据
-    uint8_t Invincivle_State;  // 敌对方无敌状态
-    uint16_t enemy_position_x; // 前两位高位为机器编号，后十四位为坐标值
-    uint16_t enemy_position_y; // 前两位高位为机器编号，后十四位为坐标值
-
-    // 特殊策略使用
-    int16_t Target_Position_X; // 云台手发点坐标x
-    int16_t Target_Position_Y; // 云台手发点坐标y
-    uint8_t Dart_Target;       // 飞镖随机固定靶信息
-
-    uint16_t crc16;
+    uint8_t alive;
+    uint8_t Fire;
+    int16_t yaw;
+    int16_t pitch;
 } __attribute__((packed));
 
 struct Struct_MiniPC_Aimmer_Tx_Data
@@ -426,6 +370,8 @@ public:
     uint8_t Get_mode();
 
     uint8_t MiniPC_Fire_Updata_Flag = 0;
+    uint8_t alive = 0;
+    uint8_t Fire = 0;
     // Struct_MiniPC_Tx_Data_Test Data_MCU_To_NUC_Test;
     // Struct_MiniPC_Rx_Data_Test Data_NUC_To_MCU_Test;
 
@@ -458,9 +404,9 @@ protected:
     //迷你主机状态
     Enum_MiniPC_Status MiniPC_Status = MiniPC_Status_DISABLE;
     //迷你主机对外接口信息
-    Struct_MiniPC_Rx_Data Data_NUC_To_MCU;
+    Struct_MiniPC_Rx_Data Data_MCU_To_NUC;
     //迷你主机对外接口信息
-    Struct_MiniPC_Tx_Data Data_MCU_To_NUC;
+    Struct_MiniPC_Tx_Data Data_NUC_To_MCU;
     Struct_MiniPC_Aimmer_Tx_Data Data_MCU_To_NUC_Aimmer;
 
     Enum_Supercap_Mode   Supercap_Mode   = Supercap_DISABLE;
@@ -483,7 +429,6 @@ protected:
 	float Rx_Angle_Roll = 0.0f;
 	float Rx_Angle_Pitch = 0.0f;
 	float Rx_Angle_Yaw = 0.0f;
-    uint8_t mode = 0;
 
     const float g = 9.8; // 重力加速度
     float bullet_v = 24.0; // 子弹速度
@@ -600,23 +545,23 @@ float Class_MiniPC::Get_Gimbal_Angle_Yaw()
 }
 inline uint8_t Class_MiniPC::Get_Camera_Id()
 {
-  return (Data_NUC_To_MCU.cam_id);
+//   return (Data_NUC_To_MCU.cam_id);
 }
 inline float Class_MiniPC::Get_yaw_vel()
 {
-  return (Data_NUC_To_MCU.yaw_vel);
+//   return (Data_NUC_To_MCU.yaw_vel);
 }
 inline float Class_MiniPC::Get_pitch_vel()
 {
-  return (Data_NUC_To_MCU.pitch_vel);
+//   return (Data_NUC_To_MCU.pitch_vel);
 }
 inline float Class_MiniPC::Get_yaw_acc()
 {
-  return (Data_NUC_To_MCU.yaw_acc);
+//   return (Data_NUC_To_MCU.yaw_acc);
 }
 inline float Class_MiniPC::Get_pitch_acc()
 {
-  return (Data_NUC_To_MCU.pitch_acc);
+//   return (Data_NUC_To_MCU.pitch_acc);
 }
 
 // /**
@@ -628,16 +573,6 @@ inline float Class_MiniPC::Get_pitch_acc()
 // {
 //   return (Data_NUC_To_MCU.Fire_Flag);
 // }
-
-/**
- * @brief 获取底盘移动控制模式
- *
- * @return Enum_MiniPC_Chassis_Control_Mode 移动控制模式
- */
-Enum_MiniPC_Chassis_Control_Mode Class_MiniPC::Get_Chassis_Control_Mode()
-{
-    return (Data_NUC_To_MCU.Chassis_Control_Mode);
-}
 
 /**
  * @brief 获取是否识别到目标（自瞄 or 巡航）

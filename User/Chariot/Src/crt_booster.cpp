@@ -177,7 +177,7 @@ void Class_Booster::Init()
     //拨弹盘电机
     Motor_Driver.PID_Angle.Init(28.0f, 0.0f, 0.0f, 0.0f, 5.0f * PI, 5.0f * PI);
     Motor_Driver.PID_Omega.Init(1500.0f, 0.0f, 0.0f, 0.0f, Motor_Driver.Get_Output_Max(), Motor_Driver.Get_Output_Max());
-    Motor_Driver.Init(&hfdcan2, DJI_Motor_ID_0x201, DJI_Motor_Control_Method_OMEGA);
+    Motor_Driver.Init(&hfdcan2, DJI_Motor_ID_0x201, DJI_Motor_Control_Method_OMEGA, 90.0f);
 
     //摩擦轮电机左
     Motor_Friction_Left.PID_Omega.Init(80.0f, 0.0f, 0.f, 0.0f, 2000.0f, Motor_Friction_Left.Get_Output_Max());
@@ -289,9 +289,12 @@ void Class_Booster::Output()
             Motor_Friction_Left.Set_DJI_Motor_Control_Method(DJI_Motor_Control_Method_OMEGA);
             Motor_Friction_Right.Set_DJI_Motor_Control_Method(DJI_Motor_Control_Method_OMEGA);
 
-            // 根据冷却计算拨弹盘默认速度, 此速度下与冷却均衡
-            Default_Driver_Omega = 30.f / 10.0f / 9.0f * 2.0f * PI;
-            Motor_Driver.Set_Target_Omega_Radian(Default_Driver_Omega);
+            // Default_Driver_Omega = 13.96f;
+            // Motor_Driver.Set_Target_Omega_Radian(Default_Driver_Omega);
+
+            // // 根据冷却计算拨弹盘默认速度, 此速度下与冷却均衡
+            // Default_Driver_Omega = 10.f / 10.0f / 9.0f * 2.0f * PI;
+            // Motor_Driver.Set_Target_Omega_Radian(Default_Driver_Omega);
 
             if (shoot_time == 0)                    //说明停火进来的
             {
@@ -317,6 +320,10 @@ void Class_Booster::Output()
                 Driver_Omega = shoot_speed * 2 * PI / 9.f;
                 Math_Constrain(&Driver_Omega, 0.0f, 18.0f);
                 Motor_Driver.Set_Target_Omega_Radian(Driver_Omega);
+
+                if((Heat_Max - Heat) > 30){
+                    shoot_time = 0;         //重新开始计算热量限制
+                }
             }
 
             if (shoot_time < ShootTime)
@@ -363,8 +370,8 @@ void Class_Booster::TIM_Calculate_PeriodElapsedCallback()
     // 冷却时间获取
     if (Referee->Get_Referee_Status() == Referee_Status_DISABLE)
     {
-        Heat_Max = 260;
-        Cooling_Value = 30; // 裁判系统没反馈用默认速度
+        Heat_Max = 70;
+        Cooling_Value = 10; // 裁判系统没反馈用默认速度
         //无需裁判系统的热量控制计算
         FSM_Heat_Detect.Reload_TIM_Status_PeriodElapsedCallback();
     }

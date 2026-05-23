@@ -136,6 +136,8 @@ extern uint8_t CAN3_Chassis_Tx_Data_E[];   //底盘给云台发送缓冲区
 extern uint8_t CAN3_Chassis_Tx_Data_F[];   //底盘给云台发送缓冲区
 extern uint8_t CAN3_Chassis_Tx_Data_G[];   //底盘给云台发送缓冲区
 
+extern uint8_t CAN_MiniPC_Tx_Data[8];
+
 /*********LK电机 控制缓冲区***********/
 extern uint8_t CAN1_0x141_Tx_Data[8];
 extern uint8_t CAN1_0x142_Tx_Data[8];

@@ -75,6 +75,8 @@ uint8_t CAN3_Chassis_Tx_Data_G[8];   //底盘给云台发送缓冲区
 uint8_t CAN3_Gimbal_Tx_Chassis_Data[8];  //云台给底盘发送缓冲区
 uint8_t CAN3_Sentry_CMD_Data[8];   //云台给底盘发送缓冲区
 
+uint8_t CAN_MiniPC_Tx_Data[8];
+
 /*********LK电机 控制缓冲区***********/
 uint8_t CAN1_0x141_Tx_Data[8];
 uint8_t CAN1_0x142_Tx_Data[8];
@@ -353,6 +355,8 @@ void TIM_CAN_PeriodElapsedCallback()
         mod20 = 0;
     }
     #elif defined (GIMBAL)
+
+    CAN_Send_Data(&hfdcan1, 0xa0, CAN_MiniPC_Tx_Data, 8);         // 拨弹盘电机
 
     // CAN_Send_Data(&hfdcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);          // Yaw Pitch 6020
     CAN_Send_Data(&hfdcan1, 0x1fe, CAN1_0x1fe_Tx_Data, 8);          //Pitch 6020
