@@ -295,7 +295,7 @@ void Class_Booster::Output()
             // // 根据冷却计算拨弹盘默认速度, 此速度下与冷却均衡
             // Default_Driver_Omega = 10.f / 10.0f / 9.0f * 2.0f * PI;
             // Motor_Driver.Set_Target_Omega_Radian(Default_Driver_Omega);
-
+ 
             if (shoot_time == 0)                    //说明停火进来的
             {
                 ShootTime = ((Heat_Max - Heat) + 2 * Cooling_Value) * 10;
@@ -320,10 +320,6 @@ void Class_Booster::Output()
                 Driver_Omega = shoot_speed * 2 * PI / 9.f;
                 Math_Constrain(&Driver_Omega, 0.0f, 18.0f);
                 Motor_Driver.Set_Target_Omega_Radian(Driver_Omega);
-
-                if((Heat_Max - Heat) > 30){
-                    shoot_time = 0;         //重新开始计算热量限制
-                }
             }
 
             if (shoot_time < ShootTime)
@@ -331,12 +327,19 @@ void Class_Booster::Output()
                 //10 * 控制周期(s)
                 shoot_time += 2;                           //注意这里应该和运算频率有关
             }
+            
+            if(shoot_time >= ShootTime)
+            {
+                if((Heat_Max - Heat) > 30){
+                    shoot_time = 0;         //重新开始计算热量限制
+                }
+            }
 
             // Motor_Driver.Set_Target_Omega_Radian(Default_Driver_Omega * 2.5f);//测试用 平常注释
-            if (Heat > Heat_Max * 0.95f)         //这里和最大热量有关
-            {
-                Motor_Driver.Set_Target_Omega_Radian(Default_Driver_Omega * 0.4f);
-            }
+            // if (Heat > Heat_Max * 0.95f)         //这里和最大热量有关
+            // {
+            //     Motor_Driver.Set_Target_Omega_Radian(Default_Driver_Omega * 0.4f);
+            // }
             // if (Heat > 340)
             // {
             //     Motor_Driver.Set_Target_Omega_Radian(Default_Driver_Omega * 0.25f);
