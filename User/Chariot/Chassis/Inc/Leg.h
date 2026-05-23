@@ -105,6 +105,11 @@ class Class_Leg{
 
 };
 
+inline float Class_Leg::Get_LQR_Wheel_T()
+{
+  return (Wheel_T);
+}
+
 inline float Class_Leg::Get_Length()
 {
   return (L0);

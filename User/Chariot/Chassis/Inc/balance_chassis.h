@@ -43,14 +43,24 @@ typedef struct {
   float Target_Velocity_X;
   float Target_Delta_Length;
   float Target_Delta_Yaw;
+  uint8_t Complex_Flag;
   Enum_Chassis_Control_Type Target_Control_Type;
 } Target_CMD_s;
+
+typedef struct __packed
+{
+  Enum_Chassis_Control_Type Chassis_Control_Type;
+  uint8_t reserve_1;
+  uint16_t reserve_2;
+  uint32_t reserve_3;
+}Chassis_To_Gimbal_Data_s;
 
 struct Gimbal_To_Chassis_s{
   int16_t tmp_Velocity_X;
   int16_t dr16_left_y;
-  uint16_t reserve_1;
-  uint8_t Supercap_Mode;
+  int8_t Pitch_uint8;
+  uint8_t Complex_Flag_1;
+  uint8_t Complex_Flag;
   Enum_Chassis_Control_Type control_type;
 }__attribute__((packed));
 
@@ -60,6 +70,43 @@ enum Enum_Reserve_Status : uint8_t
   Reserve_Status_1,                       //Pitch翻车,摆正车体
   Reserve_Status_2,                       //摆杆摆正过程
   Reserve_Complete,                       //自救完成
+};
+
+/**
+ * @brief 底盘冲刺状态枚举
+ *
+ */
+enum Enum_Sprint_Status : uint8_t
+{
+    Sprint_Status_DISABLE = 0, 
+    Sprint_Status_ENABLE,
+};
+
+/**
+ * @brief 摩擦轮控制类型
+ *
+ */
+enum Enum_Friction_Control_Type
+{
+    Friction_Control_Type_DISABLE = 0,
+    Friction_Control_Type_ENABLE,
+};
+
+enum Enum_Referee_UI_Refresh_Status : uint8_t
+{
+    Referee_UI_Refresh_Status_DISABLE = 0,
+    Referee_UI_Refresh_Status_ENABLE,
+};
+
+/**
+ * @brief 云台控制类型
+ *
+ */
+enum Enum_Gimbal_Control_Type :uint8_t
+{
+    Gimbal_Control_Type_DISABLE = 0,
+    Gimbal_Control_Type_NORMAL,
+    Gimbal_Control_Type_MINIPC,
 };
 
 typedef enum {
@@ -105,6 +152,8 @@ class Class_Balance_Chassis{
     inline float Get_Pitch_Angle();
     inline float Get_Roll_Angle();
     inline float Get_Yaw_Angle();
+    inline float Get_LQR_3();
+    inline float Get_LQR_2();
     inline JumpState_e Get_Jump_State();
     inline Enum_Chassis_Control_Type Get_Chassis_Control_Type();
 
@@ -115,6 +164,7 @@ class Class_Balance_Chassis{
     void Set_Target_Yaw_Angle(float __Target_Yaw_Angle);
     void Set_Reserve_Status(Enum_Reserve_Status __Reserve_Status);
     void Set_Chassis_Control_Type(Enum_Chassis_Control_Type __Chassis_Control_Type);
+    void Set_Jump_Enable_Flag(uint8_t __Jump_Enable_Flag);
     void Reset_Chassis_Stable_Count();
 
     void CAN_Chassis_Rx_Gimbal_Callback(uint8_t *Rx_Data);
@@ -135,6 +185,20 @@ class Class_Balance_Chassis{
 
     float Compensite_F0 = 0.0f;                             //转向前馈补偿力
     float Limit_Power_Vx_Max = 2.0f;
+    float Chassis_Forward = 1.0f;
+
+    uint8_t MiniPC_Aim = 0;             //0 上位机离线   1 没瞄到在线   2 在线瞄到
+
+    float Gimbal_Pitch_Angle = 0.0f;
+    Enum_Reserve_Status Reserve_Status = Reserve_Disable;
+    Enum_Sprint_Status Sprint_Status = Sprint_Status_DISABLE;
+    Enum_Friction_Control_Type Fric_Status = Friction_Control_Type_DISABLE;
+    Enum_Gimbal_Control_Type Gimbal_Control_Type = Gimbal_Control_Type_DISABLE;
+    Enum_Referee_UI_Refresh_Status Referee_UI_Refresh_Status = Referee_UI_Refresh_Status_DISABLE;
+    Enum_Referee_UI_Refresh_Status Last_Referee_UI_Refresh_Status = Referee_UI_Refresh_Status_DISABLE;
+
+    uint8_t Switch_Chassis_Forward = 0;
+    uint8_t Last_Switch_Chassis_Forward = 0;
 
   protected:
 
@@ -160,14 +224,14 @@ class Class_Balance_Chassis{
     float Limit_Power = 70.0f;
     float Limit_Power_Kp = 0.3f;
 
-    uint8_t Jump_Enable_Flag = 1;
+    uint8_t Jump_Enable_Flag = 0;
 
     TD_HandleTypeDef Target_Vx_Td;
 
     KalmanFilter_t V_EstimateKF;
 
     JumpState_e jump_state = JUMP_BACK_SWING;
-    Enum_Reserve_Status Reserve_Status = Reserve_Disable;
+    
     volatile Enum_Chassis_Control_Type Chassis_Control_Type = Chassis_Control_Type_DISABLE;
 
   private:
@@ -188,6 +252,9 @@ class Class_Balance_Chassis{
 
     void Get_Polyfit_K();              //根据当前腿长获取K矩阵
     void V_EstimateKF_Init();
+
+    Chassis_To_Gimbal_Data_s Chassis_To_Gimbal_Data;
+    void CAN_Chassis_To_Gimbal_Data_Process();
 
     //相关中间变量小写
     float aver_v;
@@ -276,6 +343,16 @@ inline float Class_Balance_Chassis::Get_Roll_Angle()
 inline float Class_Balance_Chassis::Get_Yaw_Angle()
 {
   return Yaw_Angle; 
+}
+
+inline float Class_Balance_Chassis::Get_LQR_3()
+{
+  return (LQR_Out[3]);
+}
+
+inline float Class_Balance_Chassis::Get_LQR_2()
+{
+  return (LQR_Out[2]);
 }
 
 inline Enum_Chassis_Control_Type Class_Balance_Chassis::Get_Chassis_Control_Type()

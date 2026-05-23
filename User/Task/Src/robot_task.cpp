@@ -8,6 +8,7 @@
 #include "printf_task.h"
 #include "emergency_stop.h"
 #include "robot_cmd.h"
+#include "ui_task.h"
 #include "balance_chassis.h"
 
 TaskHandle_t CanTransmit_TaskHandle;
@@ -16,12 +17,14 @@ TaskHandle_t Robot_TaskHandle;
 TaskHandle_t CMD_TaskHandle;
 TaskHandle_t Printf_TaskHandle;
 TaskHandle_t Emergency_Stop_TaskHandle;
+TaskHandle_t UI_TaskHandle;
 
 struct_DwtTime CanTransmit_dwt;
 struct_DwtTime CMDProcess_dwt;
 struct_DwtTime Daemon_dwt;
 struct_DwtTime Robot_dwt;
 struct_DwtTime Emergency_Stop_dwt;
+struct_DwtTime UI_dwt;
 
 void Printf_Task(void *Para){
   while (1)
@@ -40,6 +43,7 @@ void CanTransmit_Task(void *Para){            //非一发一收模式的报文�
 
     CAN_Send_Data(&hfdcan1, 0x200, CAN1_0x200_Tx_Data, 8);          
     CAN_Send_Data(&hfdcan2, 0x200, CAN2_0x200_Tx_Data, 8);
+    CAN_Send_Data(&hfdcan3, 0x78, CAN_Chassis_Tx_Data, 8);
     CAN_Send_Data(&hfdcan2, 0x66, CAN_Supercap_Tx_Data, 8);
 
     vTaskDelay(CAN_TRANSMIT_TASK_DT);           //1000Hz
@@ -78,6 +82,16 @@ void Daemon_Task(void *Para){
     DaemonTask();
 
     vTaskDelay(DAEMON_TASK_DT);
+  }
+}
+
+void UI_Task(void *Para){
+  while(1){
+    UI_dwt.dt = DWT_GetDeltaT(&UI_dwt.cnt_last);
+
+    UITask();
+
+    vTaskDelay(UI_Task_DT);
   }
 }
 

@@ -900,6 +900,11 @@
               <FileType>8</FileType>
               <FilePath>..\User\Device\Src\dvc_VT13.cpp</FilePath>
             </File>
+            <File>
+              <FileName>dvc_GraphicsSendTask.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\User\Device\Src\dvc_GraphicsSendTask.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -989,6 +994,11 @@
               <FileName>emergency_stop.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\User\Task\Src\emergency_stop.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>ui_task.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\User\Task\Src\ui_task.cpp</FilePath>
             </File>
           </Files>
         </Group>

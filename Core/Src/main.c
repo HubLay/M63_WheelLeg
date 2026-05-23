@@ -67,6 +67,7 @@ void MX_FREERTOS_Init(void);
 uint32_t reset_flag; 
 /* USER CODE END 0 */
 
+
 /**
   * @brief  The application entry point.
   * @retval int

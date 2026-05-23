@@ -9,6 +9,7 @@ extern TaskHandle_t Robot_TaskHandle;
 extern TaskHandle_t CMD_TaskHandle;
 extern TaskHandle_t Printf_TaskHandle;
 extern TaskHandle_t Emergency_Stop_TaskHandle;
+extern TaskHandle_t UI_TaskHandle;
 
 void CanTransmit_Task(void *Para);
 void Daemon_Task(void *Para);
@@ -16,6 +17,7 @@ void CMDProcess_Task(void *Para);
 void Robot_Task(void *Para);
 void Printf_Task(void *Para);
 void Emergency_Stop_Task(void *Para);
+void UI_Task(void *Para);
 
 
 

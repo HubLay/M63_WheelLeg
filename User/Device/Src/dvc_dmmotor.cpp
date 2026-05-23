@@ -57,42 +57,42 @@ uint8_t *allocate_tx_data(FDCAN_HandleTypeDef *hcan, Enum_DM_Motor_ID __CAN_ID)
     {
         switch (__CAN_ID)
         {
-        case (DM_Motor_ID_0xA1):
+        case (DM_Motor_ID_0x01):
         {
             tmp_tx_data_ptr = CAN1_0xxf1_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA2):
+        case (DM_Motor_ID_0x02):
         {
             tmp_tx_data_ptr = CAN1_0xxf2_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA3):
+        case (DM_Motor_ID_0x03):
         {
             tmp_tx_data_ptr = CAN1_0xxf3_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA4):
+        case (DM_Motor_ID_0x04):
         {
             tmp_tx_data_ptr = CAN1_0xxf4_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA5):
+        case (DM_Motor_ID_0x05):
         {
             tmp_tx_data_ptr = CAN1_0xxf5_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA6):
+        case (DM_Motor_ID_0x06):
         {
             tmp_tx_data_ptr = CAN1_0xxf6_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA7):
+        case (DM_Motor_ID_0x07):
         {
             tmp_tx_data_ptr = CAN1_0xxf7_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA8):
+        case (DM_Motor_ID_0x08):
         {
             tmp_tx_data_ptr = CAN1_0xxf8_Tx_Data;
         }
@@ -103,42 +103,42 @@ uint8_t *allocate_tx_data(FDCAN_HandleTypeDef *hcan, Enum_DM_Motor_ID __CAN_ID)
     {
         switch (__CAN_ID)
         {
-        case (DM_Motor_ID_0xA1):
+        case (DM_Motor_ID_0x01):
         {
             tmp_tx_data_ptr = CAN2_0xxf1_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA2):
+        case (DM_Motor_ID_0x02):
         {
             tmp_tx_data_ptr = CAN2_0xxf2_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA3):
+        case (DM_Motor_ID_0x03):
         {
             tmp_tx_data_ptr = CAN2_0xxf3_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA4):
+        case (DM_Motor_ID_0x04):
         {
             tmp_tx_data_ptr = CAN2_0xxf4_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA5):
+        case (DM_Motor_ID_0x05):
         {
             tmp_tx_data_ptr = CAN2_0xxf5_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA6):
+        case (DM_Motor_ID_0x06):
         {
             tmp_tx_data_ptr = CAN2_0xxf6_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA7):
+        case (DM_Motor_ID_0x07):
         {
             tmp_tx_data_ptr = CAN2_0xxf7_Tx_Data;
         }
         break;
-        case (DM_Motor_ID_0xA8):
+        case (DM_Motor_ID_0x08):
         {
             tmp_tx_data_ptr = CAN2_0xxf8_Tx_Data;
         }
@@ -178,15 +178,15 @@ void Class_DM_Motor_8009P::Init(FDCAN_HandleTypeDef *hcan, Enum_DM_Motor_ID __CA
     Daemon_Init_Config_s Daemon_Init_Config_Ins = Get_DaemonInitConfig_s(10, this, DM8009P_Offline_Callback_Function);
     daemon_instance = DaemonRegister(Daemon_Init_Config_Ins);
 
-    for(int i = 0; i < 10;i++){
-        CAN_Send_Data(CAN_Manage_Object->CAN_Handler, static_cast<Enum_DM_Motor_ID>(CAN_ID) + 0xf0, DM_Motor_CAN_Message_Clear_Error, 8);               //清除错误状态
-        DWT_Delay_us(500);
-    }
+    // for(int i = 0; i < 10;i++){
+    //     CAN_Send_Data(CAN_Manage_Object->CAN_Handler, static_cast<Enum_DM_Motor_ID>(CAN_ID) + 0x03, DM_Motor_CAN_Message_Clear_Error, 8);               //清除错误状态
+    //     DWT_Delay_us(500);
+    // }
 
-    for(int i = 0; i < 10;i++){
-        CAN_Send_Data(CAN_Manage_Object->CAN_Handler, static_cast<Enum_DM_Motor_ID>(CAN_ID) + 0xf0, DM_Motor_CAN_Message_Enter, 8);         //使能电机
-        DWT_Delay_us(500);
-    }
+    // for(int i = 0; i < 10;i++){
+    //     CAN_Send_Data(CAN_Manage_Object->CAN_Handler, static_cast<Enum_DM_Motor_ID>(CAN_ID) + 0x03, DM_Motor_CAN_Message_Enter, 8);         //使能电机
+    //     DWT_Delay_us(500);
+    // }
 
 }
 
@@ -207,6 +207,10 @@ void Class_DM_Motor_8009P::Data_Process()
     tmp_torque = ((tmp_buffer->Omega_3_0_Torque_11_8 & 0x0f) << 8) | (tmp_buffer->Torque_7_0);
 
     Data.CAN_ID = tmp_buffer->CAN_ID;
+
+    if(Data.CAN_ID == (CAN_ID + 0x10 + 0x03)){
+        DaemonReload(daemon_instance);
+    }
 
     //计算圈数与总角度值
     delta_position = tmp_position - Data.Pre_Position;
@@ -245,8 +249,6 @@ void Class_DM_Motor_8009P::Set_Output_Torque(float __Output_Torque)
  */
 void Class_DM_Motor_8009P::CAN_RxCpltCallback(uint8_t *Rx_Data)
 {
-    DaemonReload(daemon_instance);
-
     Data_Process();
 }
 
@@ -255,7 +257,15 @@ void Class_DM_Motor_8009P::CAN_RxCpltCallback(uint8_t *Rx_Data)
  */
 void Class_DM_Motor_8009P::Offline_Callback_Function()
 {
-    // CAN_Send_Data(CAN_Manage_Object->CAN_Handler, static_cast<Enum_DM_Motor_ID>(CAN_ID) + 0xf0, DM_Motor_CAN_Message_Enter, 8);
+    for(int i = 0; i < 10;i++){
+        CAN_Send_Data(CAN_Manage_Object->CAN_Handler, static_cast<Enum_DM_Motor_ID>(CAN_ID) + 0x03, DM_Motor_CAN_Message_Clear_Error, 8);               //清除错误状态
+        DWT_Delay_us(50);
+    }
+
+    for(int i = 0; i < 10;i++){
+        CAN_Send_Data(CAN_Manage_Object->CAN_Handler, static_cast<Enum_DM_Motor_ID>(CAN_ID) + 0x03, DM_Motor_CAN_Message_Enter, 8);         //使能电机
+        DWT_Delay_us(50);
+    }
 }
 
 /**

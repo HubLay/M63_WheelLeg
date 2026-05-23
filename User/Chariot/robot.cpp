@@ -13,12 +13,12 @@
 
 void Chassis_Device_CAN1_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage){
   switch (CAN_RxMessage->Header.Identifier){
-    case(0xA1):
+    case(0x01):
     {
       Balance_Chassis.Left_Leg.Front_Joint.CAN_RxCpltCallback(CAN_RxMessage->Data);
       break;
     }
-    case(0xA2):
+    case(0x02):
     {
       Balance_Chassis.Left_Leg.Back_Joint.CAN_RxCpltCallback(CAN_RxMessage->Data);
       break;
@@ -33,12 +33,12 @@ void Chassis_Device_CAN1_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage){
 
 void Chassis_Device_CAN2_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage){
   switch (CAN_RxMessage->Header.Identifier){
-    case(0xA1):
+    case(0x01):
     {
       Balance_Chassis.Right_Leg.Front_Joint.CAN_RxCpltCallback(CAN_RxMessage->Data);
       break;
     }
-    case(0xA2):
+    case(0x02):
     {
       Balance_Chassis.Right_Leg.Back_Joint.CAN_RxCpltCallback(CAN_RxMessage->Data);
       break;
@@ -128,6 +128,7 @@ void osTaskCreate(){
   xTaskCreate(Robot_Task, "Robot_Task", 512, NULL, 2, &Robot_TaskHandle);
   xTaskCreate(Ins_Task, "Ins_Task", 512, NULL, 2, &Ins_TaskHandle);
   xTaskCreate(CMDProcess_Task, "CMDProcess_Task", 128, NULL, 2, &CMD_TaskHandle); 
+  xTaskCreate(UI_Task, "UI_Task", 512, NULL, 2, &UI_TaskHandle);
 
   xTaskCreate(Printf_Task, "Printf_Task", 512, NULL, 1, &Printf_TaskHandle);
   xTaskCreate(Emergency_Stop_Task, "Emergency_Stop_Task", 128, NULL, 3, &Emergency_Stop_TaskHandle); 
