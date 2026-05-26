@@ -8,48 +8,47 @@
 
 // K矩阵拟合系数 K_Fit_Coefficients[40][6]
 // 第n个K元素: K_n = p00 + p10*l_l + p01*l_r + p20*l_l^2 + p11*l_l*l_r + p02*l_r^2
-
 float K_Fit_Coefficients[40][6] = {
-    {    -97.8881f,      182.684f,      65.6251f,     -68.0585f,     -417.371f,      271.797f},  // K[0][0]
-    {    -67.1043f,      177.937f,      14.3905f,     -72.9723f,     -311.637f,      196.721f},  // K[0][1]
-    {    -2.23184f,      1.62634f,      -20.873f,    -0.119368f,     -8.41238f,      27.8325f},  // K[0][2]
-    {   -0.548827f,      4.52946f,      -10.257f,     -6.25067f,     -2.32751f,      12.0633f},  // K[0][3]
-    {    -18.5059f,      53.2619f,       80.125f,      -6.9576f,      -62.654f,      -33.288f},  // K[0][4]
-    {   -0.496833f,      3.75368f,      5.30542f,     -2.54725f,      2.29076f,     -5.94352f},  // K[0][5]
-    {    -115.257f,      71.1243f,        124.9f,     -36.1982f,     -125.311f,     -2.34016f},  // K[0][6]
-    {     -11.976f,      1.06768f,      22.8495f,     0.548935f,     -5.05388f,     -19.0424f},  // K[0][7]
-    {     103.755f,     -267.084f,       910.08f,      323.758f,     -126.185f,     -988.674f},  // K[0][8]
-    {    -1.54973f,      5.10867f,      51.2694f,      5.90422f,     -40.3401f,     -38.0401f},  // K[0][9]
-    {    -97.8881f,      65.6251f,      182.684f,      271.797f,     -417.371f,     -68.0585f},  // K[1][0]
-    {    -67.1043f,      14.3905f,      177.937f,      196.721f,     -311.637f,     -72.9723f},  // K[1][1]
-    {     2.23184f,       20.873f,     -1.62634f,     -27.8325f,      8.41238f,     0.119368f},  // K[1][2]
-    {    0.548827f,       10.257f,     -4.52946f,     -12.0633f,      2.32751f,      6.25067f},  // K[1][3]
-    {    -115.257f,        124.9f,      71.1243f,     -2.34016f,     -125.311f,     -36.1982f},  // K[1][4]
-    {     -11.976f,      22.8495f,      1.06768f,     -19.0424f,     -5.05388f,     0.548935f},  // K[1][5]
-    {    -18.5059f,       80.125f,      53.2619f,      -33.288f,      -62.654f,      -6.9576f},  // K[1][6]
-    {   -0.496833f,      5.30542f,      3.75368f,     -5.94352f,      2.29076f,     -2.54725f},  // K[1][7]
-    {     103.755f,       910.08f,     -267.084f,     -988.674f,     -126.185f,      323.758f},  // K[1][8]
-    {    -1.54973f,      51.2694f,      5.10867f,     -38.0401f,     -40.3401f,      5.90422f},  // K[1][9]
-    {     9.45644f,     -84.2143f,      150.216f,      29.0928f,      82.2974f,     -191.055f},  // K[2][0]
-    {     8.58622f,     -43.0036f,      74.0945f,      9.87919f,      47.7134f,     -94.8672f},  // K[2][1]
-    {    -1.99335f,     -5.69234f,       8.5402f,      9.23248f,     -6.84941f,     -3.35206f},  // K[2][2]
-    {   -0.475617f,     -3.10883f,      3.43437f,      5.13723f,     -4.57371f,    -0.199828f},  // K[2][3]
-    {     5.56384f,      19.9396f,      1.75658f,     -44.0771f,      39.4854f,     -26.4769f},  // K[2][4]
-    {    0.408402f,      1.13219f,     -0.61127f,     -0.83017f,     0.672308f,    -0.284312f},  // K[2][5]
-    {     12.7113f,     -34.3429f,      111.234f,      38.1672f,     -24.5191f,     -92.9248f},  // K[2][6]
-    {     1.25536f,     -1.58526f,      8.21307f,      2.34562f,     -2.71367f,     -5.31222f},  // K[2][7]
-    {     64.9701f,     -90.1223f,      -76.815f,      73.4952f,      84.3918f,     -16.6548f},  // K[2][8]
-    {     5.31923f,     -12.7431f,     -2.11852f,      9.88623f,      11.3477f,       -6.228f},  // K[2][9]
-    {     9.45644f,      150.216f,     -84.2143f,     -191.055f,      82.2974f,      29.0928f},  // K[3][0]
-    {     8.58622f,      74.0945f,     -43.0036f,     -94.8672f,      47.7134f,      9.87919f},  // K[3][1]
-    {     1.99335f,      -8.5402f,      5.69234f,      3.35206f,      6.84941f,     -9.23248f},  // K[3][2]
-    {    0.475617f,     -3.43437f,      3.10883f,     0.199828f,      4.57371f,     -5.13723f},  // K[3][3]
-    {     12.7113f,      111.234f,     -34.3429f,     -92.9248f,     -24.5191f,      38.1672f},  // K[3][4]
-    {     1.25536f,      8.21307f,     -1.58526f,     -5.31222f,     -2.71367f,      2.34562f},  // K[3][5]
-    {     5.56384f,      1.75658f,      19.9396f,     -26.4769f,      39.4854f,     -44.0771f},  // K[3][6]
-    {    0.408402f,     -0.61127f,      1.13219f,    -0.284312f,     0.672308f,     -0.83017f},  // K[3][7]
-    {     64.9701f,      -76.815f,     -90.1223f,     -16.6548f,      84.3918f,      73.4952f},  // K[3][8]
-    {     5.31923f,     -2.11852f,     -12.7431f,       -6.228f,      11.3477f,      9.88623f}   // K[3][9]
+    {    -96.5545f,      176.669f,       106.05f,      -91.689f,     -379.671f,       198.05f},  // K[0][0]
+    {    -64.6624f,      171.034f,      38.5274f,     -85.6268f,     -282.999f,      146.562f},  // K[0][1]
+    {     -2.1959f,    0.0104624f,     -20.0622f,      2.30338f,     -10.2525f,      28.3793f},  // K[0][2]
+    {   -0.534528f,       3.6115f,     -9.50624f,     -4.85271f,     -3.29124f,      11.8824f},  // K[0][3]
+    {    -6.65279f,       52.892f,      87.5563f,     -53.5347f,      -5.2478f,     -85.6105f},  // K[0][4]
+    {   -0.464306f,      2.44983f,      5.34708f,     -1.47951f,      2.89551f,     -5.92465f},  // K[0][5]
+    {    -122.088f,      6.59311f,      231.659f,      20.1404f,     -78.1071f,     -156.691f},  // K[0][6]
+    {    -5.78317f,      0.94824f,      9.93108f,     0.577056f,     -5.39357f,     -9.71229f},  // K[0][7]
+    {     120.398f,      -277.23f,      887.505f,      349.063f,     -132.921f,     -1002.65f},  // K[0][8]
+    {   -0.829964f,      3.28272f,       52.116f,      6.89871f,     -37.9673f,     -41.9249f},  // K[0][9]
+    {    -96.5545f,       106.05f,      176.669f,       198.05f,     -379.671f,      -91.689f},  // K[1][0]
+    {    -64.6624f,      38.5274f,      171.034f,      146.562f,     -282.999f,     -85.6268f},  // K[1][1]
+    {      2.1959f,      20.0622f,   -0.0104624f,     -28.3793f,      10.2525f,     -2.30338f},  // K[1][2]
+    {    0.534528f,      9.50624f,      -3.6115f,     -11.8824f,      3.29124f,      4.85271f},  // K[1][3]
+    {    -122.088f,      231.659f,      6.59311f,     -156.691f,     -78.1071f,      20.1404f},  // K[1][4]
+    {    -5.78317f,      9.93108f,      0.94824f,     -9.71229f,     -5.39357f,     0.577056f},  // K[1][5]
+    {    -6.65279f,      87.5563f,       52.892f,     -85.6105f,      -5.2478f,     -53.5347f},  // K[1][6]
+    {   -0.464306f,      5.34708f,      2.44983f,     -5.92465f,      2.89551f,     -1.47951f},  // K[1][7]
+    {     120.398f,      887.505f,      -277.23f,     -1002.65f,     -132.921f,      349.063f},  // K[1][8]
+    {   -0.829964f,       52.116f,      3.28272f,     -41.9249f,     -37.9673f,      6.89871f},  // K[1][9]
+    {     11.0744f,     -85.1534f,      148.038f,      29.2957f,      85.8848f,     -194.453f},  // K[2][0]
+    {     9.67867f,     -43.7494f,       71.264f,      9.54446f,      51.0358f,      -94.908f},  // K[2][1]
+    {    -2.00645f,     -5.84193f,      8.86619f,      9.26624f,     -6.24804f,     -4.05345f},  // K[2][2]
+    {   -0.478317f,     -3.21184f,       3.5689f,      5.18993f,     -4.35735f,    -0.487019f},  // K[2][3]
+    {      6.1826f,      18.2078f,     -8.46516f,     -32.4082f,      20.5423f,     -6.67626f},  // K[2][4]
+    {    0.386686f,     0.776862f,    -0.493589f,    -0.360526f,     0.867031f,    -0.619751f},  // K[2][5]
+    {     14.3476f,     -25.0733f,      104.857f,      29.0335f,     -16.0514f,     -96.6673f},  // K[2][6]
+    {    0.759864f,     -1.62219f,      5.16019f,      2.33626f,     -2.57324f,      -1.0541f},  // K[2][7]
+    {     64.0489f,     -91.7202f,     -97.9422f,      73.3877f,      88.5232f,      19.4997f},  // K[2][8]
+    {     5.45702f,     -13.0403f,     -3.14601f,      9.96659f,       12.037f,     -5.09242f},  // K[2][9]
+    {     11.0744f,      148.038f,     -85.1534f,     -194.453f,      85.8848f,      29.2957f},  // K[3][0]
+    {     9.67867f,       71.264f,     -43.7494f,      -94.908f,      51.0358f,      9.54446f},  // K[3][1]
+    {     2.00645f,     -8.86619f,      5.84193f,      4.05345f,      6.24804f,     -9.26624f},  // K[3][2]
+    {    0.478317f,      -3.5689f,      3.21184f,     0.487019f,      4.35735f,     -5.18993f},  // K[3][3]
+    {     14.3476f,      104.857f,     -25.0733f,     -96.6673f,     -16.0514f,      29.0335f},  // K[3][4]
+    {    0.759864f,      5.16019f,     -1.62219f,      -1.0541f,     -2.57324f,      2.33626f},  // K[3][5]
+    {      6.1826f,     -8.46516f,      18.2078f,     -6.67626f,      20.5423f,     -32.4082f},  // K[3][6]
+    {    0.386686f,    -0.493589f,     0.776862f,    -0.619751f,     0.867031f,    -0.360526f},  // K[3][7]
+    {     64.0489f,     -97.9422f,     -91.7202f,      19.4997f,      88.5232f,      73.3877f},  // K[3][8]
+    {     5.45702f,     -3.14601f,     -13.0403f,     -5.09242f,       12.037f,      9.96659f}   // K[3][9]
 };
 // 平衡点偏移拟合系数 Offset_Fit_Coefficients[3][6]
 // [0]: theta_l_eq, [1]: theta_r_eq, [2]: theta_b_eq
@@ -224,6 +223,7 @@ float test_tp = 0.0f;
 uint8_t start_flag = 0;
 uint32_t Test_cnt = 0;
 float tmp_target_length = 0.20f;
+float Left_Right_Err;
 void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
 {
   //控制量的更改和模式什么的一般在中断里边实现
@@ -279,7 +279,7 @@ void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
 
       //在腿部稳定的情况下，如果开启了上台阶模式，进入到达台阶的判断
       if(Jump_Enable_Flag == 1 && Chassis_Control_Type == Chassis_Control_Type_FLLOW){
-        if(Left_Leg.L0 > 0.30f && Left_Leg.theta > 0.5f && Right_Leg.L0 > 0.30f && Right_Leg.theta > 0.5f){
+        if(Left_Leg.L0 > 0.32f && Left_Leg.theta > 0.5f && Right_Leg.L0 > 0.32f && Right_Leg.theta > 0.5f){
           Chassis_Control_Type = Chassis_Control_Type_JUMP_1;     //磕上台阶
         }
       }
@@ -301,16 +301,12 @@ void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
 
   }
 
-  // if(start_flag){
+  // if(Target_CMD_Data.Target_Control_Type == Chassis_Control_Type_FLLOW){
   //   //测试代码    
-  //   Target_Length = Left_Leg.Target_L0 = Right_Leg.Target_L0 = tmp_target_length;
-
-  //   Left_Leg.Air_Status = Leg_Air;
-  //   Right_Leg.Air_Status = Leg_Air;
-
-  //   SynthesizeMotion();       //转向和防劈叉
+  //   // Target_Length = Left_Leg.Target_L0 = Right_Leg.Target_L0 = tmp_target_length;
+  //   Reserve_FSM();            //自救的逻辑还需要完善，比如腿在前方的时候
   //   LengthControl();          //腿长和Roll
-  //   NormalOutput();
+  //   ReserveOutput();          //自救模式下的力矩输出
 
   //   Left_Leg.VMCProject();
   //   Right_Leg.VMCProject();
@@ -326,9 +322,12 @@ void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
 
 }
 
-float tmp_Pitch_Err;
+float tmp_X_Err, tmp_Pitch_Err, tmp_Left_Theta_Err, tmp_Right_Theta_Err;
 float tmp_wt;
 float LQR_Tp_L[10];
+float pitch_max;
+float pitch_min;
+float T_other;
 void Class_Balance_Chassis::LQR_Calc()
 {
   Target_l_theta = Offset_Fit_Coefficients[0][0] + Offset_Fit_Coefficients[0][1]*Left_Leg.L0 + Offset_Fit_Coefficients[0][2]*Right_Leg.L0 
@@ -362,48 +361,70 @@ void Class_Balance_Chassis::LQR_Calc()
 
   Get_Polyfit_K();
 
+  tmp_X_Err = (Target_X - X);
   tmp_Pitch_Err = (Target_Pitch_Angle - Pitch_Angle);
+  tmp_Left_Theta_Err = (Target_l_theta - Left_Leg.theta);
+  tmp_Right_Theta_Err = (Target_r_theta - Right_Leg.theta);
   // float a =  -0.20f * Vx + 0.50f;
   // if(a < 0.1f){
   //   a = 0.1f;
   // }
-  Math_Constrain(&tmp_Pitch_Err, -0.8f, 0.8f);
+  Math_Constrain(&tmp_X_Err, -0.5f, 0.5f);
+  Math_Constrain(&tmp_Pitch_Err, -0.08f, 0.08f);
+  Math_Constrain(&tmp_Left_Theta_Err, -0.6f, 0.6f);
+  Math_Constrain(&tmp_Right_Theta_Err, -0.6f, 0.6f);
 
-  //T(r-b)
-  LQR_Out[0] = K[0][0] * (Target_X - X) + K[0][1] * (True_Target_Vx - Vx) + K[0][2] * (Target_Yaw_Angle - Yaw_Angle)
-              + K[0][3] * (Target_Omega - GyroYaw) + K[0][4] * (Target_l_theta - Left_Leg.theta) + K[0][5] * (Target_l_dtheta - Left_Leg.d_theta)
-              + K[0][6] * (Target_r_theta - Right_Leg.theta) + K[0][7] * (Target_r_dtheta - Right_Leg.d_theta) 
-              + K[0][8] * tmp_Pitch_Err + K[0][9] * (Target_Picth_Omega - GyroPitch);
-
-  //T(l-b)
-  LQR_Out[1] = K[1][0] * (Target_X - X) + K[1][1] * (True_Target_Vx - Vx) + K[1][2] * (Target_Yaw_Angle - Yaw_Angle)
-              + K[1][3] * (Target_Omega - GyroYaw) + K[1][4] * (Target_l_theta - Left_Leg.theta) + K[1][5] * (Target_l_dtheta - Left_Leg.d_theta)
-              + K[1][6] * (Target_r_theta - Right_Leg.theta) + K[1][7] * (Target_r_dtheta - Right_Leg.d_theta) 
-              + K[1][8] * tmp_Pitch_Err + K[1][9] * (Target_Picth_Omega - GyroPitch);
+  LQR_Output_Calc(tmp_X_Err, tmp_Left_Theta_Err, tmp_Right_Theta_Err, tmp_Pitch_Err);
   
-  //T(wr-r)
-  LQR_Out[2] = K[2][0] * (Target_X - X) + K[2][1] * (True_Target_Vx - Vx) + K[2][2] * (Target_Yaw_Angle - Yaw_Angle)
-              + K[2][3] * (Target_Omega - GyroYaw) + K[2][4] * (Target_l_theta - Left_Leg.theta) + K[2][5] * (Target_l_dtheta - Left_Leg.d_theta)
-              + K[2][6] * (Target_r_theta - Right_Leg.theta) + K[2][7] * (Target_r_dtheta - Right_Leg.d_theta) 
-              + K[2][8] * tmp_Pitch_Err + K[2][9] * (Target_Picth_Omega - GyroPitch);
-  
-  //T(wl-l)
-  LQR_Out[3] = K[3][0] * (Target_X - X) + K[3][1] * (True_Target_Vx - Vx) + K[3][2] * (Target_Yaw_Angle - Yaw_Angle)
-              + K[3][3] * (Target_Omega - GyroYaw) + K[3][4] * (Target_l_theta - Left_Leg.theta) + K[3][5] * (Target_l_dtheta - Left_Leg.d_theta)
-              + K[3][6] * (Target_r_theta - Right_Leg.theta) + K[3][7] * (Target_r_dtheta - Right_Leg.d_theta) 
-              + K[3][8] * tmp_Pitch_Err + K[3][9] * (Target_Picth_Omega - GyroPitch);
+  // if(IS_NORMAL()){
+  //   if(K[2][8] * tmp_Pitch_Err * LQR_Out[2] > 0.0f){     //说明转矩较大是Pitch引起的
 
-  tmp_wt = LQR_Out[3];
-  LQR_Tp_L[0] = K[1][0] * (Target_X - X);
-  LQR_Tp_L[1] = K[1][1] * (True_Target_Vx - Vx);
-  LQR_Tp_L[2] = K[1][2] * (Target_Yaw_Angle - Yaw_Angle);
-  LQR_Tp_L[3] = K[1][3] * (Target_Omega - GyroYaw);
-  LQR_Tp_L[4] = K[1][4] * (Target_l_theta - Left_Leg.theta);
-  LQR_Tp_L[5] = K[1][5] * (Target_l_dtheta - Left_Leg.d_theta);
-  LQR_Tp_L[6] = K[1][6] * (Target_r_theta - Right_Leg.theta);
-  LQR_Tp_L[7] = K[1][7] * (Target_r_dtheta - Right_Leg.d_theta);
-  LQR_Tp_L[8] = K[1][8] * tmp_Pitch_Err;
-  LQR_Tp_L[9] = K[1][9] * (Target_Picth_Omega - GyroPitch);
+  //     float T_Max = 4.9f;
+  //     T_other = LQR_Out[2] - K[2][8] * tmp_Pitch_Err;
+
+  //     if(K[2][8] > 0.0f){
+  //       pitch_max = (T_Max - T_other) / K[2][8];
+  //       pitch_min = (-T_Max - T_other) / K[2][8];
+  //     }
+  //     else{
+  //       pitch_max = (-T_Max - T_other) / K[2][8];
+  //       pitch_min = (T_Max - T_other) / K[2][8];
+  //     }
+
+  //     if(pitch_max < 0.05f){
+  //       pitch_max = 0.05f;
+  //     }
+  //     if(pitch_min > -0.05f){
+  //       pitch_min = -0.05f;
+  //     }
+
+  //     if(fabs(tmp_Pitch_Err) > 0.15f){
+  //       if(tmp_Pitch_Err > pitch_max){
+  //         tmp_Pitch_Err = pitch_max;
+  //       }
+  //       else if(tmp_Pitch_Err < pitch_min){
+  //         tmp_Pitch_Err = pitch_min;
+  //       }
+  //       // LQR_Output_Calc(tmp_Pitch_Err);
+  //     }
+  //     else{
+  //       // Emergency_Stop_Flag = 1;
+  //     }
+
+  //   }
+  // }
+
+  tmp_wt = LQR_Out[2];
+  LQR_Tp_L[0] = K[2][0] * (Target_X - X);
+  LQR_Tp_L[1] = K[2][1] * (True_Target_Vx - Vx);
+  LQR_Tp_L[2] = K[2][2] * (Target_Yaw_Angle - Yaw_Angle);
+  LQR_Tp_L[3] = K[2][3] * (Target_Omega - GyroYaw);
+  LQR_Tp_L[4] = K[2][4] * (Target_l_theta - Left_Leg.theta);
+  LQR_Tp_L[5] = K[2][5] * (Target_l_dtheta - Left_Leg.d_theta);
+  LQR_Tp_L[6] = K[2][6] * (Target_r_theta - Right_Leg.theta);
+  LQR_Tp_L[7] = K[2][7] * (Target_r_dtheta - Right_Leg.d_theta);
+  LQR_Tp_L[8] = K[2][8] * tmp_Pitch_Err;
+  LQR_Tp_L[9] = K[2][9] * (Target_Picth_Omega - GyroPitch);
   
   if(Left_Leg.Get_Air_Status() == Leg_Air){
     LQR_Out[1] = K[1][4] * (Target_l_theta - Left_Leg.theta) + K[1][5] * (Target_l_dtheta - Left_Leg.d_theta);
@@ -415,6 +436,33 @@ void Class_Balance_Chassis::LQR_Calc()
     LQR_Out[2] = 0.0f;
   }
 
+}
+
+void Class_Balance_Chassis::LQR_Output_Calc(float __tmp_x_err, float __tmp_left_theta_err, float __tmp_right_theta_err, float __tmp_pitch_err)
+{
+  //T(r-b)
+  LQR_Out[0] = K[0][0] * __tmp_x_err + K[0][1] * (True_Target_Vx - Vx) + K[0][2] * (Target_Yaw_Angle - Yaw_Angle)
+              + K[0][3] * (Target_Omega - GyroYaw) + K[0][4] * __tmp_left_theta_err + K[0][5] * (Target_l_dtheta - Left_Leg.d_theta)
+              + K[0][6] * __tmp_right_theta_err + K[0][7] * (Target_r_dtheta - Right_Leg.d_theta) 
+              + K[0][8] * __tmp_pitch_err + K[0][9] * (Target_Picth_Omega - GyroPitch);
+
+  //T(l-b)
+  LQR_Out[1] = K[1][0] * __tmp_x_err + K[1][1] * (True_Target_Vx - Vx) + K[1][2] * (Target_Yaw_Angle - Yaw_Angle)
+              + K[1][3] * (Target_Omega - GyroYaw) + K[1][4] * __tmp_left_theta_err + K[1][5] * (Target_l_dtheta - Left_Leg.d_theta)
+              + K[1][6] * __tmp_right_theta_err + K[1][7] * (Target_r_dtheta - Right_Leg.d_theta) 
+              + K[1][8] * __tmp_pitch_err + K[1][9] * (Target_Picth_Omega - GyroPitch);
+  
+  //T(wr-r)
+  LQR_Out[2] = K[2][0] * __tmp_x_err + K[2][1] * (True_Target_Vx - Vx) + K[2][2] * (Target_Yaw_Angle - Yaw_Angle)
+              + K[2][3] * (Target_Omega - GyroYaw) + K[2][4] * __tmp_left_theta_err + K[2][5] * (Target_l_dtheta - Left_Leg.d_theta)
+              + K[2][6] * __tmp_right_theta_err + K[2][7] * (Target_r_dtheta - Right_Leg.d_theta) 
+              + K[2][8] * __tmp_pitch_err + K[2][9] * (Target_Picth_Omega - GyroPitch);
+  
+  //T(wl-l)
+  LQR_Out[3] = K[3][0] * __tmp_x_err + K[3][1] * (True_Target_Vx - Vx) + K[3][2] * (Target_Yaw_Angle - Yaw_Angle)
+              + K[3][3] * (Target_Omega - GyroYaw) + K[3][4] * __tmp_left_theta_err + K[3][5] * (Target_l_dtheta - Left_Leg.d_theta)
+              + K[3][6] * __tmp_right_theta_err + K[3][7] * (Target_r_dtheta - Right_Leg.d_theta) 
+              + K[3][8] * __tmp_pitch_err + K[3][9] * (Target_Picth_Omega - GyroPitch);
 }
 
 void Class_Balance_Chassis::LengthControl()
@@ -763,21 +811,32 @@ void Class_Balance_Chassis::CAN_Chassis_To_Gimbal_Data_Process()
   memcpy(CAN_Chassis_Tx_Data, &Chassis_To_Gimbal_Data, 8);
 }
 
+uint32_t status_cnt = 0;
+uint32_t xxx1 = 0;
+float reserve_right_theta_I = 0.0f, reserve_left_theta_I = 0.0f;
 void Class_Balance_Chassis::Reserve_FSM()
 {
-  static uint16_t status_cnt = 0;
-  static uint8_t Theta_Synchronize = 0, Theta_Synchronize_FLag = 0;
+  static uint8_t Theta_Synchronize = 0, Theta_Synchronize_FLag = 0, Pre_Theta_Synchronize = 0;   // 正在进行同步  2 保证同步只进入一次
   static uint8_t Left_Alpha_Status = 0, Right_Alpha_Status = 0;     //切到1的时候代表偏角过大，先速度环在切回角度环
-  static float resver_theta_Kp = 50.0f, reserve_d_alpha_Kp = 8.0f;
+  static float resver_theta_Kp = 50.0f, reserve_d_alpha_Kp = 3.0f, reserve_d_alpha_Kp_1 = 5.0f;
+  static float Theta_Synchronize_Kp = 2.0f;
   static float resver_theta_Kd = 0.7f;
-  static float Target_Left_theta = 0.15f, Target_Right_theta = 0.15f;     //左右坐标系不一致
+  static float Target_Left_theta = 0.10f, Target_Right_theta = 0.10f;     //左右坐标系不一致
+
+  Left_Leg.Air_Status = Leg_UnAir;
+  Right_Leg.Air_Status = Leg_UnAir;
+
   switch (Reserve_Status)
   {
     case(Reserve_Disable):
     {
+      xxx1 = 2;
       status_cnt = 0;
+      reserve_right_theta_I = 0;
+      reserve_left_theta_I = 0;
       Theta_Synchronize = 0;
       Theta_Synchronize_FLag = 0;
+      Pre_Theta_Synchronize = 0;
       Left_Alpha_Status = Right_Alpha_Status = 0;
       Left_Leg.Disable();
       Right_Leg.Disable();
@@ -791,14 +850,14 @@ void Class_Balance_Chassis::Reserve_FSM()
     }
     case(Reserve_Status_1):
     {
-      if(Pitch_Angle < -30.0f / 57.3f || Pitch_Angle > 30.0f / 57.3f){                //仍然是翻车状态
+      if(Pitch_Angle < -50.0f / 57.3f || Pitch_Angle > 50.0f / 57.3f){                //仍然是翻车状态
         status_cnt = 0;
         Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.33f;
 
         Left_Leg.Wheel_T = 0.0f;
         Right_Leg.Wheel_T = 0.0f;
 
-        float Left_Right_Err = Normalize_Angle_Radian_PI_to_PI(Left_Leg.alpha - Right_Leg.alpha);
+        Left_Right_Err = Normalize_Angle_Radian_PI_to_PI(Left_Leg.alpha - Right_Leg.alpha);
 
         if(fabs(Left_Right_Err) > 0.3 && Theta_Synchronize_FLag == 0){
           Theta_Synchronize = 1;
@@ -809,13 +868,24 @@ void Class_Balance_Chassis::Reserve_FSM()
         }
 
         if(Theta_Synchronize){
-          Right_Leg.Target_L0 = 0.16f;
-          Left_Leg.Tp = 0.0f;
-          Right_Leg.Tp = reserve_d_alpha_Kp * (-3.0f - Right_Leg.d_alpha);
+          xxx1 = 5;
+            Left_Leg.Target_L0 = 0.16f;
+            reserve_left_theta_I += (-4.0f - Left_Leg.d_alpha) * 0.02f;
+            Left_Leg.Tp = reserve_d_alpha_Kp * (-4.0f - Left_Leg.d_alpha) + reserve_left_theta_I * 1.2f;
+            Right_Leg.Tp = reserve_d_alpha_Kp * (0.0f - Right_Leg.d_alpha);
         }
         else{
-          Left_Leg.Tp  = reserve_d_alpha_Kp * (3.0f - Left_Leg.d_alpha);
-          Right_Leg.Tp = reserve_d_alpha_Kp * (3.0f - Right_Leg.d_alpha);
+          xxx1 = 6;
+          if(Theta_Synchronize == 0 && Pre_Theta_Synchronize == 1){     //从正在同步切换到不需要同步了，清零积分
+            reserve_right_theta_I = 0.0f;
+            reserve_left_theta_I = 0.0f;
+          }
+
+          reserve_left_theta_I += (4.0f - Left_Leg.d_alpha) * 0.02f;
+          reserve_right_theta_I += (4.0f - Right_Leg.d_alpha) * 0.02f;
+
+          Left_Leg.Tp  = reserve_d_alpha_Kp_1 * (4.0f - Left_Leg.d_alpha) + reserve_left_theta_I * 2.0f - Theta_Synchronize_Kp * Left_Right_Err;
+          Right_Leg.Tp = reserve_d_alpha_Kp_1 * (4.0f - Right_Leg.d_alpha) + reserve_right_theta_I * 2.0f + Theta_Synchronize_Kp * Left_Right_Err;
         }
       }
       else{
@@ -825,17 +895,24 @@ void Class_Balance_Chassis::Reserve_FSM()
         Right_Leg.Wheel_T = 0.0f;
         Left_Leg.Tp  = 0.0f;
         Right_Leg.Tp = 0.0f;
+        reserve_right_theta_I = 0.0f;
+        reserve_left_theta_I = 0.0f;
       }
 
-      if(fabs(Pitch_Angle) < 20.0f / 57.3f){
+      Pre_Theta_Synchronize = Theta_Synchronize;
+
+      if(fabs(Pitch_Angle) < 50.0f / 57.3f){
         status_cnt ++;
       }
 
       //状态切换时清零计数
-      if(status_cnt > 50){
+      if(status_cnt > 300){
         status_cnt = 0;
         Reserve_Status = Reserve_Status_2; 
       }
+
+      Math_Constrain(&Left_Leg.Tp, -30.0f, 30.0f);
+      Math_Constrain(&Right_Leg.Tp, -30.0f, 30.0f);
 
       break;
     }
@@ -891,8 +968,11 @@ void Class_Balance_Chassis::Reserve_FSM()
         status_cnt ++;
       }
 
-      if(status_cnt > 300){
+      xxx1 = 1;
+
+      if(status_cnt > 100){
         status_cnt = 0;
+        xxx1 = 10;
         Left_Alpha_Status = 0;
         Right_Alpha_Status = 0;
         Reserve_Status = Reserve_Complete; 
@@ -905,10 +985,15 @@ void Class_Balance_Chassis::Reserve_FSM()
       X = 0.0f;
       Vx = 0.0f;
 
+      xxx1 = 20;
+
       Target_X  = 0.0f;
       Target_Vx = 0.0f;
       Theta_Synchronize = 0;
       Theta_Synchronize_FLag = 0;
+      Pre_Theta_Synchronize = 0;
+      reserve_right_theta_I = 0.0f;
+      reserve_left_theta_I = 0.0f;
       Target_Yaw_Angle = Yaw_Angle;
       Chassis_Stable_Count = 0;
       Target_Roll_Angle = 0.0f;
@@ -945,6 +1030,8 @@ void Class_Balance_Chassis::Reserve_FSM()
       else{
         Balance_Chassis.Chassis_Forward = -1.0f;
       }
+
+      V_EstimateKF_Init();    
 
       #ifdef UNFLLOW_ENABLE
       Chassis_Control_Type = Chassis_Control_Type_UNFLLOW;        //切回正常lqr
@@ -983,8 +1070,8 @@ void Class_Balance_Chassis::JUMP_1_FSM()
   float BACK_TARGET_ALPHA_L = 1.0f;   // 左腿后摆
   float BACK_TARGET_ALPHA_R = 1.0f;
 
-  float NORMAL_Theta_L = 0.15f;
-  float NORMAL_Theta_R = 0.15f;
+  float NORMAL_Theta_L = 0.08f;
+  float NORMAL_Theta_R = 0.08f;
 
   float Left_Target_Alpha_Omega = 10.0f;         //向后转动
   float Right_Target_Alpha_Omega = 10.0f;
@@ -1103,7 +1190,7 @@ void Class_Balance_Chassis::JUMP_1_FSM()
 
       //相关状态重置
       X = Vx = 0.0f;
-      Target_X = 0.3f;
+      Target_X = 0.0f;
       True_Target_Vx = Target_Vx = 0.0f;
       Target_Roll_Angle = 0.0f;
       Target_Yaw_Angle = Yaw_Angle;
@@ -1111,6 +1198,7 @@ void Class_Balance_Chassis::JUMP_1_FSM()
       Target_Length = 0.20f;
       Left_Leg.Target_L0  = 0.20f;
       Right_Leg.Target_L0 = 0.20f;
+      V_EstimateKF_Init();          //重启状态
 
       // Left_Leg.Tp = 0.0f;
       // Right_Leg.Tp = 0.0f;

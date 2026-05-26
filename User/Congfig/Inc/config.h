@@ -85,10 +85,10 @@
 
 #define Reference_Rad (-0.5675f)
 
-#define Length_MIN 0.15f
-#define Length_MAX 0.330f
+#define Length_MIN 0.16f
+#define Length_MAX 0.350f
 
-#define Length_MIN_SPIN 0.15f
+#define Length_MIN_SPIN 0.16f
 #define Length_MAX_SPIN 0.27f
 
 // #define H7_Offset_X -0.12f       //IMU距离车体中心的距离，IMU自身坐标系 m 量不出来硬调

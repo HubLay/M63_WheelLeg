@@ -29,7 +29,7 @@ void Class_External_IMU::UART_BMI_Data_Process(uint8_t *Buffer){
 void Class_External_IMU::Init(float yaw_offset)
 { 
     //EKF初始化
-    IMU_QuaternionEKF_Init(10, 0.001, 10000000, 1, 0, yaw_offset, &QEKF_INS);
+    IMU_QuaternionEKF_Init(10, 0.001, 10000000, 1, 0, 0,&QEKF_INS);
 }
 
 static float tmp_gravity_b[3];

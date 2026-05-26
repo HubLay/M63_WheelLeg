@@ -236,6 +236,7 @@ class Class_Balance_Chassis{
 
   private:
     void LQR_Calc();
+    void LQR_Output_Calc(float __tmp_x_err, float __tmp_left_theta_err, float __tmp_right_theta_err, float __tmp_pitch_err);
     void LengthControl();         // 腿长控制，Roll保持机体水平
     void SynthesizeMotion();      // 转向和抗劈叉
     void SpeedUpdata();

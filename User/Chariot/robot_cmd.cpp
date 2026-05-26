@@ -183,7 +183,7 @@ void CMDProcessTask()
     Math_Constrain(&tmp_target_v, -tmp_v_max, tmp_v_max);
 
     if(Balance_Chassis.Get_Target_Length() > 0.28f){
-      Math_Constrain(&tmp_target_v, -1.3f, 1.3f);
+      Math_Constrain(&tmp_target_v, -1.8f, 1.8f);
     }
 
   }
