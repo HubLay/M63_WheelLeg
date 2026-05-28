@@ -93,6 +93,14 @@ void CMDProcessTask()
     else if(Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_SPIN){
 
       tmp_target_omega = SPIN_OMEGA;
+
+      if(fabs(SPIN_OMEGA - Balance_Chassis.Get_Target_Omega()) * 1000.0f / CMDProcess_TASK_DT > 8.0f){
+        tmp_target_omega = Balance_Chassis.Get_Target_Omega() + ((SPIN_OMEGA - Balance_Chassis.Get_Target_Omega()) > 0 ? 1.0f:-1.0f) * 8.0f * CMDProcess_TASK_DT / 1000.0f;
+      }
+      else{
+        tmp_target_omega = SPIN_OMEGA;
+      }
+
       tmp_target_yaw = Balance_Chassis.Get_Yaw_Angle() + tmp_target_omega * CMDProcess_TASK_DT / 1000.0f;                           //小陀螺下不输出Yaw角度这一项
     }
     else if(Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_UNFLLOW){
@@ -193,9 +201,10 @@ void CMDProcessTask()
   Balance_Chassis.Set_Target_V(tmp_target_v);
   Balance_Chassis.Set_Target_Omega(tmp_target_omega);
   Balance_Chassis.Set_Target_Yaw_Angle(tmp_target_yaw);
+  Balance_Chassis.Set_Target_Length(tmp_target_length);
 
   if(Balance_Chassis.IS_NORMAL()){
-    Balance_Chassis.Set_Target_Length(tmp_target_length);
+    
   }
   
 }

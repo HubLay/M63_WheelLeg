@@ -24,7 +24,7 @@ void Class_IMU::Init()
     //  HAL_Delay(100);
 
     // 初始化MahonyAHRS算法，并传入初始四元数
-    IMU_MahonyAHRS.init(INS_Quat);
+    IMU_MahonyAHRS.init();
  
     //EKF初始化                         第三个加速度参数加大，减小运动过程中的影响    过于不相信加速度导致静止到目标收敛慢，看起来在飘
     IMU_QuaternionEKF_Init(10, 0.001, 1000000, 0.9996, 0.0, 0.00249999994f, &QEKF_INS);
@@ -68,7 +68,13 @@ void Class_IMU::TIM_Calculate_PeriodElapsedCallback(void)
     // 核心函数,EKF更新四元数
     IMU_QuaternionEKF_Update(INS.Gyro[0], INS.Gyro[1], INS.Gyro[2], INS.Accel[0], INS.Accel[1], INS.Accel[2], INS_DWT_Dt, &QEKF_INS);
 
+    // IMU_MahonyAHRS.MahonyAHRSupdate(INS.Gyro[0], INS.Gyro[1], INS.Gyro[2], INS.Accel[0], INS.Accel[1], INS.Accel[2], 0, 0, 0);
+    // memcpy(INS.q, IMU_MahonyAHRS.q, sizeof(IMU_MahonyAHRS.q));
     memcpy(INS.q, QEKF_INS.q, sizeof(QEKF_INS.q));
+
+    // IMU_MahonyAHRS.Get_Quat_To_Angle();
+
+    // memcpy(INS.q, QEKF_INS.q, sizeof(QEKF_INS.q));
 
     // 机体系基向量转换到导航坐标系，本例选取惯性系为导航系
     BodyFrameToEarthFrame(X_b, INS.xn, INS.q);
@@ -118,6 +124,7 @@ void Class_IMU::TIM1msMod50_Alive_PeriodElapsedCallback(void)
 
 void Class_IMU::Get_Angle()
 {
+    static uint8_t reset_flag = 0;
     // 获取最终数据
     //INS.Yaw = QEKF_INS.Yaw - accel * cnt;
     INS.Yaw = QEKF_INS.Yaw;
@@ -131,6 +138,26 @@ void Class_IMU::Get_Angle()
     for(int i=0;i<3;i++){
         INS_Angle[i] = INS_Rad[i] * 180.0f / 3.1415926f;
     }
+
+    // if(fabs(IMU_MahonyAHRS.Roll) > 70.0f){
+    //     reset_flag = 1;
+    //     INS.Roll = IMU_MahonyAHRS.Pitch;
+    //     INS.Pitch = IMU_MahonyAHRS.Roll;
+    //     INS.Yaw = IMU_MahonyAHRS.Yaw; 
+    // }
+    // else{
+    //     INS.Roll = QEKF_INS.Roll;
+    //     INS.Pitch = QEKF_INS.Pitch;
+    //     INS.Yaw = QEKF_INS.Yaw;
+    //     INS.YawTotalAngle = QEKF_INS.YawTotalAngle;
+    // }
+
+    // if(fabs(IMU_MahonyAHRS.Roll) < 70.0f && reset_flag == 1){
+    //     memset(&QEKF_INS, 0, sizeof(QEKF_INS_t));
+    //     IMU_QuaternionEKF_Init(10, 0.001, 1000000, 0.9996, 0.0, 0.00249999994f, &QEKF_INS);
+    //     reset_flag = 0;
+    // }
+
 }
 
 void Class_IMU::TIM_Set_PWM(TIM_HandleTypeDef *tim_pwmHandle, uint8_t Channel, uint16_t value)

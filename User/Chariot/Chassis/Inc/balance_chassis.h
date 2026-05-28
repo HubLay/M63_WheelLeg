@@ -278,7 +278,7 @@ class Class_Balance_Chassis{
  */
 inline uint8_t Class_Balance_Chassis::IS_NORMAL()
 {
-  return ((Chassis_Control_Type == Chassis_Control_Type_FLLOW || Chassis_Control_Type == Chassis_Control_Type_SPIN || Chassis_Control_Type == Chassis_Control_Type_UNFLLOW) && (Chassis_Stable_Count >= 100));
+  return ((Chassis_Control_Type == Chassis_Control_Type_FLLOW || Chassis_Control_Type == Chassis_Control_Type_SPIN || Chassis_Control_Type == Chassis_Control_Type_UNFLLOW) && (Chassis_Stable_Count >= 300));
 }
 
 inline float Class_Balance_Chassis::Get_aver_v()

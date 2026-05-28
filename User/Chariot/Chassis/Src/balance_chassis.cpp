@@ -9,46 +9,46 @@
 // K矩阵拟合系数 K_Fit_Coefficients[40][6]
 // 第n个K元素: K_n = p00 + p10*l_l + p01*l_r + p20*l_l^2 + p11*l_l*l_r + p02*l_r^2
 float K_Fit_Coefficients[40][6] = {
-    {    -96.5545f,      176.669f,       106.05f,      -91.689f,     -379.671f,       198.05f},  // K[0][0]
-    {    -64.6624f,      171.034f,      38.5274f,     -85.6268f,     -282.999f,      146.562f},  // K[0][1]
-    {     -2.1959f,    0.0104624f,     -20.0622f,      2.30338f,     -10.2525f,      28.3793f},  // K[0][2]
-    {   -0.534528f,       3.6115f,     -9.50624f,     -4.85271f,     -3.29124f,      11.8824f},  // K[0][3]
-    {    -6.65279f,       52.892f,      87.5563f,     -53.5347f,      -5.2478f,     -85.6105f},  // K[0][4]
-    {   -0.464306f,      2.44983f,      5.34708f,     -1.47951f,      2.89551f,     -5.92465f},  // K[0][5]
-    {    -122.088f,      6.59311f,      231.659f,      20.1404f,     -78.1071f,     -156.691f},  // K[0][6]
-    {    -5.78317f,      0.94824f,      9.93108f,     0.577056f,     -5.39357f,     -9.71229f},  // K[0][7]
-    {     120.398f,      -277.23f,      887.505f,      349.063f,     -132.921f,     -1002.65f},  // K[0][8]
-    {   -0.829964f,      3.28272f,       52.116f,      6.89871f,     -37.9673f,     -41.9249f},  // K[0][9]
-    {    -96.5545f,       106.05f,      176.669f,       198.05f,     -379.671f,      -91.689f},  // K[1][0]
-    {    -64.6624f,      38.5274f,      171.034f,      146.562f,     -282.999f,     -85.6268f},  // K[1][1]
-    {      2.1959f,      20.0622f,   -0.0104624f,     -28.3793f,      10.2525f,     -2.30338f},  // K[1][2]
-    {    0.534528f,      9.50624f,      -3.6115f,     -11.8824f,      3.29124f,      4.85271f},  // K[1][3]
-    {    -122.088f,      231.659f,      6.59311f,     -156.691f,     -78.1071f,      20.1404f},  // K[1][4]
-    {    -5.78317f,      9.93108f,      0.94824f,     -9.71229f,     -5.39357f,     0.577056f},  // K[1][5]
-    {    -6.65279f,      87.5563f,       52.892f,     -85.6105f,      -5.2478f,     -53.5347f},  // K[1][6]
-    {   -0.464306f,      5.34708f,      2.44983f,     -5.92465f,      2.89551f,     -1.47951f},  // K[1][7]
-    {     120.398f,      887.505f,      -277.23f,     -1002.65f,     -132.921f,      349.063f},  // K[1][8]
-    {   -0.829964f,       52.116f,      3.28272f,     -41.9249f,     -37.9673f,      6.89871f},  // K[1][9]
-    {     11.0744f,     -85.1534f,      148.038f,      29.2957f,      85.8848f,     -194.453f},  // K[2][0]
-    {     9.67867f,     -43.7494f,       71.264f,      9.54446f,      51.0358f,      -94.908f},  // K[2][1]
-    {    -2.00645f,     -5.84193f,      8.86619f,      9.26624f,     -6.24804f,     -4.05345f},  // K[2][2]
-    {   -0.478317f,     -3.21184f,       3.5689f,      5.18993f,     -4.35735f,    -0.487019f},  // K[2][3]
-    {      6.1826f,      18.2078f,     -8.46516f,     -32.4082f,      20.5423f,     -6.67626f},  // K[2][4]
-    {    0.386686f,     0.776862f,    -0.493589f,    -0.360526f,     0.867031f,    -0.619751f},  // K[2][5]
-    {     14.3476f,     -25.0733f,      104.857f,      29.0335f,     -16.0514f,     -96.6673f},  // K[2][6]
-    {    0.759864f,     -1.62219f,      5.16019f,      2.33626f,     -2.57324f,      -1.0541f},  // K[2][7]
-    {     64.0489f,     -91.7202f,     -97.9422f,      73.3877f,      88.5232f,      19.4997f},  // K[2][8]
-    {     5.45702f,     -13.0403f,     -3.14601f,      9.96659f,       12.037f,     -5.09242f},  // K[2][9]
-    {     11.0744f,      148.038f,     -85.1534f,     -194.453f,      85.8848f,      29.2957f},  // K[3][0]
-    {     9.67867f,       71.264f,     -43.7494f,      -94.908f,      51.0358f,      9.54446f},  // K[3][1]
-    {     2.00645f,     -8.86619f,      5.84193f,      4.05345f,      6.24804f,     -9.26624f},  // K[3][2]
-    {    0.478317f,      -3.5689f,      3.21184f,     0.487019f,      4.35735f,     -5.18993f},  // K[3][3]
-    {     14.3476f,      104.857f,     -25.0733f,     -96.6673f,     -16.0514f,      29.0335f},  // K[3][4]
-    {    0.759864f,      5.16019f,     -1.62219f,      -1.0541f,     -2.57324f,      2.33626f},  // K[3][5]
-    {      6.1826f,     -8.46516f,      18.2078f,     -6.67626f,      20.5423f,     -32.4082f},  // K[3][6]
-    {    0.386686f,    -0.493589f,     0.776862f,    -0.619751f,     0.867031f,    -0.360526f},  // K[3][7]
-    {     64.0489f,     -97.9422f,     -91.7202f,      19.4997f,      88.5232f,      73.3877f},  // K[3][8]
-    {     5.45702f,     -3.14601f,     -13.0403f,     -5.09242f,       12.037f,      9.96659f}   // K[3][9]
+    {    -86.0654f,      208.196f,     -13.6151f,     -96.8805f,     -324.019f,      266.625f},  // K[0][0]
+    {    -75.9694f,      218.589f,      -16.384f,     -86.8254f,     -340.663f,       235.33f},  // K[0][1]
+    {    -3.84703f,     -4.89002f,     -28.6622f,      7.03207f,     -10.2345f,      37.8851f},  // K[0][2]
+    {   -0.711998f,      5.40623f,     -12.5458f,     -8.66345f,    0.0847037f,      12.9111f},  // K[0][3]
+    {    -6.08593f,      60.4018f,       62.339f,     -37.8672f,      8.35883f,     -73.9267f},  // K[0][4]
+    {   -0.775625f,      2.40378f,      4.39168f,     0.709417f,      1.71046f,     -3.92949f},  // K[0][5]
+    {     -188.03f,      6.03719f,      315.823f,      11.3315f,     -45.0586f,     -209.546f},  // K[0][6]
+    {    -3.44061f,      2.58984f,     -2.54192f,     -1.74741f,     -3.69152f,      1.73302f},  // K[0][7]
+    {     30.2958f,     -82.2591f,      424.255f,      106.797f,     -89.8547f,     -428.552f},  // K[0][8]
+    {    -5.85738f,      18.9656f,      34.7914f,     -8.31388f,     -43.9869f,     -16.4344f},  // K[0][9]
+    {    -86.0654f,     -13.6151f,      208.196f,      266.625f,     -324.019f,     -96.8805f},  // K[1][0]
+    {    -75.9694f,      -16.384f,      218.589f,       235.33f,     -340.663f,     -86.8254f},  // K[1][1]
+    {     3.84703f,      28.6622f,      4.89002f,     -37.8851f,      10.2345f,     -7.03207f},  // K[1][2]
+    {    0.711998f,      12.5458f,     -5.40623f,     -12.9111f,   -0.0847037f,      8.66345f},  // K[1][3]
+    {     -188.03f,      315.823f,      6.03719f,     -209.546f,     -45.0586f,      11.3315f},  // K[1][4]
+    {    -3.44061f,     -2.54192f,      2.58984f,      1.73302f,     -3.69152f,     -1.74741f},  // K[1][5]
+    {    -6.08593f,       62.339f,      60.4018f,     -73.9267f,      8.35883f,     -37.8672f},  // K[1][6]
+    {   -0.775625f,      4.39168f,      2.40378f,     -3.92949f,      1.71046f,     0.709417f},  // K[1][7]
+    {     30.2958f,      424.255f,     -82.2591f,     -428.552f,     -89.8547f,      106.797f},  // K[1][8]
+    {    -5.85738f,      34.7914f,      18.9656f,     -16.4344f,     -43.9869f,     -8.31388f},  // K[1][9]
+    {     4.72887f,     -45.6439f,       109.92f,      19.5555f,      21.5612f,     -118.107f},  // K[2][0]
+    {     7.06986f,     -34.5044f,      74.2529f,      9.16089f,      27.4475f,     -84.0092f},  // K[2][1]
+    {     -3.5195f,      -6.8466f,      12.1924f,      9.62517f,     -4.30225f,     -7.87206f},  // K[2][2]
+    {   -0.617531f,     -3.34838f,      3.81316f,      5.29058f,     -4.75958f,    -0.329466f},  // K[2][3]
+    {     3.61436f,      24.9964f,     -8.78831f,      -27.048f,     -4.07832f,      6.68051f},  // K[2][4]
+    {    0.259609f,     0.792794f,    -0.219382f,     0.222556f,     0.165259f,    -0.621936f},  // K[2][5]
+    {     16.4702f,     -13.1301f,       137.13f,       18.611f,     -20.4804f,     -129.761f},  // K[2][6]
+    {    0.345977f,     -1.26199f,      5.12038f,      2.04062f,     -3.01689f,     0.460358f},  // K[2][7]
+    {     30.7689f,     -45.2845f,     -24.9503f,      37.0548f,      38.2141f,     -20.7176f},  // K[2][8]
+    {     3.87378f,     -10.0949f,     0.167977f,      7.84706f,      7.98542f,     -6.18537f},  // K[2][9]
+    {     4.72887f,       109.92f,     -45.6439f,     -118.107f,      21.5612f,      19.5555f},  // K[3][0]
+    {     7.06986f,      74.2529f,     -34.5044f,     -84.0092f,      27.4475f,      9.16089f},  // K[3][1]
+    {      3.5195f,     -12.1924f,       6.8466f,      7.87206f,      4.30225f,     -9.62517f},  // K[3][2]
+    {    0.617531f,     -3.81316f,      3.34838f,     0.329466f,      4.75958f,     -5.29058f},  // K[3][3]
+    {     16.4702f,       137.13f,     -13.1301f,     -129.761f,     -20.4804f,       18.611f},  // K[3][4]
+    {    0.345977f,      5.12038f,     -1.26199f,     0.460358f,     -3.01689f,      2.04062f},  // K[3][5]
+    {     3.61436f,     -8.78831f,      24.9964f,      6.68051f,     -4.07832f,      -27.048f},  // K[3][6]
+    {    0.259609f,    -0.219382f,     0.792794f,    -0.621936f,     0.165259f,     0.222556f},  // K[3][7]
+    {     30.7689f,     -24.9503f,     -45.2845f,     -20.7176f,      38.2141f,      37.0548f},  // K[3][8]
+    {     3.87378f,     0.167977f,     -10.0949f,     -6.18537f,      7.98542f,      7.84706f}   // K[3][9]
 };
 // 平衡点偏移拟合系数 Offset_Fit_Coefficients[3][6]
 // [0]: theta_l_eq, [1]: theta_r_eq, [2]: theta_b_eq
@@ -279,7 +279,7 @@ void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
 
       //在腿部稳定的情况下，如果开启了上台阶模式，进入到达台阶的判断
       if(Jump_Enable_Flag == 1 && Chassis_Control_Type == Chassis_Control_Type_FLLOW){
-        if(Left_Leg.L0 > 0.32f && Left_Leg.theta > 0.5f && Right_Leg.L0 > 0.32f && Right_Leg.theta > 0.5f){
+        if(Left_Leg.L0 > 0.33f && Left_Leg.theta > 0.45f && Right_Leg.L0 > 0.33f && Right_Leg.theta > 0.45f){
           Chassis_Control_Type = Chassis_Control_Type_JUMP_1;     //磕上台阶
         }
       }
@@ -352,11 +352,11 @@ void Class_Balance_Chassis::LQR_Calc()
   }
 
   if(Left_Leg.Air_Status == Leg_Air){
-    Target_l_theta = -0.0f;
+    Target_l_theta = -0.05f;
   }
 
   if(Right_Leg.Air_Status == Leg_Air){
-    Target_r_theta = -0.0f;
+    Target_r_theta = -0.05f;
   }
 
   Get_Polyfit_K();
@@ -370,7 +370,7 @@ void Class_Balance_Chassis::LQR_Calc()
   //   a = 0.1f;
   // }
   Math_Constrain(&tmp_X_Err, -0.5f, 0.5f);
-  Math_Constrain(&tmp_Pitch_Err, -0.08f, 0.08f);
+  Math_Constrain(&tmp_Pitch_Err, -0.3f, 0.3f);
   Math_Constrain(&tmp_Left_Theta_Err, -0.6f, 0.6f);
   Math_Constrain(&tmp_Right_Theta_Err, -0.6f, 0.6f);
 
@@ -513,6 +513,9 @@ void Class_Balance_Chassis::LengthControl()
     }
   }
 
+  // tmp_left_target_l0 = Target_Length;
+  // tmp_right_target_l0 = Target_Length;
+
   Left_Leg.Target_L0 = tmp_left_target_l0;
   Right_Leg.Target_L0 = tmp_right_target_l0;
 
@@ -532,6 +535,7 @@ void Class_Balance_Chassis::LengthControl()
   else{
     Compensite_F0 = 0.0f;
   }
+  // Compensite_F0 = 0.0f;
 }
 
 void Class_Balance_Chassis::SynthesizeMotion()
@@ -668,6 +672,14 @@ void Class_Balance_Chassis::SpeedEstimate()
     Target_X = 0.0f;
   }
 
+  if(Left_Leg.Air_Status == Leg_Air || Right_Leg.Air_Status == Leg_Air){
+    Target_X = 0.0f;
+    X = 0.0f;
+
+    Target_Vx = 0.0f;
+    Vx = 0.0f;
+  }
+
 }
 
 void Class_Balance_Chassis::Power_Control_Task(float *__Target_Vx)
@@ -705,15 +717,15 @@ void Class_Balance_Chassis::NormalOutput()
     
   }
   else if(Left_Leg.Get_Air_Status() == Leg_Air && Right_Leg.Get_Air_Status() == Leg_Air){
-    Left_Leg.F0  = Left_Leg.dLength_PID.Get_Out();
-    Right_Leg.F0 = Right_Leg.dLength_PID.Get_Out(); 
+    Left_Leg.F0  = 35.0f;//Left_Leg.dLength_PID.Get_Out() * 0.3f;
+    Right_Leg.F0 = 35.0f;//Right_Leg.dLength_PID.Get_Out() * 0.3f; 
   }
   else if(Left_Leg.Get_Air_Status() == Leg_UnAir && Right_Leg.Get_Air_Status() == Leg_Air){
     Left_Leg.F0  = 100.0f / arm_cos_f32(Left_Leg.theta) + Left_Leg.dLength_PID.Get_Out();
-    Right_Leg.F0 = Right_Leg.dLength_PID.Get_Out(); 
+    Right_Leg.F0 = 35.0f;//Right_Leg.dLength_PID.Get_Out() * 0.3f; 
   }
   else if(Left_Leg.Get_Air_Status() == Leg_Air && Right_Leg.Get_Air_Status() == Leg_UnAir){
-    Left_Leg.F0  = Left_Leg.dLength_PID.Get_Out();
+    Left_Leg.F0  = 35.0f;//Left_Leg.dLength_PID.Get_Out() * 0.3f;
     Right_Leg.F0 = 100.0f / arm_cos_f32(Right_Leg.theta) + Right_Leg.dLength_PID.Get_Out(); 
   }
 
@@ -928,7 +940,7 @@ void Class_Balance_Chassis::Reserve_FSM()
       }
 
       if(Left_Alpha_Status == 1){     //用速度环摆正
-        Left_Leg.Target_L0 = 0.30f;
+        Left_Leg.Target_L0 = 0.23f;
         Left_Leg.Tp = reserve_d_alpha_Kp * (-5.0f - Left_Leg.d_alpha);
 
         if(fabs(Left_Leg.alpha - 1.5f) < 0.05f){      //接近1.5rad认为可以切换角度换控制
@@ -943,7 +955,7 @@ void Class_Balance_Chassis::Reserve_FSM()
       }
 
       if(Right_Alpha_Status == 1){     //用速度环摆正
-        Right_Leg.Target_L0 = 0.30f;
+        Right_Leg.Target_L0 = 0.23f;
         Right_Leg.Tp = reserve_d_alpha_Kp * (-5.0f - Right_Leg.d_alpha);
 
         if(fabs(Right_Leg.alpha - 1.5f) < 0.05f){
@@ -957,8 +969,8 @@ void Class_Balance_Chassis::Reserve_FSM()
         Right_Leg.Target_L0 = 0.16f;
       }
 
-      Math_Constrain(&Left_Leg.Tp, -13.0f, 13.0f);
-      Math_Constrain(&Right_Leg.Tp, -13.0f, 13.0f);
+      Math_Constrain(&Left_Leg.Tp, -20.0f, 20.0f);
+      Math_Constrain(&Right_Leg.Tp, -20.0f, 20.0f);
 
       Left_Leg.Wheel_T = 0.0f;
       Right_Leg.Wheel_T = 0.0f;
@@ -997,7 +1009,7 @@ void Class_Balance_Chassis::Reserve_FSM()
       Target_Yaw_Angle = Yaw_Angle;
       Chassis_Stable_Count = 0;
       Target_Roll_Angle = 0.0f;
-      Target_Length = Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.20f;
+      Target_Length = Left_Leg.Target_L0 = Right_Leg.Target_L0 = 0.18f;
       Reserve_Status = Reserve_Disable;
 
       // Left_Leg.Disable();
@@ -1123,8 +1135,8 @@ void Class_Balance_Chassis::JUMP_1_FSM()
         Right_Leg.Tp = KP_ALPHA * err_r - KD_ALPHA * Right_Leg.d_alpha;
       }
 
-      Math_Constrain(&Left_Leg.Tp, -10.0f, 10.0f);
-      Math_Constrain(&Right_Leg.Tp, -10.0f, 10.0f);
+      Math_Constrain(&Left_Leg.Tp, -20.0f, 20.0f);
+      Math_Constrain(&Right_Leg.Tp, -20.0f, 20.0f);
 
       // 到位判断
       if(fabs(err_l) < 0.2f && fabs(err_r) < 0.2f)
@@ -1162,8 +1174,8 @@ void Class_Balance_Chassis::JUMP_1_FSM()
       Left_Leg.Tp  = KP_ALPHA * err_l - KD_ALPHA * Left_Leg.d_theta;
       Right_Leg.Tp = KP_ALPHA * err_r - KD_ALPHA * Right_Leg.d_theta;
 
-      Math_Constrain(&Left_Leg.Tp, -10.0f, 10.0f);
-      Math_Constrain(&Right_Leg.Tp, -10.0f, 10.0f);
+      Math_Constrain(&Left_Leg.Tp, -20.0f, 20.0f);
+      Math_Constrain(&Right_Leg.Tp, -20.0f, 20.0f);
 
       if(fabs(err_l) < 0.2f && fabs(err_r) < 0.2f)
       {
@@ -1212,8 +1224,8 @@ void Class_Balance_Chassis::JUMP_1_FSM()
       Left_Leg.Tp  = KP_ALPHA * err_l - KD_ALPHA * Left_Leg.d_theta;
       Right_Leg.Tp = KP_ALPHA * err_r - KD_ALPHA * Right_Leg.d_theta;
 
-      Math_Constrain(&Left_Leg.Tp, -10.0f, 10.0f);
-      Math_Constrain(&Right_Leg.Tp, -10.0f, 10.0f);
+      Math_Constrain(&Left_Leg.Tp, -20.0f, 20.0f);
+      Math_Constrain(&Right_Leg.Tp, -20.0f, 20.0f);
 
       #ifdef UNFLLOW_ENABLE
       Chassis_Control_Type = Chassis_Control_Type_UNFLLOW;

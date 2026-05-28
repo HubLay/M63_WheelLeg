@@ -76,17 +76,17 @@
 
 #define V_MAX 1.8f
 #define V_MAX_2 2.8f
-#define V_MAX_SPIN 0.6f
+#define V_MAX_SPIN 0.7f
 #define Yaw_Angle_Resolution (1.5f / 57.3f)
 #define Length_Angle_Resolution 0.008f
-#define SPIN_OMEGA 10.0f
-#define Acc_Max_1 2.3f
+#define SPIN_OMEGA 8.0f
+#define Acc_Max_1 3.0f
 #define ACC_Max_2 3.0f
 
 #define Reference_Rad (-0.5675f)
 
 #define Length_MIN 0.16f
-#define Length_MAX 0.350f
+#define Length_MAX 0.37f
 
 #define Length_MIN_SPIN 0.16f
 #define Length_MAX_SPIN 0.27f

@@ -25,6 +25,13 @@ extern uint8_t Theta_Synchronize, Theta_Synchronize_FLag;
 extern float Left_Right_Err;
 
 void PrintfTask(){
+    sprintf(Mes, "%f,%f,%f,%d,%d\n",
+  Balance_Chassis.Left_Leg.FN,
+  Balance_Chassis.Right_Leg.FN,
+  Balance_Chassis.Left_Leg.F0,
+  Balance_Chassis.Left_Leg.Air_Status,
+  Balance_Chassis.Get_Chassis_Control_Type());           //128根本不够
+
   // sprintf(Mes, "%f,%f,%f,%f,%f,%f,%f,%f,%d\n", 
   // Balance_Chassis.Left_Leg.Get_Theta(),
   // Balance_Chassis.Get_Target_Vx(),
@@ -36,16 +43,16 @@ void PrintfTask(){
   // Balance_Chassis.Get_Roll_Angle(),
   // Balance_Chassis.Get_Chassis_Control_Type());           //128根本不够
 
-  sprintf(Mes, "%f,%f,%f,%f,%f,%f,%d,%d,%d\n",
-  Balance_Chassis.Left_Leg.Target_L0,
-  Balance_Chassis.Left_Leg.alpha,
-  Balance_Chassis.Left_Leg.Wheel_Motor.Get_Target_Torque(),
-  Balance_Chassis.Left_Leg.Tp,
-  Balance_Chassis.Get_True_Vx(),
-  Balance_Chassis.Get_Pitch_Angle(),
-  Balance_Chassis.Get_Jump_State(),
-  cnt111,
-  Balance_Chassis.Get_Chassis_Control_Type());           //128根本不够
+  // sprintf(Mes, "%f,%f,%f,%f,%f,%f,%d,%d,%d\n",
+  // Balance_Chassis.Left_Leg.Target_L0,
+  // Balance_Chassis.Left_Leg.alpha,
+  // Balance_Chassis.Left_Leg.Wheel_Motor.Get_Target_Torque(),
+  // Balance_Chassis.Left_Leg.Tp,
+  // Balance_Chassis.Get_True_Vx(),
+  // Balance_Chassis.Get_Pitch_Angle(),
+  // Balance_Chassis.Get_Jump_State(),
+  // cnt111,
+  // Balance_Chassis.Get_Chassis_Control_Type());           //128根本不够
 
   // sprintf(Mes, "%f,%f,%f,%f,%f\n", tmp_Pitch_Err, pitch_max, pitch_min,tmp_wt,T_other);           //128根本不够
 
