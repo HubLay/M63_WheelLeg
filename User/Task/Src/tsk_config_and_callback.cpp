@@ -486,6 +486,7 @@ void Task100us_TIM4_Callback()
             chariot.Booster.Set_Booster_Control_Type(Booster_Control_Type_DISABLE);
             chariot.Gimbal.Set_Gimbal_Control_Type(Gimbal_Control_Type_DISABLE);
         }
+         #elif defined(USE_VT13)
 
         #elif defined(USE_FS_i6X)
          if(chariot.Referee.Get_Game_Stage() == Referee_Game_Status_Stage_BATTLE && chariot.FS_i6X.Get_FS_Status() == FS_Status_DISABLE && chariot.Referee.Get_Referee_Status() == Referee_Status_ENABLE){                               //比赛开始状态

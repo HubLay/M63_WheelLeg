@@ -416,8 +416,8 @@ void Class_Chariot::CAN_Gimbal_Tx_Chassis_Callback()
     uint8_t Complex_Flag = (Sprint_Status << 7) | (MiniPC_Aim << 5) | (Gimbal.Get_Gimbal_Control_Type() << 3) | (Referee_UI_Refresh_Status << 2) | (Jump_Flag << 1) | Switch_Chassis_Forward;
     //控制类型字节
     chassis_velocity_x = Chassis.Get_Target_Velocity_X();
-    // chassis_control_type = Chassis.Get_Chassis_Control_Type();
-    chassis_control_type = Chassis_Control_Type_DISABLE;
+    chassis_control_type = Chassis.Get_Chassis_Control_Type();
+    // chassis_control_type = Chassis_Control_Type_DISABLE;
     //设定速度
     tmp_chassis_velocity_x = Math_Float_To_Int(chassis_velocity_x,-4.f , 4.f ,-450,450);
     memcpy(CAN3_Gimbal_Tx_Chassis_Data, &tmp_chassis_velocity_x, sizeof(int16_t));
@@ -676,7 +676,7 @@ void Class_Chariot::DR16_Remote_Control_Chasssis()
     dr16_l_y = (Math_Abs(DR16.Get_Left_Y()) > DR16_Dead_Zone) ? DR16.Get_Left_Y() : 0;
 
     //设定矩形到圆形映射进行控制
-    remote_velocity_x = dr16_l_x * sqrt(1.0f - dr16_l_y * dr16_l_y / 2.0f) * 1.0f;
+    remote_velocity_x = dr16_l_x * sqrt(1.0f - dr16_l_y * dr16_l_y / 2.0f) * 0.5f;
     remote_velocity_y = dr16_l_y * sqrt(1.0f - dr16_l_x * dr16_l_x / 2.0f) * Chassis.Get_Velocity_X_Max();              //作为腿长控制
 
     gimbal_velocity_x =  remote_velocity_y;             //遥控器坐标系是反的（前Y）

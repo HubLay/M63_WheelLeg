@@ -301,11 +301,11 @@ void Class_Booster::Output()
                 ShootTime = ((Heat_Max - Heat) + 2 * Cooling_Value) * 10;
                 if (Heat_Max - Heat < 100)              //分级弹频
                 {
-                    shoot_speed = (10 * (Heat_Max - Heat) - Cooling_Value - 3 * Heat_Consumption) / (Heat_Consumption * (ShootTime / 100.f)) + Cooling_Value / Heat_Consumption;
+                    shoot_speed = (10 * (Heat_Max - Heat) - Cooling_Value - 5 * Heat_Consumption) / (Heat_Consumption * (ShootTime / 100.f)) + Cooling_Value / Heat_Consumption;
                 }
                 else
                 {
-                    shoot_speed = (10 * (Heat_Max - Heat) - Cooling_Value - 5 * Heat_Consumption) / (Heat_Consumption * (ShootTime / 100.f)) + Cooling_Value / Heat_Consumption;
+                    shoot_speed = (10 * (Heat_Max - Heat) - Cooling_Value - 7 * Heat_Consumption) / (Heat_Consumption * (ShootTime / 100.f)) + Cooling_Value / Heat_Consumption;
                 }
             }
             else if (0 < shoot_time && shoot_time < ShootTime)

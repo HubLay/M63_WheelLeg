@@ -92,6 +92,8 @@ class Class_IMU
 
     Enum_IMU_Status Get_IMU_Status(void);
 
+    QEKF_INS_t QEKF_INS;
+
     protected:
 
     Class_MahonyAHRS IMU_MahonyAHRS;
@@ -105,7 +107,6 @@ class Class_IMU
     void TIM_Set_PWM(TIM_HandleTypeDef *tim_pwmHandle, uint8_t Channel, uint16_t value);
 
     INS_t INS;
-    QEKF_INS_t QEKF_INS;
     IMU_Data_t BMI088_Raw_Data;
     IMU_Data_t Pre_BMI088_Raw_Data;
     //IST8310_Real_Data_t IST8310_Real_Data;

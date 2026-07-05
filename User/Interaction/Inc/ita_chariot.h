@@ -354,7 +354,7 @@ protected:
         uint8_t Shoot_Flag = 0;
         //DR16控制数据来源
         Enum_DR16_Control_Type DR16_Control_Type = DR16_Control_Type_REMOTE;
-        Enum_VT13_Control_Type VT13_Control_Type = VT13_Control_Type_NONE;
+        Enum_VT13_Control_Type VT13_Control_Type = VT13_Control_Type_REMOTE;
 
         // 当前活动的控制器
         Enum_Active_Controller Active_Controller = Controller_NONE;
@@ -372,7 +372,7 @@ protected:
         //鼠标云台pitch灵敏度系数, 不同鼠标不同参数
         float Mouse_Pitch_Angle_Resolution = 57.8 * 2.0f;
 
-        float KeyBoard_Delta_Length = 0.3f;
+        float KeyBoard_Delta_Length = 0.2f;
 
         uint8_t Jump_Flag = 0;
 

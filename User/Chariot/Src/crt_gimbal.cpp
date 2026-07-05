@@ -66,8 +66,8 @@ void Class_Gimbal::Init()
     // pitch轴电机
     // Motor_Pitch.PID_Angle.Init(0.70f, 0.0f, 0.00f, 0.0f, 10.0f, 10.0f);
     // Motor_Pitch.PID_Omega.Init(120.0f, 0.0f, 0.0f, 0.0f, 2048.0f, 2048.0f);
-    Motor_Pitch.PID_Angle.Init(0.6f, 1.0f, 0.0f, 0.0f, 2.0f, 5.0f);
-    Motor_Pitch.PID_Omega.Init(7000.0f, 0.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
+    Motor_Pitch.PID_Angle.Init(0.8f, 1.0f, 0.0f, 0.0f, 2.0f, 5.0f);
+    Motor_Pitch.PID_Omega.Init(5000.0f, 0.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
     // Motor_Pitch.PID_Angle.Init(0.55f, 0.0f, 0.0017, 0.0f, 7.0f, 7.0f);
     // Motor_Pitch.PID_Omega.Init(7000.0f, 5000.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
     // Motor_Pitch.PID_Angle.Init(0.0f, 0.0f, 0.0f, 0.0f, 10.0f, 10.0f);

@@ -23,23 +23,23 @@
 
 //---------------------------------------------------------------------------------------------------
 
-void Class_MahonyAHRS::init(float quat[4])
+void Class_MahonyAHRS::init()
 {
-    quat[0] = 1.0f;
-    quat[1] = 0.0f;
-    quat[2] = 0.0f;
-    quat[3] = 0.0f;
+    q[0] = 1.0f;
+    q[1] = 0.0f;
+    q[2] = 0.0f;
+    q[3] = 0.0f;
 
 }
 
-void Class_MahonyAHRS::AHRS_update(float quat[4], float time, float gyro[3], float accel[3], float mag[3])
-{
-    MahonyAHRSupdate(quat, gyro[0], gyro[1], gyro[2], accel[0], accel[1], accel[2], mag[0], mag[1], mag[2]);
-	//MahonyAHRSupdate(quat, gyro[0], gyro[1], gyro[2], accel[0], accel[1], accel[2],0, 0, 0);
-}
+// void Class_MahonyAHRS::AHRS_update(float quat[4], float time, float gyro[3], float accel[3], float mag[3])
+// {
+//     MahonyAHRSupdate(quat, gyro[0], gyro[1], gyro[2], accel[0], accel[1], accel[2], mag[0], mag[1], mag[2]);
+// 	//MahonyAHRSupdate(quat, gyro[0], gyro[1], gyro[2], accel[0], accel[1], accel[2],0, 0, 0);
+// }
 
 // AHRS algorithm update
-void Class_MahonyAHRS::MahonyAHRSupdate(float q[4], float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz) {
+void Class_MahonyAHRS::MahonyAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz) {
 	
 	float recipNorm;
   float q0q0, q0q1, q0q2, q0q3, q1q1, q1q2, q1q3, q2q2, q2q3, q3q3;  
@@ -50,7 +50,7 @@ void Class_MahonyAHRS::MahonyAHRSupdate(float q[4], float gx, float gy, float gz
 
 	// Use IMU algorithm if magnetometer measurement invalid (avoids NaN in magnetometer normalisation)
 	if((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f)) {
-		MahonyAHRSupdateIMU(q, gx, gy, gz, ax, ay, az);
+		MahonyAHRSupdateIMU(gx, gy, gz, ax, ay, az);
 		return;
 	}
 
@@ -144,7 +144,7 @@ void Class_MahonyAHRS::MahonyAHRSupdate(float q[4], float gx, float gy, float gz
 //---------------------------------------------------------------------------------------------------
 // IMU algorithm update
 
-void Class_MahonyAHRS::MahonyAHRSupdateIMU(float q[4], float gx, float gy, float gz, float ax, float ay, float az) {
+void Class_MahonyAHRS::MahonyAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az) {
 	float recipNorm;
 	float halfvx, halfvy, halfvz;
 	float halfex, halfey, halfez;
@@ -155,6 +155,7 @@ void Class_MahonyAHRS::MahonyAHRSupdateIMU(float q[4], float gx, float gy, float
 
 		// Normalise accelerometer measurement
 		recipNorm = invSqrt(ax * ax + ay * ay + az * az);
+
 		ax *= recipNorm;
 		ay *= recipNorm;
 		az *= recipNorm;        
@@ -208,6 +209,13 @@ void Class_MahonyAHRS::MahonyAHRSupdateIMU(float q[4], float gx, float gy, float
 	q[1] *= recipNorm;
 	q[2] *= recipNorm;
 	q[3] *= recipNorm;
+}
+
+void Class_MahonyAHRS::Get_Quat_To_Angle()
+{
+		Yaw = atan2f(2.0f * (q[1] * q[2] + q[0] * q[3]), q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3]) * 180.0f / 3.1415926f;
+		Pitch = asinf(-2.0f * (q[1] * q[3] - q[0] * q[2])) * 180.0f / 3.1415926f;
+		Roll = atan2f(2.0f * (q[0] * q[1] + q[2] * q[3]), q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3]) * 180.0f / 3.1415926f;
 }
 
 //---------------------------------------------------------------------------------------------------

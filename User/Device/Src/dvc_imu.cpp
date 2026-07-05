@@ -23,10 +23,10 @@ void Class_IMU::Init()
     //  HAL_Delay(100);
 
     // 初始化MahonyAHRS算法，并传入初始四元数
-    IMU_MahonyAHRS.init(INS_Quat);
+    IMU_MahonyAHRS.init();
  
     //EKF初始化                         第三个加速度参数加大，减小运动过程中的影响    过于不相信加速度导致静止到目标收敛慢，看起来在飘
-    IMU_QuaternionEKF_Init(10, 0.001, 10000000, 0.9996, 0.05, 0.00144999998, &QEKF_INS);
+    IMU_QuaternionEKF_Init(10, 0.1, 1000000, 0.9996, 0.05, 0.00144999998, &QEKF_INS);
 
     INS.AccelLPF = 0.05f;
 
@@ -56,9 +56,14 @@ void Class_IMU::TIM_Calculate_PeriodElapsedCallback(void)
     INS.Gyro[2] = BMI088_Raw_Data.Gyro[2];
 
     // 核心函数,EKF更新四元数
-    IMU_QuaternionEKF_Update(INS.Gyro[0], INS.Gyro[1], INS.Gyro[2], INS.Accel[0], INS.Accel[1], INS.Accel[2], INS_DWT_Dt, &QEKF_INS);
+    // IMU_QuaternionEKF_Update(INS.Gyro[0], INS.Gyro[1], INS.Gyro[2], INS.Accel[0], INS.Accel[1], INS.Accel[2], INS_DWT_Dt, &QEKF_INS);
 
-    memcpy(INS.q, QEKF_INS.q, sizeof(QEKF_INS.q));
+    // memcpy(INS.q, QEKF_INS.q, sizeof(QEKF_INS.q));
+
+    IMU_MahonyAHRS.MahonyAHRSupdate(INS.Gyro[0], INS.Gyro[1], INS.Gyro[2], INS.Accel[0], INS.Accel[1], INS.Accel[2], 0, 0, 0);
+    memcpy(INS.q, IMU_MahonyAHRS.q, sizeof(IMU_MahonyAHRS.q));
+
+    IMU_MahonyAHRS.Get_Quat_To_Angle();
 
     // 机体系基向量转换到导航坐标系，本例选取惯性系为导航系
     BodyFrameToEarthFrame(X_b, INS.xn, INS.q);
@@ -110,21 +115,25 @@ float accel = 0.00035f;
 uint64_t cnt =0;
 void Class_IMU::Get_Angle()
 {
-    cnt ++;
-    // 获取最终数据
-    //INS.Yaw = QEKF_INS.Yaw - accel * cnt;
-    INS.Yaw = QEKF_INS.Yaw;
-    INS.Pitch = QEKF_INS.Pitch;
-    INS.Roll = QEKF_INS.Roll;
-    INS.YawTotalAngle = QEKF_INS.YawTotalAngle;
+    // cnt ++;
+    // // 获取最终数据
+    // //INS.Yaw = QEKF_INS.Yaw - accel * cnt;
+    // INS.Yaw = QEKF_INS.Yaw;
+    // INS.Pitch = QEKF_INS.Pitch;
+    // INS.Roll = QEKF_INS.Roll;
+    // INS.YawTotalAngle = QEKF_INS.YawTotalAngle;
 
-    INS_Rad[0] = atan2f(2.0f*(INS_Quat[0]*INS_Quat[3]+INS_Quat[1]*INS_Quat[2]), 2.0f*(INS_Quat[0]*INS_Quat[0]+INS_Quat[1]*INS_Quat[1])-1.0f);
-    INS_Rad[1] = asinf(-2.0f*(INS_Quat[1]*INS_Quat[3]-INS_Quat[0]*INS_Quat[2]));
-    INS_Rad[2] = atan2f(2.0f*(INS_Quat[0]*INS_Quat[1]+INS_Quat[2]*INS_Quat[3]),2.0f*(INS_Quat[0]*INS_Quat[0]+INS_Quat[3]*INS_Quat[3])-1.0f);
+    // INS_Rad[0] = atan2f(2.0f*(INS_Quat[0]*INS_Quat[3]+INS_Quat[1]*INS_Quat[2]), 2.0f*(INS_Quat[0]*INS_Quat[0]+INS_Quat[1]*INS_Quat[1])-1.0f);
+    // INS_Rad[1] = asinf(-2.0f*(INS_Quat[1]*INS_Quat[3]-INS_Quat[0]*INS_Quat[2]));
+    // INS_Rad[2] = atan2f(2.0f*(INS_Quat[0]*INS_Quat[1]+INS_Quat[2]*INS_Quat[3]),2.0f*(INS_Quat[0]*INS_Quat[0]+INS_Quat[3]*INS_Quat[3])-1.0f);
 
-    for(int i=0;i<3;i++){
-        INS_Angle[i] = INS_Rad[i] * 180.0f / 3.1415926f;
-    }
+    // for(int i=0;i<3;i++){
+    //     INS_Angle[i] = INS_Rad[i] * 180.0f / 3.1415926f;
+    // }
+
+    INS.Roll = IMU_MahonyAHRS.Pitch;
+    INS.Pitch = IMU_MahonyAHRS.Roll;
+    INS.Yaw = IMU_MahonyAHRS.Yaw; 
 }
 
 void Class_IMU::TIM_Set_PWM(TIM_HandleTypeDef *tim_pwmHandle, uint8_t Channel, uint16_t value)

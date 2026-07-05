@@ -33,13 +33,20 @@ class Class_MahonyAHRS
 {
     public:
 
-    void init(float quat[4]);
-    void AHRS_update(float quat[4], float time, float gyro[3], float accel[3], float mag[3]);
-    void MahonyAHRSupdate(float q[4], float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
-    void MahonyAHRSupdateIMU(float q[4], float gx, float gy, float gz, float ax, float ay, float az);
+    void init();
+    void AHRS_update(float time, float gyro[3], float accel[3], float mag[3]);
+    void MahonyAHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
+    void MahonyAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, float az);
+    void Get_Quat_To_Angle();
     float invSqrt(float x);
 
+    float q[4];
+    float Yaw, Roll, Pitch;
+
     protected:
+
+    float acc_g = 0.0f, last_acc_g = 0.0f;
+    float Kp_Use = 0.0f;
 
     float twoKp = 2.0f * 0.5f;  // 2 * proportional gain
     float twoKi = 2.0f * 0.0f;  // 2 * integral gain
@@ -47,7 +54,7 @@ class Class_MahonyAHRS
     float integralFBx = 0.0f;
     float integralFBy = 0.0f;
     float integralFBz = 0.0f;	// integral error terms scaled by Ki
-    float q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
+    // float q0, q1, q2, q3;	// quaternion of sensor frame relative to auxiliary frame
 };
 
 
