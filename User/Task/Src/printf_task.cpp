@@ -25,12 +25,12 @@ extern uint8_t Theta_Synchronize, Theta_Synchronize_FLag;
 extern float Left_Right_Err;
 
 void PrintfTask(){
-    sprintf(Mes, "%f,%f,%f,%d,%d\n",
-  Balance_Chassis.Left_Leg.FN,
-  Balance_Chassis.Right_Leg.FN,
-  Balance_Chassis.Left_Leg.F0,
-  Balance_Chassis.Left_Leg.Air_Status,
-  Balance_Chassis.Get_Chassis_Control_Type());           //128根本不够
+//     sprintf(Mes, "%f,%f,%f,%f,%d\n",
+//   Balance_Chassis.Get_True_Vx(),
+// Balance_Chassis.Get_True_X(),
+// Balance_Chassis.Left_Leg.F0,
+// Balance_Chassis.Right_Leg.F0,
+// Balance_Chassis.Get_Chassis_Control_Type());           //128根本不够
 
   // sprintf(Mes, "%f,%f,%f,%f,%f,%f,%f,%f,%d\n", 
   // Balance_Chassis.Left_Leg.Get_Theta(),

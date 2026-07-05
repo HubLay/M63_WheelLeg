@@ -27,7 +27,7 @@ void Class_IMU::Init()
     IMU_MahonyAHRS.init();
  
     //EKF初始化                         第三个加速度参数加大，减小运动过程中的影响    过于不相信加速度导致静止到目标收敛慢，看起来在飘
-    IMU_QuaternionEKF_Init(10, 0.001, 1000000, 0.9996, 0.0, 0.00249999994f, &QEKF_INS);
+    IMU_QuaternionEKF_Init(10, 0.001, 1000000, 1.0f, 0.0, 0.00249999994f, &QEKF_INS);
 
     INS.AccelLPF = 0.0f;
 
@@ -125,8 +125,11 @@ void Class_IMU::TIM1msMod50_Alive_PeriodElapsedCallback(void)
 void Class_IMU::Get_Angle()
 {
     static uint8_t reset_flag = 0;
+    // INS.Roll = IMU_MahonyAHRS.Pitch;
+    // INS.Pitch = IMU_MahonyAHRS.Roll;
+    // INS.Yaw = IMU_MahonyAHRS.Yaw; 
+
     // 获取最终数据
-    //INS.Yaw = QEKF_INS.Yaw - accel * cnt;
     INS.Yaw = QEKF_INS.Yaw;
     INS.Pitch = QEKF_INS.Pitch;
     INS.Roll = QEKF_INS.Roll;
@@ -138,25 +141,6 @@ void Class_IMU::Get_Angle()
     for(int i=0;i<3;i++){
         INS_Angle[i] = INS_Rad[i] * 180.0f / 3.1415926f;
     }
-
-    // if(fabs(IMU_MahonyAHRS.Roll) > 70.0f){
-    //     reset_flag = 1;
-    //     INS.Roll = IMU_MahonyAHRS.Pitch;
-    //     INS.Pitch = IMU_MahonyAHRS.Roll;
-    //     INS.Yaw = IMU_MahonyAHRS.Yaw; 
-    // }
-    // else{
-    //     INS.Roll = QEKF_INS.Roll;
-    //     INS.Pitch = QEKF_INS.Pitch;
-    //     INS.Yaw = QEKF_INS.Yaw;
-    //     INS.YawTotalAngle = QEKF_INS.YawTotalAngle;
-    // }
-
-    // if(fabs(IMU_MahonyAHRS.Roll) < 70.0f && reset_flag == 1){
-    //     memset(&QEKF_INS, 0, sizeof(QEKF_INS_t));
-    //     IMU_QuaternionEKF_Init(10, 0.001, 1000000, 0.9996, 0.0, 0.00249999994f, &QEKF_INS);
-    //     reset_flag = 0;
-    // }
 
 }
 

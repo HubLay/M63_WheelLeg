@@ -23,7 +23,7 @@
 #define INS_TASK_DT      2                  //姿态估计任务周期      ms  
 #define ROBOT_TASK_DT    2                  //机器人控制任务周期
 #define DAEMON_TASK_DT   10                 //离线守护任务周期
-#define UI_Task_DT       50                 //ui刷新周期
+#define UI_Task_DT       5                 //ui刷新周期
 #define CAN_TRANSMIT_TASK_DT  1             //can发送任务周期
 #define CMDProcess_TASK_DT 5                //控制命令处理周期  5ms
 #define EMERGENCY_STOP_TASK_DT 10           //紧急停止任务周期
@@ -74,9 +74,9 @@
 #define NORMAL_CHASSIS
 #endif
 
-#define V_MAX 1.8f
-#define V_MAX_2 2.8f
-#define V_MAX_SPIN 0.7f
+#define V_MAX 1.3f
+#define V_MAX_2 2.1f
+#define V_MAX_SPIN 0.5f
 #define Yaw_Angle_Resolution (1.5f / 57.3f)
 #define Length_Angle_Resolution 0.008f
 #define SPIN_OMEGA 8.0f
@@ -89,7 +89,7 @@
 #define Length_MAX 0.37f
 
 #define Length_MIN_SPIN 0.16f
-#define Length_MAX_SPIN 0.27f
+#define Length_MAX_SPIN 0.23f
 
 // #define H7_Offset_X -0.12f       //IMU距离车体中心的距离，IMU自身坐标系 m 量不出来硬调
 // #define H7_Offset_Y -0.0f         //IMU距离车体中心的距离，IMU自身坐标系 m

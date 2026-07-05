@@ -8,47 +8,48 @@
 
 // K矩阵拟合系数 K_Fit_Coefficients[40][6]
 // 第n个K元素: K_n = p00 + p10*l_l + p01*l_r + p20*l_l^2 + p11*l_l*l_r + p02*l_r^2
+
 float K_Fit_Coefficients[40][6] = {
-    {    -86.0654f,      208.196f,     -13.6151f,     -96.8805f,     -324.019f,      266.625f},  // K[0][0]
-    {    -75.9694f,      218.589f,      -16.384f,     -86.8254f,     -340.663f,       235.33f},  // K[0][1]
-    {    -3.84703f,     -4.89002f,     -28.6622f,      7.03207f,     -10.2345f,      37.8851f},  // K[0][2]
-    {   -0.711998f,      5.40623f,     -12.5458f,     -8.66345f,    0.0847037f,      12.9111f},  // K[0][3]
-    {    -6.08593f,      60.4018f,       62.339f,     -37.8672f,      8.35883f,     -73.9267f},  // K[0][4]
-    {   -0.775625f,      2.40378f,      4.39168f,     0.709417f,      1.71046f,     -3.92949f},  // K[0][5]
-    {     -188.03f,      6.03719f,      315.823f,      11.3315f,     -45.0586f,     -209.546f},  // K[0][6]
-    {    -3.44061f,      2.58984f,     -2.54192f,     -1.74741f,     -3.69152f,      1.73302f},  // K[0][7]
-    {     30.2958f,     -82.2591f,      424.255f,      106.797f,     -89.8547f,     -428.552f},  // K[0][8]
-    {    -5.85738f,      18.9656f,      34.7914f,     -8.31388f,     -43.9869f,     -16.4344f},  // K[0][9]
-    {    -86.0654f,     -13.6151f,      208.196f,      266.625f,     -324.019f,     -96.8805f},  // K[1][0]
-    {    -75.9694f,      -16.384f,      218.589f,       235.33f,     -340.663f,     -86.8254f},  // K[1][1]
-    {     3.84703f,      28.6622f,      4.89002f,     -37.8851f,      10.2345f,     -7.03207f},  // K[1][2]
-    {    0.711998f,      12.5458f,     -5.40623f,     -12.9111f,   -0.0847037f,      8.66345f},  // K[1][3]
-    {     -188.03f,      315.823f,      6.03719f,     -209.546f,     -45.0586f,      11.3315f},  // K[1][4]
-    {    -3.44061f,     -2.54192f,      2.58984f,      1.73302f,     -3.69152f,     -1.74741f},  // K[1][5]
-    {    -6.08593f,       62.339f,      60.4018f,     -73.9267f,      8.35883f,     -37.8672f},  // K[1][6]
-    {   -0.775625f,      4.39168f,      2.40378f,     -3.92949f,      1.71046f,     0.709417f},  // K[1][7]
-    {     30.2958f,      424.255f,     -82.2591f,     -428.552f,     -89.8547f,      106.797f},  // K[1][8]
-    {    -5.85738f,      34.7914f,      18.9656f,     -16.4344f,     -43.9869f,     -8.31388f},  // K[1][9]
-    {     4.72887f,     -45.6439f,       109.92f,      19.5555f,      21.5612f,     -118.107f},  // K[2][0]
-    {     7.06986f,     -34.5044f,      74.2529f,      9.16089f,      27.4475f,     -84.0092f},  // K[2][1]
-    {     -3.5195f,      -6.8466f,      12.1924f,      9.62517f,     -4.30225f,     -7.87206f},  // K[2][2]
-    {   -0.617531f,     -3.34838f,      3.81316f,      5.29058f,     -4.75958f,    -0.329466f},  // K[2][3]
-    {     3.61436f,      24.9964f,     -8.78831f,      -27.048f,     -4.07832f,      6.68051f},  // K[2][4]
-    {    0.259609f,     0.792794f,    -0.219382f,     0.222556f,     0.165259f,    -0.621936f},  // K[2][5]
-    {     16.4702f,     -13.1301f,       137.13f,       18.611f,     -20.4804f,     -129.761f},  // K[2][6]
-    {    0.345977f,     -1.26199f,      5.12038f,      2.04062f,     -3.01689f,     0.460358f},  // K[2][7]
-    {     30.7689f,     -45.2845f,     -24.9503f,      37.0548f,      38.2141f,     -20.7176f},  // K[2][8]
-    {     3.87378f,     -10.0949f,     0.167977f,      7.84706f,      7.98542f,     -6.18537f},  // K[2][9]
-    {     4.72887f,       109.92f,     -45.6439f,     -118.107f,      21.5612f,      19.5555f},  // K[3][0]
-    {     7.06986f,      74.2529f,     -34.5044f,     -84.0092f,      27.4475f,      9.16089f},  // K[3][1]
-    {      3.5195f,     -12.1924f,       6.8466f,      7.87206f,      4.30225f,     -9.62517f},  // K[3][2]
-    {    0.617531f,     -3.81316f,      3.34838f,     0.329466f,      4.75958f,     -5.29058f},  // K[3][3]
-    {     16.4702f,       137.13f,     -13.1301f,     -129.761f,     -20.4804f,       18.611f},  // K[3][4]
-    {    0.345977f,      5.12038f,     -1.26199f,     0.460358f,     -3.01689f,      2.04062f},  // K[3][5]
-    {     3.61436f,     -8.78831f,      24.9964f,      6.68051f,     -4.07832f,      -27.048f},  // K[3][6]
-    {    0.259609f,    -0.219382f,     0.792794f,    -0.621936f,     0.165259f,     0.222556f},  // K[3][7]
-    {     30.7689f,     -24.9503f,     -45.2845f,     -20.7176f,      38.2141f,      37.0548f},  // K[3][8]
-    {     3.87378f,     0.167977f,     -10.0949f,     -6.18537f,      7.98542f,      7.84706f}   // K[3][9]
+    {    -60.7585f,      159.482f,     -30.5101f,     -73.0383f,     -229.311f,      204.672f},  // K[0][0]
+    {    -66.0071f,      192.915f,     -26.4667f,     -73.8158f,      -296.92f,      216.864f},  // K[0][1]
+    {    -4.40796f,     -9.39721f,     -29.1652f,      12.7302f,     -12.7268f,      39.9132f},  // K[0][2]
+    {   -0.742356f,      4.16586f,     -11.8566f,     -7.13081f,    -0.232103f,      12.0355f},  // K[0][3]
+    {    -6.57427f,      59.2128f,      52.9669f,     -25.5244f,      2.91315f,     -62.2565f},  // K[0][4]
+    {   -0.657005f,      2.30481f,      3.75351f,      1.24557f,      1.95359f,     -3.53309f},  // K[0][5]
+    {    -188.471f,      11.4981f,      297.465f,      5.40061f,     -49.4406f,     -185.652f},  // K[0][6]
+    {    -4.86775f,      2.28806f,      1.83995f,     -1.49988f,     -3.61502f,     -2.96709f},  // K[0][7]
+    {     22.3247f,     -61.9425f,       322.99f,      76.6453f,     -66.0442f,     -318.925f},  // K[0][8]
+    {    -5.01813f,      16.9651f,      29.1011f,     -7.91495f,     -38.1182f,     -12.4972f},  // K[0][9]
+    {    -60.7585f,     -30.5101f,      159.482f,      204.672f,     -229.311f,     -73.0383f},  // K[1][0]
+    {    -66.0071f,     -26.4667f,      192.915f,      216.864f,      -296.92f,     -73.8158f},  // K[1][1]
+    {     4.40796f,      29.1652f,      9.39721f,     -39.9132f,      12.7268f,     -12.7302f},  // K[1][2]
+    {    0.742356f,      11.8566f,     -4.16586f,     -12.0355f,     0.232103f,      7.13081f},  // K[1][3]
+    {    -188.471f,      297.465f,      11.4981f,     -185.652f,     -49.4406f,      5.40061f},  // K[1][4]
+    {    -4.86775f,      1.83995f,      2.28806f,     -2.96709f,     -3.61502f,     -1.49988f},  // K[1][5]
+    {    -6.57427f,      52.9669f,      59.2128f,     -62.2565f,      2.91315f,     -25.5244f},  // K[1][6]
+    {   -0.657005f,      3.75351f,      2.30481f,     -3.53309f,      1.95359f,      1.24557f},  // K[1][7]
+    {     22.3247f,       322.99f,     -61.9425f,     -318.925f,     -66.0442f,      76.6453f},  // K[1][8]
+    {    -5.01813f,      29.1011f,      16.9651f,     -12.4972f,     -38.1182f,     -7.91495f},  // K[1][9]
+    {     3.09454f,     -28.0077f,      73.1078f,      12.8024f,      7.79604f,     -73.7949f},  // K[2][0]
+    {     5.61011f,     -28.3871f,      63.6515f,      8.42875f,      19.4971f,     -69.4894f},  // K[2][1]
+    {    -4.07902f,     -6.90635f,      13.0897f,      8.95603f,     -2.17388f,      -9.8619f},  // K[2][2]
+    {   -0.666745f,      -3.1003f,      3.61707f,      4.71458f,     -3.91678f,    -0.607726f},  // K[2][3]
+    {     3.31986f,      23.7262f,     -8.02599f,      -24.396f,      -6.8347f,       7.8476f},  // K[2][4]
+    {    0.232222f,     0.874923f,    -0.258592f,     0.205104f,    -0.235544f,    -0.313333f},  // K[2][5]
+    {     16.1819f,     -12.4284f,      134.822f,      17.0711f,     -18.0642f,     -128.485f},  // K[2][6]
+    {    0.471576f,     -1.09559f,      5.12532f,      1.78569f,     -2.67966f,    -0.175115f},  // K[2][7]
+    {     23.6609f,     -34.5432f,     -16.0525f,      28.1897f,      28.7835f,     -19.6861f},  // K[2][8]
+    {     3.35501f,     -8.61287f,     0.107052f,       6.7071f,       6.6773f,     -5.10999f},  // K[2][9]
+    {     3.09454f,      73.1078f,     -28.0077f,     -73.7949f,      7.79604f,      12.8024f},  // K[3][0]
+    {     5.61011f,      63.6515f,     -28.3871f,     -69.4894f,      19.4971f,      8.42875f},  // K[3][1]
+    {     4.07902f,     -13.0897f,      6.90635f,       9.8619f,      2.17388f,     -8.95603f},  // K[3][2]
+    {    0.666745f,     -3.61707f,       3.1003f,     0.607726f,      3.91678f,     -4.71458f},  // K[3][3]
+    {     16.1819f,      134.822f,     -12.4284f,     -128.485f,     -18.0642f,      17.0711f},  // K[3][4]
+    {    0.471576f,      5.12532f,     -1.09559f,    -0.175115f,     -2.67966f,      1.78569f},  // K[3][5]
+    {     3.31986f,     -8.02599f,      23.7262f,       7.8476f,      -6.8347f,      -24.396f},  // K[3][6]
+    {    0.232222f,    -0.258592f,     0.874923f,    -0.313333f,    -0.235544f,     0.205104f},  // K[3][7]
+    {     23.6609f,     -16.0525f,     -34.5432f,     -19.6861f,      28.7835f,      28.1897f},  // K[3][8]
+    {     3.35501f,     0.107052f,     -8.61287f,     -5.10999f,       6.6773f,       6.7071f}   // K[3][9]
 };
 // 平衡点偏移拟合系数 Offset_Fit_Coefficients[3][6]
 // [0]: theta_l_eq, [1]: theta_r_eq, [2]: theta_b_eq
@@ -71,7 +72,7 @@ float vaEstimateKF_Q[4] = {0.2f, 0.0f,
 // Q矩阵初始值     Q11减小更信任用加速度估计出来的速度，Q22增大，对加速度的滤波效果减小
 //R11 增大R11减小对轮速的信任度，但是要足够大，太大了会造成转向结束震荡（因为转向时速度实际上应该更信任轮子，实际上是速度滞后太大了不收敛到真实的速度
 //在不打滑的前提下，轮速应该是更准确的，所以在没问题的前提下应该更信任轮子
-float vaEstimateKF_R[4] = {1000.0f, 0.0f, 
+float vaEstimateKF_R[4] = {700.0f, 0.0f, 
                             0.0f,  0.005f}; 	//v a观测噪声
 													 
 float vaEstimateKF_H[4] = {1.0f, 0.0f,
@@ -94,12 +95,12 @@ void Class_Balance_Chassis::Init()
 
   //使用香港大学的建模，右腿前电机ID为A2
   Left_Leg.Wheel_Motor.Init(&hfdcan1, DJI_Motor_ID_0x204, DJI_Motor_Control_Method_TORQUE, 15.765f, 4.925f);
-  Left_Leg.Front_Joint.Init(&hfdcan1, DM_Motor_ID_0x01, DM_Motor_Control_Method_MIT_TORQUE, 0, 45.0f, JOINT_MAX_TORQUE);
-  Left_Leg.Back_Joint.Init(&hfdcan1, DM_Motor_ID_0x02, DM_Motor_Control_Method_MIT_TORQUE, 0, 45.0f, JOINT_MAX_TORQUE);
-
+  Left_Leg.Front_Joint.Init(&hfdcan1, DM_Motor_ID_0x01, DM_Motor_Control_Method_MIT_TORQUE, 0, 25.0f, JOINT_MAX_TORQUE);
+  Left_Leg.Back_Joint.Init(&hfdcan1, DM_Motor_ID_0x02, DM_Motor_Control_Method_MIT_TORQUE, 0, 25.0f, JOINT_MAX_TORQUE);
+  
   Right_Leg.Wheel_Motor.Init(&hfdcan2, DJI_Motor_ID_0x201, DJI_Motor_Control_Method_TORQUE, 15.765f, 4.925f);         //4.925 = 20 * 0.3 * 15.765 / (3591/187)
-  Right_Leg.Front_Joint.Init(&hfdcan2, DM_Motor_ID_0x01, DM_Motor_Control_Method_MIT_TORQUE, 0, 45.0f, JOINT_MAX_TORQUE);
-  Right_Leg.Back_Joint.Init(&hfdcan2, DM_Motor_ID_0x02, DM_Motor_Control_Method_MIT_TORQUE, 0, 45.0f, JOINT_MAX_TORQUE);
+  Right_Leg.Front_Joint.Init(&hfdcan2, DM_Motor_ID_0x01, DM_Motor_Control_Method_MIT_TORQUE, 0, 25.0f, JOINT_MAX_TORQUE);
+  Right_Leg.Back_Joint.Init(&hfdcan2, DM_Motor_ID_0x02, DM_Motor_Control_Method_MIT_TORQUE, 0, 25.0f, JOINT_MAX_TORQUE);
 
   Left_Leg.Init();
   Right_Leg.Init();
@@ -280,7 +281,7 @@ void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
       //在腿部稳定的情况下，如果开启了上台阶模式，进入到达台阶的判断
       if(Jump_Enable_Flag == 1 && Chassis_Control_Type == Chassis_Control_Type_FLLOW){
         if(Left_Leg.L0 > 0.33f && Left_Leg.theta > 0.45f && Right_Leg.L0 > 0.33f && Right_Leg.theta > 0.45f){
-          Chassis_Control_Type = Chassis_Control_Type_JUMP_1;     //磕上台阶
+          // Chassis_Control_Type = Chassis_Control_Type_JUMP_1;     //磕上台阶
         }
       }
 
@@ -322,7 +323,6 @@ void Class_Balance_Chassis::TIM_Calculate_PeriodElapsedCallback()
 
 }
 
-float tmp_X_Err, tmp_Pitch_Err, tmp_Left_Theta_Err, tmp_Right_Theta_Err;
 float tmp_wt;
 float LQR_Tp_L[10];
 float pitch_max;
@@ -351,17 +351,19 @@ void Class_Balance_Chassis::LQR_Calc()
     Target_r_theta = -0.0f;
   }
 
-  if(Left_Leg.Air_Status == Leg_Air){
-    Target_l_theta = -0.05f;
-  }
+  // if(Left_Leg.Air_Status == Leg_Air){
+  //   Target_l_theta = -0.12f;
+  // }
 
-  if(Right_Leg.Air_Status == Leg_Air){
-    Target_r_theta = -0.05f;
-  }
+  // if(Right_Leg.Air_Status == Leg_Air){
+  //   Target_r_theta = -0.12f;
+  // }
 
   Get_Polyfit_K();
 
   tmp_X_Err = (Target_X - X);
+  tmp_Vx_Err = (True_Target_Vx - Vx);
+  tmp_Yaw_Err = (Target_Yaw_Angle - Yaw_Angle);
   tmp_Pitch_Err = (Target_Pitch_Angle - Pitch_Angle);
   tmp_Left_Theta_Err = (Target_l_theta - Left_Leg.theta);
   tmp_Right_Theta_Err = (Target_r_theta - Right_Leg.theta);
@@ -370,11 +372,13 @@ void Class_Balance_Chassis::LQR_Calc()
   //   a = 0.1f;
   // }
   Math_Constrain(&tmp_X_Err, -0.5f, 0.5f);
-  Math_Constrain(&tmp_Pitch_Err, -0.3f, 0.3f);
+  Math_Constrain(&tmp_Vx_Err, -1.0f, 1.0f);
+  Math_Constrain(&tmp_Yaw_Err, -0.8f, 0.8f);
+  Math_Constrain(&tmp_Pitch_Err, -1.0f, 1.0f);
   Math_Constrain(&tmp_Left_Theta_Err, -0.6f, 0.6f);
   Math_Constrain(&tmp_Right_Theta_Err, -0.6f, 0.6f);
 
-  LQR_Output_Calc(tmp_X_Err, tmp_Left_Theta_Err, tmp_Right_Theta_Err, tmp_Pitch_Err);
+  LQR_Output_Calc(tmp_X_Err, tmp_Vx_Err, tmp_Yaw_Err, tmp_Left_Theta_Err, tmp_Right_Theta_Err, tmp_Pitch_Err);
   
   // if(IS_NORMAL()){
   //   if(K[2][8] * tmp_Pitch_Err * LQR_Out[2] > 0.0f){     //说明转矩较大是Pitch引起的
@@ -438,28 +442,28 @@ void Class_Balance_Chassis::LQR_Calc()
 
 }
 
-void Class_Balance_Chassis::LQR_Output_Calc(float __tmp_x_err, float __tmp_left_theta_err, float __tmp_right_theta_err, float __tmp_pitch_err)
+void Class_Balance_Chassis::LQR_Output_Calc(float __tmp_x_err, float __tmp_vx_err, float __tmp_yaw_err, float __tmp_left_theta_err, float __tmp_right_theta_err, float __tmp_pitch_err)
 {
   //T(r-b)
-  LQR_Out[0] = K[0][0] * __tmp_x_err + K[0][1] * (True_Target_Vx - Vx) + K[0][2] * (Target_Yaw_Angle - Yaw_Angle)
+  LQR_Out[0] = K[0][0] * __tmp_x_err + K[0][1] * __tmp_vx_err + K[0][2] * __tmp_yaw_err
               + K[0][3] * (Target_Omega - GyroYaw) + K[0][4] * __tmp_left_theta_err + K[0][5] * (Target_l_dtheta - Left_Leg.d_theta)
               + K[0][6] * __tmp_right_theta_err + K[0][7] * (Target_r_dtheta - Right_Leg.d_theta) 
               + K[0][8] * __tmp_pitch_err + K[0][9] * (Target_Picth_Omega - GyroPitch);
 
   //T(l-b)
-  LQR_Out[1] = K[1][0] * __tmp_x_err + K[1][1] * (True_Target_Vx - Vx) + K[1][2] * (Target_Yaw_Angle - Yaw_Angle)
+  LQR_Out[1] = K[1][0] * __tmp_x_err + K[1][1] * __tmp_vx_err + K[1][2] * __tmp_yaw_err
               + K[1][3] * (Target_Omega - GyroYaw) + K[1][4] * __tmp_left_theta_err + K[1][5] * (Target_l_dtheta - Left_Leg.d_theta)
               + K[1][6] * __tmp_right_theta_err + K[1][7] * (Target_r_dtheta - Right_Leg.d_theta) 
               + K[1][8] * __tmp_pitch_err + K[1][9] * (Target_Picth_Omega - GyroPitch);
   
   //T(wr-r)
-  LQR_Out[2] = K[2][0] * __tmp_x_err + K[2][1] * (True_Target_Vx - Vx) + K[2][2] * (Target_Yaw_Angle - Yaw_Angle)
+  LQR_Out[2] = K[2][0] * __tmp_x_err + K[2][1] * __tmp_vx_err + K[2][2] * __tmp_yaw_err
               + K[2][3] * (Target_Omega - GyroYaw) + K[2][4] * __tmp_left_theta_err + K[2][5] * (Target_l_dtheta - Left_Leg.d_theta)
               + K[2][6] * __tmp_right_theta_err + K[2][7] * (Target_r_dtheta - Right_Leg.d_theta) 
               + K[2][8] * __tmp_pitch_err + K[2][9] * (Target_Picth_Omega - GyroPitch);
   
   //T(wl-l)
-  LQR_Out[3] = K[3][0] * __tmp_x_err + K[3][1] * (True_Target_Vx - Vx) + K[3][2] * (Target_Yaw_Angle - Yaw_Angle)
+  LQR_Out[3] = K[3][0] * __tmp_x_err + K[3][1] * __tmp_vx_err + K[3][2] * __tmp_yaw_err
               + K[3][3] * (Target_Omega - GyroYaw) + K[3][4] * __tmp_left_theta_err + K[3][5] * (Target_l_dtheta - Left_Leg.d_theta)
               + K[3][6] * __tmp_right_theta_err + K[3][7] * (Target_r_dtheta - Right_Leg.d_theta) 
               + K[3][8] * __tmp_pitch_err + K[3][9] * (Target_Picth_Omega - GyroPitch);
@@ -468,6 +472,14 @@ void Class_Balance_Chassis::LQR_Output_Calc(float __tmp_x_err, float __tmp_left_
 void Class_Balance_Chassis::LengthControl()
 {
   //对于Roll的补偿还有另一种计算的方式
+
+  if(Chassis_Control_Type == Chassis_Control_Type_SPIN){
+    Roll_PID.Set_K_P(1200.0f);
+  }
+  else{
+    Roll_PID.Set_K_P(800.0f);      //roll要调到单独按一边腿，另一边跟着下降
+  }
+
   Roll_PID.Set_Now(Roll_Angle);
   Roll_PID.Set_D_Extern_Value(-GyroRoll);       //error的变换率 （Target - Now）
   Roll_PID.Set_Target(0.0f);
@@ -493,6 +505,7 @@ void Class_Balance_Chassis::LengthControl()
 
   //腿的补偿加个斜坡？
   //单边腿离地也正常补偿Roll的平衡，双边离地不补偿
+  //斜坡腿长的补偿有时候会误判，平地上也可能乱补偿，慢慢才能收敛回来
   float tmp_left_target_l0 = Left_Leg.Target_L0, tmp_right_target_l0 = Right_Leg.Target_L0;
 
   if(Left_Leg.Air_Status == Leg_Air && Right_Leg.Air_Status == Leg_Air){
@@ -513,8 +526,8 @@ void Class_Balance_Chassis::LengthControl()
     }
   }
 
-  // tmp_left_target_l0 = Target_Length;
-  // tmp_right_target_l0 = Target_Length;
+  tmp_left_target_l0 = Target_Length;
+  tmp_right_target_l0 = Target_Length;
 
   Left_Leg.Target_L0 = tmp_left_target_l0;
   Right_Leg.Target_L0 = tmp_right_target_l0;
@@ -560,10 +573,13 @@ void Class_Balance_Chassis::ParamUpdata()
   Roll_Angle  = -IMU.Get_Rad_Roll();
   Pitch_Angle = IMU.Get_Rad_Pitch();
   Accel_X   = -IMU.Get_Accel_Y_b();              //注意看是不是对应了
-  Accel_Z   = IMU.Get_Accel_Z_b();
+  Accel_Z   = IMU.Get_Accel_Z_n();
+  Accel_Z_b = IMU.Get_Accel_Z_b();
   GyroYaw   = IMU.Get_Gyro_Yaw();
   GyroRoll  = -IMU.Get_Gyro_Roll();              //Roll和Pitch陀螺仪速度应该换一下（可能）
   GyroPitch = IMU.Get_Gyro_Pitch();
+
+  Accel_X = Accel_X * arm_cos_f32(Pitch_Angle) + Accel_Z_b * arm_sin_f32(Pitch_Angle);      //除去Yaw角影响的机体坐标系加速度
 
   //IMU安装方式前Y，右X，这也是IMU解算算法的坐标系
   Left_Leg.GyroPitch  = GyroPitch;
@@ -598,8 +614,6 @@ void Class_Balance_Chassis::ParamUpdata()
 
   }
 
-  Target_X = 0.0f;
-
   //功率限制限制速度
   Power_Control_Task(&True_Target_Vx);
   Angle_Continuity_Process_Rad(&Target_Yaw_Angle, Yaw_Angle);
@@ -628,9 +642,12 @@ void Class_Balance_Chassis::ParamUpdata()
   Right_Leg.d_phi1 = -Right_Leg.Back_Joint.Get_Now_Omega();
   Right_Leg.d_phi4 = -Right_Leg.Front_Joint.Get_Now_Omega();
 
+  float tmp_left_omega = -Left_Leg.Wheel_Motor.Get_Now_Omega_Radian();
+  float tmp_right_omega = Right_Leg.Wheel_Motor.Get_Now_Omega_Radian();
+
   //轮子自身力矩都遵循右手系，面朝Y负方向看过去逆时针为正（这里加负号和电机安装方式相关）
-  Kalman_PeriodElapsedCallback(&Left_Leg.Wheel_Speed_Kalman, -Left_Leg.Wheel_Motor.Get_Now_Omega_Radian());
-  Kalman_PeriodElapsedCallback(&Right_Leg.Wheel_Speed_Kalman, Right_Leg.Wheel_Motor.Get_Now_Omega_Radian());
+  Kalman_PeriodElapsedCallback(&Left_Leg.Wheel_Speed_Kalman, tmp_left_omega);
+  Kalman_PeriodElapsedCallback(&Right_Leg.Wheel_Speed_Kalman, tmp_right_omega);
 
   Left_Leg.Wheel_Speed = Kalman_Get_Out(Left_Leg.Wheel_Speed_Kalman);
   Right_Leg.Wheel_Speed = Kalman_Get_Out(Right_Leg.Wheel_Speed_Kalman);
@@ -662,9 +679,10 @@ void Class_Balance_Chassis::SpeedEstimate()
   Vx = V_EstimateKF.FilteredValue[0];
 
   // X = X + Vx * ROBOT_TASK_DT * 1.0f/ 1000.0f;
+  // Target_X = Target_X + True_Target_Vx * ROBOT_TASK_DT * 1.0f/ 1000.0f;
 
   if(fabs(True_Target_Vx) < 0.1f){
-    X = X + Vx * ROBOT_TASK_DT / 1000.0f;
+    X = X + Vx * ROBOT_TASK_DT * 1.0f/ 1000.0f;
     Target_X = 0.0f;
   }
   else{
@@ -675,9 +693,6 @@ void Class_Balance_Chassis::SpeedEstimate()
   if(Left_Leg.Air_Status == Leg_Air || Right_Leg.Air_Status == Leg_Air){
     Target_X = 0.0f;
     X = 0.0f;
-
-    Target_Vx = 0.0f;
-    Vx = 0.0f;
   }
 
 }
@@ -706,8 +721,8 @@ void Class_Balance_Chassis::NormalOutput()
   //最终力的输出
   if(Left_Leg.Get_Air_Status() == Leg_UnAir && Right_Leg.Get_Air_Status() == Leg_UnAir){
     if(Chassis_Control_Type == Chassis_Control_Type_FLLOW){
-      Left_Leg.F0  = 100.0f / arm_cos_f32(Left_Leg.theta) + Left_Leg.dLength_PID.Get_Out() - Compensite_F0;         //F0是机体受到的向上的力
-      Right_Leg.F0 = 100.0f / arm_cos_f32(Right_Leg.theta) + Right_Leg.dLength_PID.Get_Out() + Compensite_F0; 
+      Left_Leg.F0  = 100.0f / arm_cos_f32(Left_Leg.theta) + Left_Leg.dLength_PID.Get_Out() - Compensite_F0 + Roll_PID.Get_Out();         //F0是机体受到的向上的力
+      Right_Leg.F0 = 100.0f / arm_cos_f32(Right_Leg.theta) + Right_Leg.dLength_PID.Get_Out() + Compensite_F0 - Roll_PID.Get_Out(); 
     }
     else{
       //小陀螺不用补偿前馈
@@ -717,15 +732,19 @@ void Class_Balance_Chassis::NormalOutput()
     
   }
   else if(Left_Leg.Get_Air_Status() == Leg_Air && Right_Leg.Get_Air_Status() == Leg_Air){
-    Left_Leg.F0  = 35.0f;//Left_Leg.dLength_PID.Get_Out() * 0.3f;
-    Right_Leg.F0 = 35.0f;//Right_Leg.dLength_PID.Get_Out() * 0.3f; 
+    Left_Leg.F0  = 25.0f;//Left_Leg.dLength_PID.Get_Out() * 0.3f;
+    Right_Leg.F0 = 25.0f;//Right_Leg.dLength_PID.Get_Out() * 0.3f; 
   }
   else if(Left_Leg.Get_Air_Status() == Leg_UnAir && Right_Leg.Get_Air_Status() == Leg_Air){
-    Left_Leg.F0  = 100.0f / arm_cos_f32(Left_Leg.theta) + Left_Leg.dLength_PID.Get_Out();
-    Right_Leg.F0 = 35.0f;//Right_Leg.dLength_PID.Get_Out() * 0.3f; 
+    Left_Leg.F0  = 100.0f / arm_cos_f32(Left_Leg.theta) + Left_Leg.dLength_PID.Get_Out();     //单边腿离地一边补偿，另一边不补偿，如果不离地的也补偿会导致不离地的收腿反而离地
+    float tmp_roll_compensate = Roll_PID.Get_Out();
+    // Math_Constrain(&tmp_roll_compensate, -20.0f, 20.0f);
+    Right_Leg.F0 = 25.0f - tmp_roll_compensate;
   }
   else if(Left_Leg.Get_Air_Status() == Leg_Air && Right_Leg.Get_Air_Status() == Leg_UnAir){
-    Left_Leg.F0  = 35.0f;//Left_Leg.dLength_PID.Get_Out() * 0.3f;
+    float tmp_roll_compensate = Roll_PID.Get_Out();
+    // Math_Constrain(&tmp_roll_compensate, -20.0f, 20.0f);
+    Left_Leg.F0  = 25.0f + tmp_roll_compensate;
     Right_Leg.F0 = 100.0f / arm_cos_f32(Right_Leg.theta) + Right_Leg.dLength_PID.Get_Out(); 
   }
 
@@ -742,10 +761,10 @@ void Class_Balance_Chassis::NormalOutput()
   // Left_Leg.Wheel_T  = 0.0f;
   // Right_Leg.Wheel_T = 0.0f;
 
-  Math_Constrain(&Left_Leg.F0, -300.0f, 300.0f);
+  Math_Constrain(&Left_Leg.F0, -200.0f, 200.0f);
   Math_Constrain(&Left_Leg.Wheel_T, -4.9f, 4.9f);
 
-  Math_Constrain(&Right_Leg.F0, -300.0f, 300.0f);
+  Math_Constrain(&Right_Leg.F0, -200.0f, 200.0f);
   Math_Constrain(&Right_Leg.Wheel_T, -4.9f, 4.9f);
 }
 

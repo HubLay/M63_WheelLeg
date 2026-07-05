@@ -56,7 +56,7 @@ void IMU_QuaternionEKF_Init(float process_noise1, float process_noise2, float me
     QEKF_INS->Q1 = process_noise1;
     QEKF_INS->Q2 = process_noise2;
     QEKF_INS->R = measure_noise;
-    QEKF_INS->ChiSquareTestThreshold = 1e-8;
+    QEKF_INS->ChiSquareTestThreshold = 1e-4;
     QEKF_INS->ConvergeFlag = 0;
     QEKF_INS->ErrorCount = 0;
     QEKF_INS->UpdateCount = 0;
@@ -204,9 +204,9 @@ void IMU_QuaternionEKF_Update(float gx, float gy, float gz, float ax, float ay, 
     QEKF_INS->q[1] = QEKF_INS->IMU_QuaternionEKF.FilteredValue[1];
     QEKF_INS->q[2] = QEKF_INS->IMU_QuaternionEKF.FilteredValue[2];
     QEKF_INS->q[3] = QEKF_INS->IMU_QuaternionEKF.FilteredValue[3];
-    QEKF_INS->GyroBias[0] = 0.0f;//QEKF_INS->IMU_QuaternionEKF.FilteredValue[4];
-    QEKF_INS->GyroBias[1] = 0.0f;//QEKF_INS->IMU_QuaternionEKF.FilteredValue[5];
-    QEKF_INS->GyroBias[2] = QEKF_INS->yaw_offset; // 大部分时候z轴通天,无法观测yaw的漂移
+    QEKF_INS->GyroBias[0] = QEKF_INS->IMU_QuaternionEKF.FilteredValue[4];
+    QEKF_INS->GyroBias[1] = QEKF_INS->IMU_QuaternionEKF.FilteredValue[5];
+    QEKF_INS->GyroBias[2] = 0.0f; // 大部分时候z轴通天,无法观测yaw的漂移
 
     // 利用四元数反解欧拉角
     QEKF_INS->Yaw = atan2f(2.0f * (QEKF_INS->q[0] * QEKF_INS->q[3] + QEKF_INS->q[1] * QEKF_INS->q[2]), 2.0f * (QEKF_INS->q[0] * QEKF_INS->q[0] + QEKF_INS->q[1] * QEKF_INS->q[1]) - 1.0f) * 57.295779513f;
@@ -472,8 +472,20 @@ static void IMU_QuaternionEKF_xhatUpdate(KalmanFilter_t *kf, void *Para1)
     }
 
     // 不修正yaw轴数据
-    kf->temp_vector.pData[3] = 0;
+    // kf->temp_vector.pData[3] = 0;
     kf->MatStatus = Matrix_Add(&kf->xhatminus, &kf->temp_vector, &kf->xhat);
+
+    for (uint8_t i = 4; i < 6; i++)
+    {
+        if (kf->xhat.pData[i] > 0.005f)
+        {
+            kf->xhat.pData[i] = 0.005f;
+        }
+        if (kf->xhat.pData[i] < -0.005f)
+        {
+            kf->xhat.pData[i] = -0.005f;
+        }
+    }
 }
 
 /**

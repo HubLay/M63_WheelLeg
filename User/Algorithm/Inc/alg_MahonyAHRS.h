@@ -48,8 +48,8 @@ class Class_MahonyAHRS
     float acc_g = 0.0f, last_acc_g = 0.0f;
     float Kp_Use = 0.0f;
 
-    float twoKp = 2.0f * 1.0f;  // 2 * proportional gain
-    float twoKi = 2.0f * 0.001f;  // 2 * integral gain
+    float twoKp = 2.0f * 0.5f;  // 2 * proportional gain
+    float twoKi = 2.0f * 0.0f;  // 2 * integral gain
     float sampleFreq = 500.0f;	// sample frequency in Hz
     float integralFBx = 0.0f;
     float integralFBy = 0.0f;

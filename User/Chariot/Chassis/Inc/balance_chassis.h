@@ -186,6 +186,8 @@ class Class_Balance_Chassis{
     float Compensite_F0 = 0.0f;                             //转向前馈补偿力
     float Limit_Power_Vx_Max = 2.0f;
     float Chassis_Forward = 1.0f;
+    float Last_Chassis_Forward = 1.0f;
+    uint8_t Chassis_Forward_Switch_Flag = 0;                            //切换前进方向的标志位，1表示正在切换，0表示没有切换
 
     uint8_t MiniPC_Aim = 0;             //0 上位机离线   1 没瞄到在线   2 在线瞄到
 
@@ -199,12 +201,15 @@ class Class_Balance_Chassis{
 
     uint8_t Switch_Chassis_Forward = 0;
     uint8_t Last_Switch_Chassis_Forward = 0;
+    float Accel_X = 0.0f;
+
+    float tmp_X_Err, tmp_Vx_Err, tmp_Yaw_Err, tmp_Pitch_Err, tmp_Left_Theta_Err, tmp_Right_Theta_Err;
 
   protected:
 
     float X = 0.0f;
     float Vx = 0.0f;
-    float Accel_X = 0.0f, Accel_Z = 0.0f;
+    float Accel_Z = 0.0f, Accel_Z_b = 0.0f;
     float Pitch_Angle = 0.0f, GyroPitch = 0.0f;             //rad
     float Roll_Angle = 0.0f, GyroRoll = 0.0f;               //rad
     float Yaw_Angle = 0.0f, GyroYaw = 0.0f;                 //angle
@@ -236,7 +241,7 @@ class Class_Balance_Chassis{
 
   private:
     void LQR_Calc();
-    void LQR_Output_Calc(float __tmp_x_err, float __tmp_left_theta_err, float __tmp_right_theta_err, float __tmp_pitch_err);
+    void LQR_Output_Calc(float __tmp_x_err, float __tmp_vx_err, float __tmp_yaw_err, float __tmp_left_theta_err, float __tmp_right_theta_err, float __tmp_pitch_err);
     void LengthControl();         // 腿长控制，Roll保持机体水平
     void SynthesizeMotion();      // 转向和抗劈叉
     void SpeedUpdata();
@@ -278,7 +283,8 @@ class Class_Balance_Chassis{
  */
 inline uint8_t Class_Balance_Chassis::IS_NORMAL()
 {
-  return ((Chassis_Control_Type == Chassis_Control_Type_FLLOW || Chassis_Control_Type == Chassis_Control_Type_SPIN || Chassis_Control_Type == Chassis_Control_Type_UNFLLOW) && (Chassis_Stable_Count >= 300));
+  return ((Chassis_Control_Type == Chassis_Control_Type_FLLOW || Chassis_Control_Type == Chassis_Control_Type_SPIN || Chassis_Control_Type == Chassis_Control_Type_UNFLLOW) 
+  && (Chassis_Stable_Count >= 300) && (Balance_Chassis.Left_Leg.Air_Status == Leg_UnAir) && (Balance_Chassis.Right_Leg.Air_Status == Leg_UnAir));
 }
 
 inline float Class_Balance_Chassis::Get_aver_v()

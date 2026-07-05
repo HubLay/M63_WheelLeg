@@ -156,20 +156,6 @@ void Class_MahonyAHRS::MahonyAHRSupdateIMU(float gx, float gy, float gz, float a
 		// Normalise accelerometer measurement
 		recipNorm = invSqrt(ax * ax + ay * ay + az * az);
 
-		acc_g = sqrtf(ax * ax + ay * ay + az * az);
-
-		acc_g = 0.3*acc_g + 0.7*last_acc_g;
-		last_acc_g = acc_g;
-
-		float acc_err =
-				fabsf(acc_g - 9.81f);
-
-		float kp_scale =
-				expf(-0.08f * acc_err);
-
-		Kp_Use =
-				twoKp * kp_scale;
-
 		ax *= recipNorm;
 		ay *= recipNorm;
 		az *= recipNorm;        
@@ -200,9 +186,9 @@ void Class_MahonyAHRS::MahonyAHRSupdateIMU(float gx, float gy, float gz, float a
 		}
 
 		// Apply proportional feedback
-		gx += Kp_Use * halfex;
-		gy += Kp_Use * halfey;
-		gz += Kp_Use * halfez;
+		gx += twoKp * halfex;
+		gy += twoKp * halfey;
+		gz += twoKp * halfez;
 	}
 	
 	// Integrate rate of change of quaternion

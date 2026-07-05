@@ -1,23 +1,28 @@
 
 
-GraphedExpression="((Balance_Chassis).Right_Leg).L0", Color=#e56a6f
-GraphedExpression="((Balance_Chassis).Right_Leg).theta", Color=#35792b
-GraphedExpression="((Balance_Chassis).Right_Leg).d_theta", Color=#769dda
-OpenDocument="main.c", FilePath="C:/Users/HLlll/Desktop/m63code/code/ZLLC_2026_M63_HK/Core/Src/main.c", Line=64
+GraphedExpression="(((Balance_Chassis).IMU).QEKF_INS).Roll", Color=#e56a6f, Show=0
+GraphedExpression="(((Balance_Chassis).IMU).QEKF_INS).Pitch", Color=#35792b, Show=0
+GraphedExpression="(((Balance_Chassis).IMU).QEKF_INS).Yaw", Color=#769dda, Show=0
+GraphedExpression="(((Balance_Chassis).IMU).INS).MotionAccel_n[0]", Color=#b14f0d
+GraphedExpression="(((Balance_Chassis).IMU).INS).MotionAccel_n[1]", Color=#b3c38e, Show=0
+GraphedExpression="(((Balance_Chassis).IMU).INS).MotionAccel_b[0]", Color=#5500ff
+GraphedExpression="(((Balance_Chassis).IMU).INS).MotionAccel_b[1]", Color=#7fd3b7, Show=0
+OpenDocument="stm32h7xx_it.c", FilePath="C:/Users/HLlll/Desktop/m63code/code/ZLLC_2026_M63_HK/Core/Src/stm32h7xx_it.c", Line=105
+OpenDocument="main.c", FilePath="C:/Users/HLlll/Desktop/m63code/code/ZLLC_2026_M63_HK/Core/Src/main.c", Line=66
 OpenDocument="Leg.h", FilePath="C:/Users/HLlll/Desktop/m63code/code/ZLLC_2026_M63_HK/User/Chariot/Chassis/Inc/Leg.h", Line=42
 OpenDocument="balance_chassis.h", FilePath="C:/Users/HLlll/Desktop/m63code/code/ZLLC_2026_M63_HK/User/Chariot/Chassis/Inc/balance_chassis.h", Line=146
 OpenToolbar="Debug", Floating=0, x=0, y=0
 OpenWindow="Call Stack", DockArea=RIGHT, x=0, y=0, w=874, h=685, TabPos=2, TopOfStack=0, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Registers 1", DockArea=LEFT, x=0, y=0, w=494, h=180, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, FilteredItems=[], RefreshRate=1
-OpenWindow="Source Files", DockArea=LEFT, x=0, y=1, w=494, h=504, TabPos=0, TopOfStack=0, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Disassembly", DockArea=LEFT, x=0, y=1, w=494, h=504, TabPos=1, TopOfStack=1, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Registers 1", DockArea=LEFT, x=0, y=0, w=494, h=214, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, FilteredItems=[], RefreshRate=1
+OpenWindow="Source Files", DockArea=LEFT, x=0, y=1, w=494, h=470, TabPos=0, TopOfStack=0, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Disassembly", DockArea=LEFT, x=0, y=1, w=494, h=470, TabPos=1, TopOfStack=1, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 OpenWindow="Memory 1", DockArea=BOTTOM, x=0, y=0, w=507, h=717, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, EditorAddress=0x40020040
 OpenWindow="Watched Data 1", DockArea=RIGHT, x=0, y=0, w=874, h=685, TabPos=0, TopOfStack=1, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 OpenWindow="Data Sampling", DockArea=RIGHT, x=0, y=0, w=874, h=685, TabPos=1, TopOfStack=0, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VisibleTab=0, UniformSampleSpacing=0
-OpenWindow="Timeline", DockArea=BOTTOM, x=1, y=0, w=2052, h=717, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=1, DataPaneShown=1, PowerPaneShown=0, CodePaneShown=0, PinCursor="Cursor Movable", TimePerDiv="1 s / Div", TimeStampFormat="Time", DataGraphDrawAsPoints=0, DataGraphLegendShown=1, DataGraphUniformSampleSpacing=0, DataGraphLegendPosition="13;34", DataGraphShowNamesAtCursor=0, PowerGraphDrawAsPoints=0, PowerGraphLegendShown=0, PowerGraphAvgFilterTime=Off, PowerGraphAvgFilterLen=Off, PowerGraphUniformSampleSpacing=0, PowerGraphLegendPosition="888;-69", CodeGraphLegendShown=0, CodeGraphLegendPosition="904;0"
+OpenWindow="Timeline", DockArea=BOTTOM, x=1, y=0, w=2052, h=717, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=1, DataPaneShown=1, PowerPaneShown=0, CodePaneShown=0, PinCursor="Cursor Movable", TimePerDiv="1 s / Div", TimeStampFormat="Time", DataGraphDrawAsPoints=0, DataGraphLegendShown=1, DataGraphUniformSampleSpacing=0, DataGraphLegendPosition="0;0", DataGraphShowNamesAtCursor=0, PowerGraphDrawAsPoints=0, PowerGraphLegendShown=0, PowerGraphAvgFilterTime=Off, PowerGraphAvgFilterLen=Off, PowerGraphUniformSampleSpacing=0, PowerGraphLegendPosition="909;-69", CodeGraphLegendShown=0, CodeGraphLegendPosition="925;0"
 SmartViewPlugin="", Page="", Toolbar="Hidden", Window="SmartView 1"
-TableHeader="Data Sampling Table", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";" ((Balance_Chassis).Right_Leg).L0";" ((Balance_Chassis).Right_Leg).theta";" ((Balance_Chassis).Right_Leg).d_theta"], ColWidths=[100;100;100;100;100]
-TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[422;100;134;124;124;144;110;144;126]
+TableHeader="Data Sampling Table", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";" (((Balance_Chassis).IMU).QEKF_INS).Roll";" (((Balance_Chassis).IMU).QEKF_INS).Pitch";" (((Balance_Chassis).IMU).QEKF_INS).Yaw";" (((Balance_Chassis).IMU).INS).MotionAccel_n[0]";" (((Balance_Chassis).IMU).INS).MotionAccel_n[1]";" (((Balance_Chassis).IMU).INS).MotionAccel_b[0]";" (((Balance_Chassis).IMU).INS).MotionAccel_b[1]"], ColWidths=[100;100;100;100;100;100;100;100;100]
+TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[422;100;134;124;114;154;110;126;126]
 TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh";"Access"], ColWidths=[514;374;134;100;104]
 TableHeader="Call Stack", SortCol="Function", SortOrder="ASCENDING", VisibleCols=["Function";"Stack Frame";"Source";"PC";"Return Address";"Stack Used"], ColWidths=[474;144;174;104;154;100]
 TableHeader="Source Files", SortCol="File", SortOrder="DESCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[262;100;100;100;1030]

@@ -131,7 +131,7 @@ void osTaskCreate(){
   xTaskCreate(UI_Task, "UI_Task", 512, NULL, 2, &UI_TaskHandle);
 
   xTaskCreate(Printf_Task, "Printf_Task", 512, NULL, 1, &Printf_TaskHandle);
-  xTaskCreate(Emergency_Stop_Task, "Emergency_Stop_Task", 128, NULL, 3, &Emergency_Stop_TaskHandle); 
+  xTaskCreate(Emergency_Stop_Task, "Emergency_Stop_Task", 128, NULL, 3, &Emergency_Stop_TaskHandle);
 
   CanTransmit_TaskCreate();
 

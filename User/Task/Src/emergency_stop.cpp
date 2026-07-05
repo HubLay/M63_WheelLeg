@@ -73,18 +73,18 @@ void Emergency_StopTask()
 
     if(fabs(Balance_Chassis.Get_Roll_Angle()) * 57.3f > 35.0f ||
        fabs(Balance_Chassis.Get_Pitch_Angle()) * 57.3f > 35.0f ||
-       fabs(Balance_Chassis.Left_Leg.Get_Theta()) > 1.2f || 
-       fabs(Balance_Chassis.Right_Leg.Get_Theta()) > 1.2f)
+       fabs(Balance_Chassis.Left_Leg.Get_Theta()) > 1.5f || 
+       fabs(Balance_Chassis.Right_Leg.Get_Theta()) > 1.5f)
       //  Left_Motor_Err_Torque_Cnt * EMERGENCY_STOP_TASK_DT > 500 ||
       //  Right_Motor_Err_Torque_Cnt * EMERGENCY_STOP_TASK_DT > 500)
     {
         Balance_Chassis.Emergency_Stop_Flag = 1;
     }
 
-    if(fabs(Balance_Chassis.Get_Roll_Angle()) * 57.3f > 35.0f)  Err_Status |= 0x01;
+    if(fabs(Balance_Chassis.Get_Roll_Angle()) * 57.3f > 50.0f)  Err_Status |= 0x01;
     if(fabs(Balance_Chassis.Get_Pitch_Angle()) * 57.3f > 40.0f) Err_Status |= (1<<1);
-    if(fabs(Balance_Chassis.Left_Leg.Get_Theta()) > 1.2f)       Err_Status |= (1<<2);
-    if(fabs(Balance_Chassis.Right_Leg.Get_Theta()) > 1.2f)      Err_Status |= (1<<3);
+    if(fabs(Balance_Chassis.Left_Leg.Get_Theta()) > 2.0f)       Err_Status |= (1<<2);
+    if(fabs(Balance_Chassis.Right_Leg.Get_Theta()) > 2.0f)      Err_Status |= (1<<3);
     // if(Left_Motor_Err_Torque_Cnt * EMERGENCY_STOP_TASK_DT > 500) Err_Status |= (1<<4);
     // if(Right_Motor_Err_Torque_Cnt * EMERGENCY_STOP_TASK_DT > 500) Err_Status |= (1<<5);
 

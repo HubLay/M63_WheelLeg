@@ -232,7 +232,6 @@ void Class_DM_Motor_8009P::Data_Process()
     Data.Now_Torque = Math_Int_To_Float(tmp_torque, 0, (1 << 12) - 1, -Torque_Max, Torque_Max);
     Data.Now_MOS_Temperature = tmp_buffer->MOS_Temperature + CELSIUS_TO_KELVIN;
     Data.Now_Rotor_Temperature = tmp_buffer->Rotor_Temperature + CELSIUS_TO_KELVIN;
-
     //存储预备信息
     Data.Pre_Position = tmp_position;
 }

@@ -16,12 +16,12 @@ void Class_Leg::Init()
   Front_Joint.TIM_Process_PeriodElapsedCallback();                //处理一次数据防止上电时刻0的数组线性映射到力矩不为0
   Back_Joint.TIM_Process_PeriodElapsedCallback();
 
-  Length_PID.Init(25.0f, 0.0f, 0.08f, 0.0f, 0.0f, 1.5f);
-  dLength_PID.Init(110.0f, 0.0f, 0.0f, 0.0f, 0.0f, 200.0f);         //腿太硬了回没有缓冲，容易进入离地
+  Length_PID.Init(25.0f, 0.0f, 0.11f, 0.0f, 0.0f, 1.5f);
+  dLength_PID.Init(110.0f, 0.0f, 0.0f, 0.0f, 0.0f, 100.0f);         //腿太硬了回没有缓冲，容易进入离地
 
   kalman_Init(&d_L0_Kalman, 0.99f, 0.01f, 0.0f, 1.0f);
-  kalman_Init(&d_alpha_Kalman, 0.99f, 0.01f, 0.0f, 1.0f);
-  kalman_Init(&d_theta_Kalman, 0.99f, 0.01f, 0.0f, 1.0f);
+  kalman_Init(&d_alpha_Kalman, 0.99f, 0.2f, 0.0f, 1.0f);
+  kalman_Init(&d_theta_Kalman, 0.99f, 0.2f, 0.0f, 1.0f);
   kalman_Init(&Wheel_Speed_Kalman, 0.99f, 0.002f, 0.0f, 1.0f);
   kalman_Init(&leg_v_Kalman, 0.99f, 0.01f, 0.0f, 1.0f);
   kalman_Init(&FN_KF, 0.99f,0.0005f,0.0f,1.0f);
@@ -144,82 +144,11 @@ void Class_Leg::ForceSlove()
 
   FN = tmp_FN;//0.5f * tmp_FN + 0.5f * Pre_FN;
 
-  // Pre_FN = FN;
-
-  // Kalman_PeriodElapsedCallback(&FN_KF, FN);
-
-  // switch(Status){
-  //   case(0):                        //正常不离地状态
-  //   {
-  //     Air_Status = Leg_UnAir;
-  //     if(FN < 30){
-  //       Status = 2;                 //可能离地状态
-  //       Status_Count = 0;
-  //     }
-
-  //     Status_Count += ROBOT_TASK_DT;
-
-  //     break;
-  //   }
-  //   case(1):                      //疑似离地状态
-  //   {
-  //     Air_Status = Leg_UnAir;
-  //     if(FN < 30){
-  //       Status = 2;                 //真正离地
-  //       Status_Count = 0;
-  //     }
-
-  //     if (FN > 100 || Status_Count > 100)              //小于50后的100ms内没有小于30，认为是误判了
-  //     {
-  //       Status = 0;
-  //       Status_Count = 0;
-  //     }
-
-  //     Status_Count += ROBOT_TASK_DT;
-
-  //     break;
-  //   }
-  //   case(2):                        //真正离地状态
-  //   {
-  //     Air_Status = Leg_Air;
-  //     if(FN > 100){
-  //       Status = 3;                 //切到可能落地状态
-  //       Status_Count = 0;
-  //     }
-
-  //     Status_Count += ROBOT_TASK_DT;
-
-  //     break;
-  //   }
-  //   case(3):
-  //   {
-  //     Air_Status = Leg_UnAir;
-  //     if(Status_Count < 50){               //落地后的一段时间内存在力的波动，疑似落地的100ms内都不进行检测
-        
-  //     }
-  //     else{
-  //       //100ms后如果还存在小力的情况就是误判了
-  //       if(FN < 30){
-  //         Status = 2;                       //力太小了认为80是误判，切回离地
-  //         Status_Count = 0;
-  //       }
-  //       else if(FN > 100 || Status_Count > 1000){       //大力或者时间过长
-  //         Status = 0;
-  //         Status_Count = 0;
-  //       }
-  //     }
-
-  //     Status_Count += ROBOT_TASK_DT;
-
-  //     break;
-  //   }
-  // }
-
-  if(FN < -30.0f){                 //两个参数和逻辑有待加强
+  if(FN < -20.0f){                 //不一定要手抬起来也离地，只要单边双边下去没问题，大部分都能进入离地就好
     Air_Status = Leg_Air;
   }
 
-  if(FN > 45.0f){
+  if(FN > 35.0f){
     Air_Status = Leg_UnAir;
   }
 

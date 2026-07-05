@@ -3,6 +3,7 @@
 #include "balance_chassis.h"
 
 uint8_t qqqq = 0;
+uint8_t SPIN_Exit_FLLOW_Flag = 0;
 
 void CMDProcessTask()
 {
@@ -29,25 +30,21 @@ void CMDProcessTask()
       //小陀螺停下或者起立的时候判断一下最好的随动方向
       if(Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_SPIN 
       && Balance_Chassis.Target_CMD_Data.Target_Control_Type == Chassis_Control_Type_FLLOW){
-        float tmp_delta_rad = -Balance_Chassis.Motor_Yaw.Get_Now_Radian() + Reference_Rad;
-        tmp_delta_rad = Normalize_Angle_Radian_PI_to_PI(tmp_delta_rad);
-
-        if(fabsf(tmp_delta_rad) < PI / 2.0f){
-          Balance_Chassis.Chassis_Forward = 1.0f;
-        }
-        else{
-          Balance_Chassis.Chassis_Forward = -1.0f;
-        }
+        SPIN_Exit_FLLOW_Flag = 1;
 
       }
+      else{
+        SPIN_Exit_FLLOW_Flag = 0;
+        Balance_Chassis.Set_Chassis_Control_Type(Balance_Chassis.Target_CMD_Data.Target_Control_Type);
 
-      Balance_Chassis.Set_Chassis_Control_Type(Balance_Chassis.Target_CMD_Data.Target_Control_Type);
+      }
     }
     else{   //只剩Jump_1
       
     }
   }
 
+  //切换底盘随动正方向
   if(Balance_Chassis.Switch_Chassis_Forward == 1 && Balance_Chassis.Last_Switch_Chassis_Forward == 0){
     Balance_Chassis.Chassis_Forward *= -1.0f;
   }
@@ -74,34 +71,104 @@ void CMDProcessTask()
   }
   else{
 
-    if(fabs(tmp_target_v) < 0.5f){
-      tmp_target_length += Balance_Chassis.Target_CMD_Data.Target_Delta_Length;
-    }
-    else{
-      tmp_target_length = Balance_Chassis.Get_Target_Length();          //高速运动下不调整腿长
-    }
+    tmp_target_length += Balance_Chassis.Target_CMD_Data.Target_Delta_Length;
+
+    // if(fabs(tmp_target_v) < 0.5f){
+    //   tmp_target_length += Balance_Chassis.Target_CMD_Data.Target_Delta_Length;
+    // }
+    // else{
+    //   tmp_target_length = Balance_Chassis.Get_Target_Length();          //高速运动下不调整腿长
+    // }
 
     if(Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_FLLOW){
       tmp_target_omega = 0.0f;
-      if(Balance_Chassis.Chassis_Forward == 1.0f){
-        tmp_target_yaw = Reference_Rad;     //标定云台相对底盘逆时针为正
+
+      //底盘随动缓慢切换
+      if(Balance_Chassis.Chassis_Forward_Switch_Flag == 0 && Balance_Chassis.Last_Chassis_Forward != Balance_Chassis.Chassis_Forward){
+        Balance_Chassis.Chassis_Forward_Switch_Flag = 1;     //进入切换状态
       }
-      else if(Balance_Chassis.Chassis_Forward == -1.0f){
-        tmp_target_yaw = Reference_Rad - PI;     //标定云台相对底盘逆时针为正
+
+      if(Balance_Chassis.Chassis_Forward_Switch_Flag == 1)
+      {
+        float desired_yaw;
+
+        if (Balance_Chassis.Chassis_Forward == 1.0f)
+        {
+          desired_yaw = Reference_Rad;
+        }
+        else
+        {
+          desired_yaw = Reference_Rad - PI;
+        }
+
+        float delta = Normalize_Angle_Radian_PI_to_PI(desired_yaw - Balance_Chassis.Get_Yaw_Angle());
+
+        float max_step = 1.3f;
+
+        if(fabs(delta) < 0.5f){
+          Balance_Chassis.Chassis_Forward_Switch_Flag = 0;     //切换完成
+        }
+        else{
+          if (delta > max_step)
+            delta = max_step;
+          else if (delta < -max_step)
+            delta = -max_step;
+
+          tmp_target_yaw = Normalize_Angle_Radian_PI_to_PI(Balance_Chassis.Get_Yaw_Angle() + delta);
+        }
+      }
+      else{
+        if (Balance_Chassis.Chassis_Forward == 1.0f)
+        {
+          tmp_target_yaw = Reference_Rad; // 标定云台相对底盘逆时针为正
+        }
+        else if (Balance_Chassis.Chassis_Forward == -1.0f)
+        {
+          tmp_target_yaw = Reference_Rad - PI; // 标定云台相对底盘逆时针为正
+        }
       }
     }
     else if(Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_SPIN){
 
-      tmp_target_omega = SPIN_OMEGA;
+      float target_omega = 0.0f;
 
-      if(fabs(SPIN_OMEGA - Balance_Chassis.Get_Target_Omega()) * 1000.0f / CMDProcess_TASK_DT > 8.0f){
-        tmp_target_omega = Balance_Chassis.Get_Target_Omega() + ((SPIN_OMEGA - Balance_Chassis.Get_Target_Omega()) > 0 ? 1.0f:-1.0f) * 8.0f * CMDProcess_TASK_DT / 1000.0f;
+      if(SPIN_Exit_FLLOW_Flag == 1){
+        target_omega = 0.0f;
       }
       else{
-        tmp_target_omega = SPIN_OMEGA;
+        target_omega = SPIN_OMEGA;
       }
 
-      tmp_target_yaw = Balance_Chassis.Get_Yaw_Angle() + tmp_target_omega * CMDProcess_TASK_DT / 1000.0f;                           //小陀螺下不输出Yaw角度这一项
+      if (fabs(target_omega - Balance_Chassis.Get_Target_Omega()) * 1000.0f / CMDProcess_TASK_DT > 12.0f)
+      {
+        tmp_target_omega = Balance_Chassis.Get_Target_Omega() + ((target_omega - Balance_Chassis.Get_Target_Omega()) > 0 ? 1.0f : -1.0f) * 12.0f * CMDProcess_TASK_DT / 1000.0f;
+      }
+      else
+      {
+        tmp_target_omega = target_omega;
+      }
+
+      if(SPIN_Exit_FLLOW_Flag == 1 && fabs(Balance_Chassis.Get_Now_Omega()) < 3.0f){
+        SPIN_Exit_FLLOW_Flag = 0;
+        tmp_target_omega = 0.0f;
+        float tmp_delta_rad = -Balance_Chassis.Motor_Yaw.Get_Now_Radian() + Reference_Rad;
+        tmp_delta_rad = Normalize_Angle_Radian_PI_to_PI(tmp_delta_rad);
+
+        if (fabsf(tmp_delta_rad) < PI / 2.0f)
+        {
+          Balance_Chassis.Chassis_Forward = 1.0f;
+        }
+        else
+        {
+          Balance_Chassis.Chassis_Forward = -1.0f;
+        }
+        tmp_target_yaw = Balance_Chassis.Get_Yaw_Angle();     //保持一帧当前角度
+        Balance_Chassis.Set_Chassis_Control_Type(Chassis_Control_Type_FLLOW);
+      }
+      else{
+        tmp_target_yaw = Balance_Chassis.Get_Yaw_Angle() + tmp_target_omega * CMDProcess_TASK_DT / 1000.0f;                           //小陀螺下不输出Yaw角度这一项
+      }
+
     }
     else if(Balance_Chassis.Get_Chassis_Control_Type() == Chassis_Control_Type_UNFLLOW){
       tmp_target_omega = 0.0f;
@@ -195,6 +262,8 @@ void CMDProcessTask()
     }
 
   }
+
+  Balance_Chassis.Last_Chassis_Forward = Balance_Chassis.Chassis_Forward;
 
   Balance_Chassis.Set_Jump_Enable_Flag(((Balance_Chassis.Target_CMD_Data.Complex_Flag & 0x02) != 0));
 
